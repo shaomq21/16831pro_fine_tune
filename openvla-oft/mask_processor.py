@@ -214,6 +214,9 @@ class GroundedSAMMasker:
     def __init__(self, cfg: GroundedSAMConfig):
         self.cfg = cfg
         self.device = torch.device(cfg.device if torch.cuda.is_available() else "cpu")
+        torch.backends.cuda.matmul.allow_tf32 = True
+        torch.backends.cudnn.allow_tf32 = True
+        torch.set_float32_matmul_precision("high")
 
         # GroundingDINO model
         self.dino = GroundingDINOModel(
@@ -238,8 +241,8 @@ class GroundedSAMMasker:
         H, W = image_rgb.shape[:2]
         union = np.zeros((H, W), dtype=bool)
 
-        # SAM needs image set once
-        self.sam_predictor.set_image(image_rgb)
+        
+        
 
         for phrase in phrases:
             phrase = phrase.strip()
@@ -291,7 +294,7 @@ class GroundedSAMMasker:
             return np.zeros(image_rgb.shape[:2], dtype=bool)
 
         H, W = image_rgb.shape[:2]
-        self.sam_predictor.set_image(image_rgb)
+        
 
         px, py = points_xy[0]   
         cx = int(px * W)
@@ -345,6 +348,7 @@ class GroundedSAMMasker:
         spec = build_mask_spec_from_lang(lang)
 
         image_rgb = np.array(img_pil.convert("RGB"),dtype=np.uint8)
+        self.sam_predictor.set_image(image_rgb)
 
         # === RED ===
         if spec.red_points_xy:                      
@@ -418,6 +422,7 @@ def main():
     dino_ckpt = "groundingdino_swint_ogc.pth"
     sam_ckpt = "sam_vit_h_4b8939.pth"
     sam_type = "vit_h"
+    #sam_type = "vit_b"
     device = "cuda"
     out_path = "debug_masked.png"
 

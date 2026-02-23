@@ -58,7 +58,6 @@ python experiments/robot/libero/run_libero_eval.py \
   --pretrained_checkpoint "/home/hongyi/runs/openvla/openvla-7b-oft-finetuned-libero-goal+libero_goal_no_noops+b4+lr-0.0005+lora-r32+dropout-0.0--image_aug--450_chkpt" \
   --task_suite_name libero_goal
 
- wandb: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
 
 PYTHONPATH=/home/ubuntu/16831pro_fine_tune/LIBERO:$PYTHONPATH \
 python experiments/robot/libero/run_libero_eval_mask.py \
@@ -70,3 +69,5 @@ git pull
 git add .
 git commit -m "add_rlds_processor"
 git push
+
+
