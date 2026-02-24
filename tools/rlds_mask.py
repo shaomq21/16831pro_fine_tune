@@ -237,14 +237,15 @@ def _main():
             writers[shard_id].write(serialized)
             shard_counts[shard_id] += 1
 
-            # 每隔 debug_every 步保存一张 mask 后的图片供检查
-            if args.debug_dir and total_steps < next_save_at <= total_steps + steps_this_ep:
-                first_step = modified_steps[0]
-                img_arr = first_step["observation"]["image"]
-                if img_arr is not None and img_arr.size > 0:
-                    img = Image.fromarray(img_arr)
-                    img.save(Path(args.debug_dir) / f"step{next_save_at:06d}_ep{global_ep:05d}_masked.png")
-                next_save_at += args.debug_every
+            
+            if args.debug_dir:
+                while total_steps < next_save_at <= total_steps + steps_this_ep:
+                    first_step = modified_steps[0]
+                    img_arr = first_step["observation"]["image"]
+                    if img_arr is not None and img_arr.size > 0:
+                        img = Image.fromarray(img_arr)
+                        img.save(Path(args.debug_dir) / f"step{next_save_at:06d}_ep{global_ep:05d}_masked.png")
+                    next_save_at += args.debug_every
 
             total_steps += steps_this_ep
 

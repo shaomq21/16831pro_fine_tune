@@ -75,7 +75,10 @@ os.environ["TOKENIZERS_PARALLELISM"] = "false"
 @dataclass
 class FinetuneConfig:
     # fmt: off
-    vla_path: str = "openvla/openvla-7b"             # Path to OpenVLA model (on HuggingFace Hub or stored locally)
+    vla_path: str = "openvla/openvla-7b"             # Path to OpenVLA model (on HuggingFace Hub or stored locally).
+                                                     # When resume=True and only saving adapter: path to ckpt dir (run_dir--step_chkpt).
+    base_vla_path: Optional[str] = None               # Fixed base model path. When resume + only saving adapter: load base from here,
+                                                     # then merge with latest adapter at start, then add new LoRA for training.
 
     # Dataset
     data_root_dir: Path = Path("datasets/rlds")      # Directory containing RLDS datasets
@@ -89,12 +92,12 @@ class FinetuneConfig:
     num_diffusion_steps_train: int = 50              # (When `diffusion==True`) Number of diffusion steps used for training
     use_film: bool = False                           # If True, uses FiLM to infuse language inputs into visual features
     num_images_in_input: int = 1                     # Number of images in the VLA input (default: 1)
-    use_proprio: bool = False                        # If True, includes robot proprioceptive state in input
+    use_proprio: bool = True                       # If True, includes robot proprioceptive state in input
 
     # Training configuration
     batch_size: int = 8                              # Batch size per device (total batch size = batch_size * num GPUs)
     learning_rate: float = 5e-4                      # Learning rate
-    lr_warmup_steps: int = 0                         # Number of steps to warm up learning rate (from 10% to 100%)
+    lr_warmup_steps: int = 200                       # Number of steps to warm up learning rate (from 10% to 100%)
     num_steps_before_decay: int = 100_000            # Number of steps before LR decays by 10x
     grad_accumulation_steps: int = 1                 # Number of gradient accumulation steps
     max_steps: int = 200_000                         # Max number of training steps
@@ -106,7 +109,7 @@ class FinetuneConfig:
                                                      #   (If False, saves all checkpoints)
     resume: bool = False                             # If True, resumes from checkpoint
     resume_step: Optional[int] = None                # (When `resume==True`) Step number that we are resuming from
-    image_aug: bool = True                           # If True, trains with image augmentations (HIGHLY RECOMMENDED)
+    image_aug: bool = False                          # If True, trains with image augmentations (HIGHLY RECOMMENDED)
     diffusion_sample_freq: int = 50                  # (When `use_diffusion==True`) Frequency for sampling in steps
 
     # LoRA
@@ -118,11 +121,11 @@ class FinetuneConfig:
                                                      #         False and merge final checkpoint offline!
 
     # Logging
-    wandb_entity: str = "your-wandb-entity"          # Name of WandB entity
-    wandb_project: str = "your-wandb-project"        # Name of WandB project
+    wandb_entity: str = "maggiesh-carnegie-mellon-university"          # Name of WandB entity
+    wandb_project: str = "vla_gripper"        # Name of WandB project
     run_id_note: Optional[str] = None                # Extra note to add to end of run ID for logging
     run_id_override: Optional[str] = None            # Optional string to override the run ID with
-    wandb_log_freq: int = 10                         # WandB logging frequency in steps
+    wandb_log_freq: int = 50                         # WandB logging frequency in steps
 
     # fmt: on
 
@@ -205,6 +208,15 @@ def load_checkpoint(module_name: str, path: str, step: int, device: str = "cpu")
     return remove_ddp_in_checkpoint(state_dict)
 
 
+def load_checkpoint_if_exists(module_name: str, path: str, step: int, device: str = "cpu"):
+    """Like load_checkpoint but returns None if file does not exist (e.g. ckpt saved without that module)."""
+    checkpoint_path = os.path.join(path, f"{module_name}--{step}_checkpoint.pt")
+    if not os.path.isfile(checkpoint_path):
+        print(f"Checkpoint not found (skipping): {checkpoint_path}")
+        return None
+    return load_checkpoint(module_name, path, step, device)
+
+
 def wrap_ddp(module: nn.Module, device_id: int, find_unused: bool = False) -> DDP:
     """
     Wrap a module with DistributedDataParallel.
@@ -263,8 +275,11 @@ def init_module(
     count_parameters(module, module_name)
 
     if cfg.resume:
-        state_dict = load_checkpoint(module_name, cfg.vla_path, cfg.resume_step)
-        module.load_state_dict(state_dict)
+        state_dict = load_checkpoint_if_exists(module_name, cfg.vla_path, cfg.resume_step)
+        if state_dict is not None:
+            module.load_state_dict(state_dict)
+        else:
+            print(f"Resume: {module_name} not in ckpt, using init weights.")
 
     if to_bf16:
         module = module.to(torch.bfloat16)
@@ -658,8 +673,9 @@ def save_training_checkpoint(
     # Merge LoRA weights into base model and save resulting model checkpoint
     # Note: Can be very slow on some devices; if so, we recommend merging offline
     if cfg.use_lora and cfg.merge_lora_during_training:
+        merge_base_path = (cfg.base_vla_path if cfg.base_vla_path and str(cfg.base_vla_path).strip() else cfg.vla_path)
         base_vla = AutoModelForVision2Seq.from_pretrained(
-            cfg.vla_path, torch_dtype=torch.bfloat16, low_cpu_mem_usage=True, trust_remote_code=True
+            merge_base_path, torch_dtype=torch.bfloat16, low_cpu_mem_usage=True, trust_remote_code=True
         )
         merged_vla = PeftModel.from_pretrained(base_vla, adapter_dir)
         merged_vla = merged_vla.merge_and_unload()
@@ -778,8 +794,18 @@ def finetune(cfg: FinetuneConfig) -> None:
         "Cannot do both L1 regression and diffusion. Please pick one of them!"
     )
 
-    # Trim trailing forward slash ('/') in VLA path if it exists
     cfg.vla_path = cfg.vla_path.rstrip("/")
+    if cfg.base_vla_path is not None:
+        cfg.base_vla_path = cfg.base_vla_path.rstrip("/")
+    if cfg.resume and not cfg.merge_lora_during_training and (not cfg.base_vla_path or not str(cfg.base_vla_path).strip()):
+        raise ValueError(
+            "When resume=True and merge_lora_during_training=False, set base_vla_path to the fixed base checkpoint."
+        )
+    # When resume with adapter-only: base loaded from base_vla_path, adapter from vla_path (ckpt dir)
+    if cfg.resume and cfg.base_vla_path and str(cfg.base_vla_path).strip():
+        base_load_path = str(cfg.base_vla_path).strip()
+    else:
+        base_load_path = cfg.vla_path
     print(f"Fine-tuning OpenVLA Model `{cfg.vla_path}` on `{cfg.dataset_name}`")
 
     # Get experiment run ID
@@ -814,41 +840,31 @@ def finetune(cfg: FinetuneConfig) -> None:
         f"\tACTION_PROPRIO_NORMALIZATION_TYPE: {ACTION_PROPRIO_NORMALIZATION_TYPE}"
     )
 
-    # Two options:
-    # (1) Base model is on Hugging Face Hub
-    #   - Then download it and record the path to the download directory
-    # (2) Base model is stored locally
-    #   - Then register model config in HF Auto Classes
-    # In both cases, we want to check whether any changes have been made to
-    # the `modeling_prismatic.py` file in this codebase; if so, we will copy
-    # the file to the downloaded or locally stored checkpoint directory so
-    # that the user's changes to the VLA class logic go into effect
-    if model_is_on_hf_hub(cfg.vla_path):
-        # Download model directly from Hugging Face Hub
-        vla_download_path = snapshot_download(repo_id=cfg.vla_path)
-        # Overwrite VLA path
-        cfg.vla_path = vla_download_path
+    if model_is_on_hf_hub(base_load_path):
+        vla_download_path = snapshot_download(repo_id=base_load_path)
+        base_load_path = vla_download_path
     else:
-        # Register OpenVLA model to HF Auto Classes (not needed if the model is on HF Hub)
         AutoConfig.register("openvla", OpenVLAConfig)
         AutoImageProcessor.register(OpenVLAConfig, PrismaticImageProcessor)
         AutoProcessor.register(OpenVLAConfig, PrismaticProcessor)
         AutoModelForVision2Seq.register(OpenVLAConfig, OpenVLAForActionPrediction)
+    if not cfg.resume:
+        cfg.vla_path = base_load_path
 
-    # Update config.json and sync model files
     if distributed_state.is_main_process:
-        update_auto_map(cfg.vla_path)
-        check_model_logic_mismatch(cfg.vla_path)
+        update_auto_map(base_load_path)
+        check_model_logic_mismatch(base_load_path)
 
     # Wait for model files to be synced
     if dist.is_available() and dist.is_initialized():
         dist.barrier()
 
 
-    # Load processor and VLA
-    processor = AutoProcessor.from_pretrained(cfg.vla_path, trust_remote_code=True)
+    # Load processor: from ckpt dir when resume (saved there), else from base
+    processor_path = cfg.vla_path if cfg.resume else base_load_path
+    processor = AutoProcessor.from_pretrained(processor_path, trust_remote_code=True)
     vla = AutoModelForVision2Seq.from_pretrained(
-        cfg.vla_path,
+        base_load_path,
         torch_dtype=torch.bfloat16,
         low_cpu_mem_usage=True,
         trust_remote_code=True,
@@ -857,17 +873,25 @@ def finetune(cfg: FinetuneConfig) -> None:
     # Set number of images in VLA input
     vla.vision_backbone.set_num_images_in_input(cfg.num_images_in_input)
 
-    # LoRA setup
+    # LoRA: resume 时先加载 adapter、merge 到 base，再挂新 LoRA 继续训
+    lora_config = LoraConfig(
+        r=cfg.lora_rank,
+        lora_alpha=min(cfg.lora_rank, 16),
+        lora_dropout=cfg.lora_dropout,
+        target_modules="all-linear",
+        init_lora_weights="gaussian",
+    )
     if cfg.use_lora:
-        lora_config = LoraConfig(
-            r=cfg.lora_rank,
-            lora_alpha=min(cfg.lora_rank, 16),
-            lora_dropout=cfg.lora_dropout,
-            target_modules="all-linear",
-            init_lora_weights="gaussian",
-        )
-        vla = get_peft_model(vla, lora_config)
-        vla.print_trainable_parameters()
+        adapter_dir = os.path.join(cfg.vla_path, "lora_adapter")
+        if cfg.resume and os.path.exists(os.path.join(adapter_dir, "adapter_config.json")):
+            # 开始时 merge 最新 adapter 和 base，再在合并后的模型上挂新 LoRA
+            vla = PeftModel.from_pretrained(vla, adapter_dir)
+            vla = vla.merge_and_unload()
+            vla = get_peft_model(vla, lora_config)
+            vla.print_trainable_parameters()
+        else:
+            vla = get_peft_model(vla, lora_config)
+            vla.print_trainable_parameters()
 
     # FiLM setup
     if cfg.use_film:
@@ -882,8 +906,11 @@ def finetune(cfg: FinetuneConfig) -> None:
         )
         count_parameters(vla.vision_backbone, "vla.vision_backbone (post-wrap)")
         if cfg.resume:
-            state_dict = load_checkpoint("vision_backbone", cfg.vla_path, cfg.resume_step)
-            vla.model.vision_backbone.load_state_dict(state_dict)
+            state_dict = load_checkpoint_if_exists("vision_backbone", cfg.vla_path, cfg.resume_step)
+            if state_dict is not None:
+                vla.model.vision_backbone.load_state_dict(state_dict)
+            else:
+                print("Resume: vision_backbone not in ckpt, using init weights.")
         vla.model.vision_backbone = vla.model.vision_backbone.to(device_id)
 
     # Wrap VLA with DDP
@@ -1156,9 +1183,17 @@ def finetune(cfg: FinetuneConfig) -> None:
 
 
 if __name__ == "__main__":
+    import sys
     try:
         finetune()
     except Exception as e:
         import traceback
         traceback.print_exc()
+        sys.stderr.flush()
+        sys.stdout.flush()
+        try:
+            with open("finetune_fail_traceback.txt", "w") as f:
+                traceback.print_exc(file=f)
+        except Exception:
+            pass
         raise e

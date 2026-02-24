@@ -255,8 +255,8 @@ class RLDSBatchTransform:
             return_dict["proprio"] = proprio
 
         #print("return_dict", return_dict.keys())
-        print("actions", actions)
-        print("lang", lang)
+        #print("actions", actions)
+        #print("lang", lang)
         return return_dict
 
 
