@@ -3,6 +3,10 @@
 # Grounded-SAM masking for OpenVLA RLDS images
 # - background black
 # - source objects painted RED, target objects painted GREEN
+# - gripper centers from Roboflow model as white dots (optional)
+#
+# Gripper detection requires: pip install inference
+# Set ROBOFLOW_API_KEY for hosted model: https://app.roboflow.com/margarets-workspace/gripper_box/models
 # ------------------------------------------------------------
 
 from __future__ import annotations
@@ -179,10 +183,68 @@ class GroundedSAMConfig:
     sam_type: str = "vit_h"  # vit_h / vit_l / vit_b
     sam_checkpoint_path: str = ""
 
+    # Gripper detection via Roboflow (optional)
+    # Model: https://app.roboflow.com/margarets-workspace/gripper_box/models
+    gripper_model_id: Optional[str] = "margarets-workspace/gripper_box/1"
+    gripper_enabled: bool = True
+
     device: str = "cuda"
 
 
 from PIL import ImageDraw
+
+# Lazy-load Roboflow inference for gripper detection
+_gripper_model = None
+
+def _get_gripper_model(model_id: str):
+    """Lazy load Roboflow gripper model. Requires: pip install inference"""
+    global _gripper_model
+    if _gripper_model is None:
+        try:
+            from inference import get_model
+            _gripper_model = get_model(model_id=model_id)
+        except ImportError:
+            raise ImportError(
+                "Gripper detection requires 'inference' package. Install with: pip install inference"
+            )
+    return _gripper_model
+
+
+def _detect_gripper_centers(image_rgb: np.ndarray, model_id: str) -> List[Tuple[int, int]]:
+    """
+    Run Roboflow gripper model; returns center points (x,y) of bounding boxes in pixel coords.
+    Typically returns 2 boxes (sometimes 1). Uses ObjectDetectionPrediction.x, .y (center coords).
+    """
+    model = _get_gripper_model(model_id)
+    result = model.infer(image_rgb)
+    # infer() can return list for batch; take first element
+    if isinstance(result, (list, tuple)) and len(result) > 0:
+        result = result[0]
+    centers = []
+    if hasattr(result, "predictions") and result.predictions:
+        for p in result.predictions:
+            if hasattr(p, "x") and hasattr(p, "y"):
+                cx = int(round(p.x))
+                cy = int(round(p.y))
+                centers.append((cx, cy))
+            elif hasattr(p, "bbox"):
+                b = p.bbox  # x_min, y_min, x_max, y_max
+                cx = int(round((b[0] + b[2]) / 2))
+                cy = int(round((b[1] + b[3]) / 2))
+                centers.append((cx, cy))
+    return centers
+
+
+def _draw_white_dots(img_arr: np.ndarray, centers_xy: List[Tuple[int, int]], radius: int = 12) -> np.ndarray:
+    """Draw filled white circles at center points on image. Returns modified array."""
+    if not centers_xy:
+        return img_arr
+    img_pil = Image.fromarray(img_arr, mode="RGB")
+    draw = ImageDraw.Draw(img_pil)
+    for (cx, cy) in centers_xy:
+        draw.ellipse((cx - radius, cy - radius, cx + radius, cy + radius), fill=(255, 255, 255), outline=(255, 255, 255))
+    return np.array(img_pil)
+
 
 def _draw_points_overlay(img_pil: Image.Image, points_xy, *, color=(255, 0, 0), r=8, w=3):
     
@@ -385,6 +447,21 @@ class GroundedSAMMasker:
         if green_mask.any():
             tinted = (1.0 - alpha) * image_rgb[green_mask] + alpha * light_green
             out[green_mask] = np.clip(tinted, 0, 255).astype(np.uint8)
+
+        # Gripper detection: draw center points as white dots on black mask
+        gripper_centers = []
+        if getattr(self.cfg, "gripper_enabled", True) and getattr(self.cfg, "gripper_model_id", None):
+            try:
+                gripper_centers = _detect_gripper_centers(image_rgb, self.cfg.gripper_model_id)
+                if gripper_centers:
+                    out = _draw_white_dots(out, gripper_centers, radius=12)
+            except Exception as e:
+                import warnings
+                warnings.warn(f"Gripper detection failed: {e}")
+
+        # If nothing was drawn (all black): return original image
+        if not red_mask.any() and not green_mask.any() and not gripper_centers:
+            return img_pil
 
         out_pil = Image.fromarray(out, mode="RGB")
         
