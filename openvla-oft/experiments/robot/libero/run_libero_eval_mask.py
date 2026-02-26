@@ -3,11 +3,15 @@ run_libero_eval_mask.py
 
 Evaluates a trained policy in a LIBERO simulation benchmark task suite.
 """
+import os
+
+# Headless OpenGL for robosuite/MuJoCo: prefer osmesa (software) to avoid EGL framebuffer errors
+os.environ.setdefault("MUJOCO_GL", "osmesa")
+os.environ.setdefault("PYOPENGL_PLATFORM", "osmesa")
 
 from PIL import Image, ImageDraw, ImageFont
 import json
 import logging
-import os
 import sys
 from collections import deque
 from dataclasses import dataclass
@@ -42,6 +46,7 @@ from experiments.robot.libero.libero_utils import (
     get_libero_env,
     get_libero_image,
     get_libero_wrist_image,
+    mask_image_from_libero_seg,
     quat2axisangle,
     save_rollout_video,
 )
@@ -155,7 +160,7 @@ class GenerateConfig:
     num_diffusion_steps_inference: int = 50          # (When `diffusion==True`) Number of diffusion steps used for inference
     use_film: bool = False                           # If True, uses FiLM to infuse language inputs into visual features
     num_images_in_input: int = 1                     # Number of images in the VLA input (default: 1)
-    use_proprio: bool = False                         # Whether to include proprio state in input
+    use_proprio: bool = True                         # Whether to include proprio state in input
 
     center_crop: bool = True                         # Center crop? (if trained w/ random crop image aug)
     num_open_loop_steps: int = 8                     # Number of actions to execute open-loop before requerying policy
@@ -180,9 +185,11 @@ class GenerateConfig:
     # Utils
     #################################################################################################################
     run_id_note: Optional[str] = None                # Extra note to add to end of run ID for logging
-    local_log_dir: str = "./experiments/logs"        # Local directory for eval logs
+    local_log_dir: str = "./experiments/info"        # Local directory for eval logs
 
     loadinfo: bool = False                           # If True: save mask images per step, action chunk and proprio to Excel
+    perturb_colors: bool = False                    # If True: white→yellow, red→blue (plate/stove yellow, plate rim blue)
+    use_mask_from_env: bool = True                  # If True: get mask from LIBERO SegmentationRenderEnv (same red/green style, no Grounded-SAM)
 
     use_wandb: bool = False                          # Whether to also log results in Weights & Biases
     wandb_entity: str = "maggiesh-carnegie-mellon-university"          # Name of WandB entity
@@ -191,6 +198,22 @@ class GenerateConfig:
     seed: int = 7                                    # Random Seed (for reproducibility)
 
     # fmt: on
+
+
+def _resolve_base_vla_path(cfg: GenerateConfig) -> None:
+    """If base_vla_path is set but the path does not exist, try project checkpoints/openvla-7b."""
+    base = getattr(cfg, "base_vla_path", None)
+    if not base or not isinstance(base, str) or not base.strip():
+        return
+    base = base.strip()
+    if (base.startswith("/") or base.startswith(".")) and not os.path.isdir(base):
+        openvla_root = Path(__file__).resolve().parent.parent.parent.parent
+        fallback = openvla_root / "checkpoints" / "openvla-7b"
+        if fallback.is_dir():
+            cfg.base_vla_path = str(fallback)
+            logging.getLogger(__name__).info(
+                "base_vla_path %s not found; using %s", base, cfg.base_vla_path
+            )
 
 
 def validate_config(cfg: GenerateConfig) -> None:
@@ -343,6 +366,29 @@ def process_action(action, model_family):
     return action
 
 
+def _apply_color_perturbation(img: Union[np.ndarray, Image.Image]) -> Union[np.ndarray, Image.Image]:
+    """Perturb colors: white → yellow (plate/stove), red → light blue overlay (plate rim). Returns same type as input."""
+    arr = np.asarray(img).astype(np.float32)
+    if arr.ndim != 3 or arr.shape[-1] != 3:
+        return img
+    r, g, b = arr[..., 0], arr[..., 1], arr[..., 2]
+    # White (high R,G,B) → Yellow (255,255,0)
+    white_mask = (r > 200) & (g > 200) & (b > 200)
+    arr[white_mask, 0] = 255
+    arr[white_mask, 1] = 255
+    arr[white_mask, 2] = 0
+    # Red / reddish (plate rim: red, reddish-brown, dull pink) → overlay light blue (淡蓝)
+    # Relaxed: R is largest and clearly stronger than G,B (catches rim even if not pure red)
+    red_mask = (r > 95) & (r >= g) & (r >= b) & ((r - np.minimum(g, b)) >= 10)
+    light_blue = np.array([200.0, 220.0, 255.0], dtype=np.float32)  # 淡蓝
+    alpha = 0.5  # 叠加强度
+    arr[red_mask, :] = (1 - alpha) * arr[red_mask, :] + alpha * light_blue
+    out = np.clip(arr, 0, 255).astype(np.uint8)
+    if isinstance(img, Image.Image):
+        return Image.fromarray(out)
+    return out
+
+
 def _draw_step_on_image(img: Union[np.ndarray, Image.Image], step: int) -> Image.Image:
     """Draw step number on image for loadinfo mask output."""
     if isinstance(img, np.ndarray):
@@ -465,19 +511,34 @@ def run_episode(
 
                 
                 observation, img = prepare_observation(obs, resize_size)
+                if getattr(cfg, "perturb_colors", False):
+                    img = _apply_color_perturbation(img)
                 replay_images.append(img)
 
-                if isinstance(img, np.ndarray):
-                    img_pil = Image.fromarray(img)
+                if getattr(cfg, "use_mask_from_env", False):
+                    # Mask from LIBERO instance segmentation (no Grounded-SAM subprocess)
+                    img_np = np.asarray(img) if not isinstance(img, np.ndarray) else img
+                    if img_np.ndim == 2:
+                        img_np = np.stack([img_np] * 3, axis=-1)
+                    seg_key = "agentview_segmentation_instance"
+                    if seg_key in obs:
+                        masked = mask_image_from_libero_seg(
+                            img_np, obs[seg_key], env, alpha=0.5
+                        )
+                    else:
+                        masked = img_np
+                    replay_masked_images.append(np.asarray(masked))
                 else:
-                    img_pil = img  # already PIL
-
-                masked = mask_image_via_other_env(
-                    img_pil.convert("RGB"),
-                    task_object,
-                    out_path,
-                )
-                replay_masked_images.append(np.asarray(masked))
+                    if isinstance(img, np.ndarray):
+                        img_pil = Image.fromarray(img)
+                    else:
+                        img_pil = img  # already PIL
+                    masked = mask_image_via_other_env(
+                        img_pil.convert("RGB"),
+                        task_object,
+                        out_path,
+                    )
+                    replay_masked_images.append(np.asarray(masked))
 
                 observation["full_image"] = resize_image_for_policy(masked, resize_size)
                 
@@ -568,7 +629,10 @@ def run_task(
     initial_states, all_initial_states = load_initial_states(cfg, task_suite, task_id, log_file)
 
     # Initialize environment and get task description
-    env, task_description = get_libero_env(task, cfg.model_family, resolution=cfg.env_img_res)
+    env, task_description = get_libero_env(
+        task, cfg.model_family, resolution=cfg.env_img_res,
+        use_segmentation_env=getattr(cfg, "use_mask_from_env", False),
+    )
     raw_task_description = task_description
     processed_description = language_mask_processor(task_description)
 
@@ -638,16 +702,23 @@ def run_task(
             total_successes += 1
 
         # Save rollout videos (raw and masked, same fps and frame count)
+        raw_suffix = "perturbed" if getattr(cfg, "perturb_colors", False) else None
         save_rollout_video(
-            replay_images, total_episodes, success=success, task_description=task_description, log_file=log_file
+            replay_images,
+            total_episodes,
+            success=success,
+            task_description=task_description,
+            log_file=log_file,
+            suffix=raw_suffix,
         )
+        masked_suffix = "masked_perturbed" if getattr(cfg, "perturb_colors", False) else "masked"
         save_rollout_video(
             replay_masked_images,
             total_episodes,
             success=success,
             task_description=task_description,
             log_file=log_file,
-            suffix="masked",
+            suffix=masked_suffix,
         )
 
         # Log results
@@ -677,8 +748,18 @@ def run_task(
 @draccus.wrap()
 def eval_libero(cfg: GenerateConfig) -> float:
     """Main function to evaluate a trained policy on LIBERO benchmark tasks."""
+    _resolve_base_vla_path(cfg)
     # Validate configuration
     validate_config(cfg)
+
+    # Before any model loading: patch dispatch_model so 8/4-bit models use hooks (no .to(device))
+    if getattr(cfg, "load_in_8bit", False) or getattr(cfg, "load_in_4bit", False):
+        from accelerate import big_modeling as _acc_bm
+        import transformers.modeling_utils as _tf_mu
+        _orig_dispatch = _acc_bm.dispatch_model
+        def _dispatch_force_hooks(model, *args, force_hooks=False, **kwargs):
+            return _orig_dispatch(model, *args, force_hooks=True, **kwargs)
+        _acc_bm.dispatch_model = _tf_mu.dispatch_model = _dispatch_force_hooks
 
     # Set random seed
     set_seed_everywhere(cfg.seed)
@@ -716,6 +797,8 @@ def eval_libero(cfg: GenerateConfig) -> float:
             total_successes,
             log_file,
         )
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
 
     # Calculate final success rate
     final_success_rate = float(total_successes) / float(total_episodes) if total_episodes > 0 else 0

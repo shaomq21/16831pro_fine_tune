@@ -452,13 +452,7 @@ class PrismaticForConditionalGeneration(PrismaticPreTrainedModel):
             # projected_patch_embeddings: (bsz, num_patches * num_images, llm_dim)
             # proprio: (bsz, proprio_dim) or (propro_dim,)
             proprio = proprio.reshape(projected_patch_embeddings.shape[0], -1)  # (bsz, proprio_dim)
-            proj_device = next(proprio_projector.parameters()).device
-            patch_device = projected_patch_embeddings.device
-            if proprio.device != proj_device:
-                proprio = proprio.to(proj_device)
             proprio_features = proprio_projector(proprio)  # (bsz, llm_dim)
-            if proprio_features.device != patch_device:
-                proprio_features = proprio_features.to(patch_device)
             proprio_features = proprio_features.unsqueeze(dim=1)  # (bsz, 1, llm_dim)
             # For simplicity, just append proprio token to the end of projected vision patch tokens
             return torch.cat((projected_patch_embeddings, proprio_features), dim=1)

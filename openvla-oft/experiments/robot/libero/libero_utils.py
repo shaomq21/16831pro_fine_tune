@@ -7,7 +7,7 @@ import imageio
 import numpy as np
 import tensorflow as tf
 from libero.libero import get_libero_path
-from libero.libero.envs import OffScreenRenderEnv
+from libero.libero.envs import OffScreenRenderEnv, SegmentationRenderEnv
 
 from experiments.robot.robot_utils import (
     DATE,
@@ -15,12 +15,23 @@ from experiments.robot.robot_utils import (
 )
 
 
-def get_libero_env(task, model_family, resolution=256):
-    """Initializes and returns the LIBERO environment, along with the task description."""
+def get_libero_env(task, model_family, resolution=256, use_segmentation_env=False):
+    """Initializes and returns the LIBERO environment, along with the task description.
+
+    Args:
+        task: LIBERO task (has .language, .problem_folder, .bddl_file).
+        model_family: Model family string (e.g. "openvla").
+        resolution: Camera height/width.
+        use_segmentation_env: If True, use SegmentationRenderEnv so obs include
+            agentview_segmentation_instance; enables mask-from-env (no Grounded-SAM).
+    """
     task_description = task.language
     task_bddl_file = os.path.join(get_libero_path("bddl_files"), task.problem_folder, task.bddl_file)
     env_args = {"bddl_file_name": task_bddl_file, "camera_heights": resolution, "camera_widths": resolution}
-    env = OffScreenRenderEnv(**env_args)
+    if use_segmentation_env:
+        env = SegmentationRenderEnv(camera_segmentations="instance", **env_args)
+    else:
+        env = OffScreenRenderEnv(**env_args)
     env.seed(0)  # IMPORTANT: seed seems to affect object positions even when using fixed initial state
     return env, task_description
 
@@ -42,6 +53,43 @@ def get_libero_wrist_image(obs):
     img = obs["robot0_eye_in_hand_image"]
     img = img[::-1, ::-1]  # IMPORTANT: rotate 180 degrees to match train preprocessing
     return img
+
+
+def mask_image_from_libero_seg(rgb_np, seg_obs, env, alpha=0.5):
+    """Paint red/green overlay from LIBERO instance segmentation to match Grounded-SAM mask style.
+
+    Args:
+        rgb_np: RGB image (H,W,3) in same geometry as get_libero_image(obs), i.e. already flipped.
+        seg_obs: Raw segmentation from obs["agentview_segmentation_instance"] (camera frame).
+        env: SegmentationRenderEnv (must have get_segmentation_instances, obj_of_interest).
+        alpha: Blend strength for overlay (0=no tint, 1=full color).
+
+    Returns:
+        RGB image (H,W,3) uint8 with red tint on first obj_of_interest, green on second.
+    """
+    # get_segmentation_instances expects raw camera-frame seg
+    seg_dict = env.get_segmentation_instances(seg_obs.copy())
+    obj_of_interest = getattr(env, "obj_of_interest", [])
+    if not obj_of_interest:
+        return rgb_np
+
+    out = np.array(rgb_np, dtype=np.float64)
+    red = np.array([255, 0, 0], dtype=np.float64)
+    green = np.array([0, 255, 0], dtype=np.float64)
+
+    # RGB from get_libero_image is flipped; seg_dict masks are in camera frame → flip masks to align
+    for i, obj_name in enumerate(obj_of_interest[:2]):
+        mask = seg_dict.get(obj_name)
+        if mask is None:
+            continue
+        mask_f = (mask[::-1, ::-1] > 0).astype(np.float64)
+        if mask_f.sum() == 0:
+            continue
+        color = red if i == 0 else green
+        for c in range(3):
+            out[:, :, c] = (1 - alpha * mask_f) * out[:, :, c] + alpha * mask_f * color[c]
+
+    return np.clip(out, 0, 255).astype(np.uint8)
 
 
 def save_rollout_video(rollout_images, idx, success, task_description, log_file=None, suffix=None, fps=30):

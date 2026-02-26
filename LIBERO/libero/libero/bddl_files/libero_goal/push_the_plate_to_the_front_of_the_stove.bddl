@@ -9,6 +9,13 @@
             )
           )
       )
+      (left_region
+          (:target main_table)
+          (:ranges (
+              (0.03 -0.5 0.050000000000000005 0.5)
+            )
+          )
+      )
       (akita_black_bowl_region
           (:target main_table)
           (:ranges (
@@ -122,7 +129,7 @@
   )
 
   (:goal
-    (And (On plate_1 main_table_stove_front_region))
+    (And (On plate_1 main_table_left_region))
   )
 
 )

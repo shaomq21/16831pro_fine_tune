@@ -238,7 +238,20 @@ def load_component_state_dict(checkpoint_path: str) -> Dict[str, torch.Tensor]:
     Returns:
         Dict: The processed state dictionary for loading
     """
-    state_dict = torch.load(checkpoint_path, weights_only=True)
+    # On CPU-only machines, checkpoint saved on GPU must be mapped to CPU; weights_only can fail for such pickles
+    map_location = torch.device("cpu") if not torch.cuda.is_available() else None
+    try:
+        state_dict = torch.load(
+            checkpoint_path,
+            weights_only=True,
+            map_location=map_location,
+        )
+    except Exception:
+        state_dict = torch.load(
+            checkpoint_path,
+            weights_only=False,
+            map_location=map_location or "cpu",
+        )
 
     # If the component was trained with DDP, elements in the state dict have prefix "module." which we must remove
     new_state_dict = {}
@@ -258,6 +271,26 @@ def get_vla(cfg: Any) -> torch.nn.Module:
     loads base from base_vla_path then loads adapter and merge_and_unload.
     """
     print("Instantiating pretrained VLA policy...")
+
+    # When loading 8-bit/4-bit, transformers calls dispatch_model which can call model.to(device);
+    # bitsandbytes models don't support .to(). Force accelerate to use hooks instead.
+    # transformers imports dispatch_model at module load time, so patch it where it's used.
+    _dispatch_restore = None
+    if getattr(cfg, "load_in_8bit", False) or getattr(cfg, "load_in_4bit", False):
+        from accelerate import big_modeling as _acc_bm
+        import transformers.modeling_utils as _tf_modeling
+
+        _orig_dispatch = _acc_bm.dispatch_model
+
+        def _dispatch_with_force_hooks(model, *args, force_hooks=False, **kwargs):
+            return _orig_dispatch(model, *args, force_hooks=True, **kwargs)
+
+        _acc_bm.dispatch_model = _dispatch_with_force_hooks
+        _tf_modeling.dispatch_model = _dispatch_with_force_hooks
+        _dispatch_restore = lambda: (
+            setattr(_acc_bm, "dispatch_model", _orig_dispatch),
+            setattr(_tf_modeling, "dispatch_model", _orig_dispatch),
+        )
 
     base_path = getattr(cfg, "base_vla_path", None) if cfg else None
     base_path = (base_path.strip() if isinstance(base_path, str) else base_path) or None
@@ -283,14 +316,18 @@ def get_vla(cfg: Any) -> torch.nn.Module:
             update_auto_map(base_path)
             check_model_logic_mismatch(base_path)
 
-        vla = AutoModelForVision2Seq.from_pretrained(
-            base_path,
+        load_kwargs = dict(
             torch_dtype=torch.bfloat16,
             load_in_8bit=cfg.load_in_8bit,
             load_in_4bit=cfg.load_in_4bit,
             low_cpu_mem_usage=True,
             trust_remote_code=True,
         )
+        if getattr(cfg, "load_in_8bit", False) or getattr(cfg, "load_in_4bit", False):
+            load_kwargs["device_map"] = "auto"
+        vla = AutoModelForVision2Seq.from_pretrained(base_path, **load_kwargs)
+        if _dispatch_restore is not None:
+            _dispatch_restore()
         from peft import PeftModel
 
         vla.vision_backbone = PeftModel.from_pretrained(vla.vision_backbone, adapter_dir)
@@ -306,14 +343,18 @@ def get_vla(cfg: Any) -> torch.nn.Module:
             update_auto_map(ckpt_path)
             check_model_logic_mismatch(ckpt_path)
 
-        vla = AutoModelForVision2Seq.from_pretrained(
-            ckpt_path,
+        load_kwargs = dict(
             torch_dtype=torch.bfloat16,
             load_in_8bit=cfg.load_in_8bit,
             load_in_4bit=cfg.load_in_4bit,
             low_cpu_mem_usage=True,
             trust_remote_code=True,
         )
+        if getattr(cfg, "load_in_8bit", False) or getattr(cfg, "load_in_4bit", False):
+            load_kwargs["device_map"] = "auto"
+        vla = AutoModelForVision2Seq.from_pretrained(ckpt_path, **load_kwargs)
+        if _dispatch_restore is not None:
+            _dispatch_restore()
 
     # If using FiLM, wrap the vision backbone to allow for infusion of language inputs
     if cfg.use_film:
@@ -428,12 +469,20 @@ def get_proprio_projector(cfg: Any, llm_dim: int, proprio_dim: int) -> ProprioPr
     Returns:
         ProprioProjector: The initialized proprio projector
     """
-    # Initialize projector and move to device
+    # Initialize projector and move to device (fallback to CPU on CUDA OOM)
     proprio_projector = ProprioProjector(
         llm_dim=llm_dim,
         proprio_dim=proprio_dim,
-    ).to(DEVICE)
-    proprio_projector = proprio_projector.to(torch.bfloat16).to(DEVICE)
+    )
+    proprio_projector = proprio_projector.to(torch.bfloat16)
+    try:
+        proprio_projector = proprio_projector.to(DEVICE)
+    except RuntimeError as e:
+        if "out of memory" in str(e).lower() or "cuda" in str(e).lower():
+            torch.cuda.empty_cache()
+            proprio_projector = proprio_projector.to("cpu")
+        else:
+            raise
     proprio_projector.eval()
 
     # Find and load checkpoint (may be on Hugging Face Hub or stored locally)

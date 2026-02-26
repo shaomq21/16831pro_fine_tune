@@ -7,6 +7,13 @@ CONDA_ROOT="${HOME}/miniconda3"
 # openvla-oft 根目录，可通过环境变量覆盖，例如: OPENVLA_ROOT=/你的路径 bash setup_envs.sh
 OPENVLA_ROOT="${OPENVLA_ROOT:-${HOME}/16831pro_fine_tune/openvla-oft}"
 echo "[INFO] openvla-oft 路径: $OPENVLA_ROOT (pip -e 仅链接，不覆盖源码)"
+
+# 必须加载 conda，否则后续 conda/pip 不可用
+if [ ! -f "${CONDA_ROOT}/etc/profile.d/conda.sh" ]; then
+    echo "[ERROR] 未找到 conda: ${CONDA_ROOT}/etc/profile.d/conda.sh"
+    echo "        请先安装 Miniconda 到 \$HOME/miniconda3，或设置 CONDA_ROOT"
+    exit 1
+fi
 source "${CONDA_ROOT}/etc/profile.d/conda.sh"
 
 # 检测是否有 GPU
@@ -26,37 +33,41 @@ conda activate vla-preprocess
 
 # 先单独装 torch，避免其他包拉错版本
 echo "[vla-preprocess] 步骤 1/4: 安装 PyTorch（单独安装避免冲突）..."
-pip install torch torchvision torchaudio $TORCH_EXTRA
+python -m pip install torch torchvision torchaudio $TORCH_EXTRA
 
 echo "[vla-preprocess] 步骤 2/4: 安装基础依赖..."
-pip install numpy scipy opencv-python pillow matplotlib pyyaml tqdm requests
-pip install addict timm pycocotools supervision yapf
-pip install "transformers>=4.33" "tokenizers" "huggingface-hub" "safetensors"
+python -m pip install numpy scipy opencv-python pillow matplotlib pyyaml tqdm requests
+python -m pip install addict timm pycocotools supervision yapf
+python -m pip install "transformers>=4.33" "tokenizers" "huggingface-hub" "safetensors"
 
 # TensorFlow（RLDS/libero 预处理用）
-pip install "tensorflow>=2.14" "tensorflow-datasets" tensorboard
+python -m pip install "tensorflow>=2.14" "tensorflow-datasets" tensorboard
 
 # Gripper 检测（mask_processor 用，需 ROBOFLOW_API_KEY）
-pip install inference
+python -m pip install inference
 
-# GroundingDINO：用项目内的（pip -e 只做链接，不覆盖源码）
+# GroundingDINO：项目内有且可安装则用本地的，否则从官方仓库安装
 GDINO_DIR="${OPENVLA_ROOT}/GroundingDINO"
-if [ -d "$GDINO_DIR" ]; then
-    echo "[vla-preprocess] 步骤 3/4: 安装 GroundingDINO..."
-    pip install -e "$GDINO_DIR" --no-build-isolation
+if [ -d "$GDINO_DIR" ] && { [ -f "$GDINO_DIR/setup.py" ] || [ -f "$GDINO_DIR/pyproject.toml" ]; }; then
+    echo "[vla-preprocess] 步骤 3/4: 安装 GroundingDINO（本地）..."
+    python -m pip install -e "$GDINO_DIR" --no-build-isolation
 else
-    echo "[WARN] GroundingDINO 目录不存在: $GDINO_DIR"
-    echo "       请先确保 openvla-oft 已克隆，或手动: pip install -e /path/to/GroundingDINO"
+    if [ -d "$GDINO_DIR" ]; then
+        echo "[vla-preprocess] 步骤 3/4: GroundingDINO 目录不完整，从官方仓库安装..."
+    else
+        echo "[vla-preprocess] 步骤 3/4: 安装 GroundingDINO（从 GitHub）..."
+    fi
+    python -m pip install "git+https://github.com/IDEA-Research/GroundingDINO.git" --no-build-isolation
 fi
 
 # Segment Anything：用项目内的（避免 git 安装的版本冲突）
 SAM_DIR="${OPENVLA_ROOT}/segment-anything"
 if [ -d "$SAM_DIR" ]; then
     echo "[vla-preprocess] 步骤 4/4: 安装 Segment Anything..."
-    pip install -e "$SAM_DIR"
+    python -m pip install -e "$SAM_DIR"
 else
     echo "[WARN] segment-anything 目录不存在，尝试从 GitHub 安装..."
-    pip install "git+https://github.com/facebookresearch/segment-anything.git@dca509fe793f601edb92606367a655c15ac00fdf"
+    python -m pip install "git+https://github.com/facebookresearch/segment-anything.git@dca509fe793f601edb92606367a655c15ac00fdf"
 fi
 
 echo "[vla-preprocess] 环境安装完成"
@@ -69,12 +80,12 @@ conda create -n simplevla python=3.10 -y
 conda activate simplevla
 
 echo "[simplevla] 步骤 1/2: 安装 PyTorch（单独安装避免冲突）..."
-pip install torch torchvision torchaudio $TORCH_EXTRA
+python -m pip install torch torchvision torchaudio $TORCH_EXTRA
 
 OVLA_DIR="${OPENVLA_ROOT}"
 if [ -d "$OVLA_DIR" ]; then
     echo "[simplevla] 步骤 2/2: 安装 openvla-oft..."
-    pip install -e "$OVLA_DIR"
+    python -m pip install -e "$OVLA_DIR"
 else
     echo "[WARN] openvla-oft 目录不存在: $OVLA_DIR"
     echo "       请克隆后执行: pip install -e /path/to/openvla-oft"

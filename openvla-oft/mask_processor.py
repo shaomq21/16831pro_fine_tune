@@ -102,9 +102,8 @@ def build_mask_spec_from_lang(lang: str) -> MaskSpec:
 
         if "plate" in lang:
             reds.append("plate")
-        # approximate "table region in front of the stove"
-        # you can tune these prompts per your scene naming
-        greens += ["white square base on the left"]
+        # approximate "table region in front of the stove" -> 左边的扁方块
+        greens += ["white rectangular box on the left"]
         print("reds,green:", reds, greens)
         return MaskSpec(red_phrases=reds, green_phrases=greens)
 
@@ -157,9 +156,9 @@ def build_mask_spec_from_lang(lang: str) -> MaskSpec:
         # you might keep the literal noun ("cabinet", "rack") because it's easier to detect.
         return MaskSpec(red_phrases=reds, green_phrases=greens)
 
-    # TURN ON
+    # TURN ON  (stove -> 左边的扁方块)
     if lang.startswith("turn on "):
-        return MaskSpec(red_phrases=[], green_phrases=["white square base on the left"])
+        return MaskSpec(red_phrases=[], green_phrases=["white rectangular box on the left"])
 
         print("reds,green:", reds, greens)
 
@@ -280,9 +279,20 @@ class GroundedSAMMasker:
         torch.backends.cudnn.allow_tf32 = True
         torch.set_float32_matmul_precision("high")
 
+        # Resolve GroundingDINO config path (use package config if local path does not exist)
+        dino_config_path = cfg.dino_config_path
+        if not os.path.isfile(dino_config_path):
+            import groundingdino
+            _pkg_dir = os.path.dirname(os.path.abspath(groundingdino.__file__))
+            dino_config_path = os.path.join(_pkg_dir, "config", "GroundingDINO_SwinT_OGC.py")
+        if not os.path.isfile(dino_config_path):
+            raise FileNotFoundError(
+                f"GroundingDINO config not found at {cfg.dino_config_path} nor at {dino_config_path}"
+            )
+
         # GroundingDINO model
         self.dino = GroundingDINOModel(
-            model_config_path=cfg.dino_config_path,
+            model_config_path=dino_config_path,
             model_checkpoint_path=cfg.dino_checkpoint_path,
             device=str(self.device),
         )
@@ -332,6 +342,11 @@ class GroundedSAMMasker:
             if "plate" in phrase.lower() and len(boxes_xyxy) > 1:
                 bottommost_idx = np.argmax(boxes_xyxy[:, 3])  # y2 最大 = 最下面
                 boxes_xyxy = np.array([boxes_xyxy[bottommost_idx]], dtype=boxes_xyxy.dtype)
+
+            # stove/左边扁方块：多个框时取最左边的一个
+            if ("on the left" in phrase.lower() or "left" in phrase.lower()) and len(boxes_xyxy) > 1:
+                leftmost_idx = np.argmin((boxes_xyxy[:, 0] + boxes_xyxy[:, 2]) / 2)
+                boxes_xyxy = np.array([boxes_xyxy[leftmost_idx]], dtype=boxes_xyxy.dtype)
 
             # 任务无 cabinet/rack 时，排除靠右的 box（多是柜子误检）
             if skip_right and len(boxes_xyxy) > 0:
@@ -413,8 +428,8 @@ class GroundedSAMMasker:
 
         If return_masks=True, also returns (red_mask, green_mask).
         """
-        lang = lang.replace("stove",
-            "white square base on the left")
+        # stove -> 左边的扁方块（白色矩形盒）
+        lang = lang.replace("stove", "white rectangular box on the left")
 
         lang = lang.replace("rack",
                           "the yellow and white striped rack near the edge of the table")
@@ -515,7 +530,7 @@ def main():
     sam_type = "vit_h"
     #sam_type = "vit_b"
     device = "cuda"
-    out_path = "debug_masked.png"
+    out_path = "/home/ubuntu/16831pro_fine_tune/zz/masked.png"
 
     cfg = GroundedSAMConfig(
         dino_config_path=dino_config,
@@ -524,8 +539,8 @@ def main():
         sam_type=sam_type,
         device=device,
     )
-    lang = "open the top drawer and put the bowl inside"
-    image = "prismatic/vla/datasets/test.png"
+    lang = "push the plate to the front of the stove"
+    image = "/home/ubuntu/16831pro_fine_tune/zt/1.jpg"
     masker = GroundedSAMMasker(cfg)
     img = Image.open(image).convert("RGB")
     out = masker.mask_image_from_lang(img, lang)

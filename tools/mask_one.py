@@ -1,9 +1,15 @@
 #!/usr/bin/env python3
-import os, argparse
-from PIL import Image
 import os
+import sys
+import argparse
+from pathlib import Path
+from PIL import Image
 
-
+# mask_processor 在 openvla-oft 下，保证子进程能导入
+_tools_dir = Path(__file__).resolve().parent
+_openvla_root = _tools_dir.parent / "openvla-oft"
+if _openvla_root.is_dir():
+    sys.path.insert(0, str(_openvla_root))
 
 from mask_processor import GroundedSAMMasker, GroundedSAMConfig
 

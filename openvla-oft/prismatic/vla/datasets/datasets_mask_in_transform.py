@@ -136,7 +136,7 @@ def mask_image_via_other_env(img_pil: Image.Image, lang: str, out_path: str) -> 
         "--dino_ckpt", str(DINO_CKPT),
         "--sam_ckpt", str(SAM_CKPT),
         "--sam_type", str(SAM_TYPE),
-        "--device", "cuda",   
+        "--device", "cpu",  # mask on CPU to leave GPU for VLA action model   
     ]
 
     r = subprocess.run(

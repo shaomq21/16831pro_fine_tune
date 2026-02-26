@@ -90,9 +90,37 @@ python experiments/robot/libero/run_libero_eval_mask.py \
 
 
 
+PYTHONPATH=/home/ubuntu/16831pro_fine_tune/LIBERO:$PYTHONPATH python experiments/robot/libero/run_libero_eval_mask.py \
+  --pretrained_checkpoint "${CKPT_DIR}" \
+  --base_vla_path "/home/ubuntu/runs/openvla/openvla-7b" \
+  --use_proprio True \
+  --task_suite_name libero_goal \
+  --load_in_8bit True
+
 
 
 
 
 cd /home/ubuntu/16831pro_fine_tune/openvla-oft
 PYTHONPATH=. /home/ubuntu/miniconda3/envs/vla-preprocess/bin/python test_roboflow_gripper.py
+
+
+
+PYTHONPATH=/home/ubuntu/16831pro_fine_tune/LIBERO:$PYTHONPATH python experiments/robot/libero/run_libero_eval_mask.py \
+  --pretrained_checkpoint "${CKPT_DIR}" \
+  --base_vla_path /home/ubuntu/16831pro_fine_tune/openvla-oft/checkpoints/openvla-7b \
+  --use_proprio True \
+  --task_suite_name libero_goal \
+  --perturb_colors True \
+  --load_in_8bit True
+
+
+
+
+
+
+  cd 16831pro_fine_tune/openvla-oft/mask_processor.py
+
+   python experiments/robot/libero/run_single_chunk_inference.py \
+   --proprio "0.144657,-0.275468,0.876451,-0.160527,0.49422,0.430039,0.738271,1" \
+   --load_in_8bit True
