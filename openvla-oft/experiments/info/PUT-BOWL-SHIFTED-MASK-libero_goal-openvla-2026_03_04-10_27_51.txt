@@ -1,0 +1,4 @@
+Put bowl mask eval: put the bowl on the plate
+Mode: no-plate env, green mask at original plate location
+3 trials
+Using default initial states

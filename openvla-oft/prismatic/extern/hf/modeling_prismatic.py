@@ -691,6 +691,9 @@ class PrismaticForConditionalGeneration(PrismaticPreTrainedModel):
         **kwargs: str,
     ) -> Dict[str, torch.Tensor]:
         """Borrowed from `LlamaForCausalLM` and simplified for batch size = 1; mirrors original PrismaticVLM logic."""
+        # Consume custom kwargs so GenerationMixin does not warn "model_kwargs are not used"
+        for key in ("proprio", "proprio_projector", "action_head", "use_film", "unnorm_key", "do_sample"):
+            kwargs.pop(key, None)
         if ((input_ids is not None) and (input_ids.shape[0] > 1)) or (
             (inputs_embeds is not None) and (inputs_embeds.shape[0] > 1)
         ):

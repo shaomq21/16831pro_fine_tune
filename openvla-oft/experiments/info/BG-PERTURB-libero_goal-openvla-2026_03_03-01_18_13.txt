@@ -1,0 +1,4 @@
+Running 2 tasks: ['push the plate to the front of the stove', 'put the bowl on the plate']
+Perturbations: mask_bg_black only; 1 per (task, perturb)
+
+--- Task: push the plate to the front of the stove | Perturb: mask_bg_black_0 | Trial: 1/1 ---

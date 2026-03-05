@@ -1,0 +1,10 @@
+Running 2 tasks: ['push the plate to the front of the stove', 'put the bowl on the plate']
+Perturbations: background elliptical patches (3 variants) + baseline, 4 per task
+
+--- Task: push the plate to the front of the stove | Perturb: background_0 ---
+Saved rollout MP4 at path ./rollouts/2026_03_01/2026_03_01-18_53_07--openvla_oft--episode=1--success=False--task=push_the_plate_to_the_front_of_the_stove--raw_background_0.mp4
+Saved rollout MP4 at path ./rollouts/2026_03_01/2026_03_01-18_53_07--openvla_oft--episode=1--success=False--task=push_the_plate_to_the_front_of_the_stove--masked_background_0.mp4
+Saved side-by-side video: ./rollouts/2026_03_01/2026_03_01-18_53_07--bg_perturb--episode=1--success=False--task=push_the_plate_to_the_front_of_the_stove--sidebyside_background_0.mp4
+Success: False | Total: 0/1
+
+--- Task: push the plate to the front of the stove | Perturb: background_1 ---

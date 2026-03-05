@@ -1,0 +1,28 @@
+Running 2 tasks: ['push the plate to the front of the stove', 'put the bowl on the plate']
+Perturbations: background(3); 1 per (task, perturb)
+
+--- Task: push the plate to the front of the stove | Perturb: background_0 | Trial: 1/1 ---
+Saved side-by-side video: ./rollouts/2026_03_03/2026_03_03-01_44_31--openvla_oft_goal--episode=1--success=False--task=push_the_plate_to_the_front_of_the_stove--sidebyside_push_openvla_oft_goal-background_0.mp4
+Success: False | Total: 0/1
+
+--- Task: push the plate to the front of the stove | Perturb: background_1 | Trial: 1/1 ---
+Saved side-by-side video: ./rollouts/2026_03_03/2026_03_03-01_44_31--openvla_oft_goal--episode=2--success=False--task=push_the_plate_to_the_front_of_the_stove--sidebyside_push_openvla_oft_goal-background_1.mp4
+Success: False | Total: 0/2
+
+--- Task: push the plate to the front of the stove | Perturb: background_2 | Trial: 1/1 ---
+Saved side-by-side video: ./rollouts/2026_03_03/2026_03_03-01_44_31--openvla_oft_goal--episode=3--success=False--task=push_the_plate_to_the_front_of_the_stove--sidebyside_push_openvla_oft_goal-background_2.mp4
+Success: False | Total: 0/3
+
+--- Task: put the bowl on the plate | Perturb: background_0 | Trial: 1/1 ---
+Saved side-by-side video: ./rollouts/2026_03_03/2026_03_03-01_44_31--openvla_oft_goal--episode=4--success=True--task=put_the_bowl_on_the_plate--sidebyside_put_openvla_oft_goal-background_0.mp4
+Success: True | Total: 1/4
+
+--- Task: put the bowl on the plate | Perturb: background_1 | Trial: 1/1 ---
+Saved side-by-side video: ./rollouts/2026_03_03/2026_03_03-01_44_31--openvla_oft_goal--episode=5--success=True--task=put_the_bowl_on_the_plate--sidebyside_put_openvla_oft_goal-background_1.mp4
+Success: True | Total: 2/5
+
+--- Task: put the bowl on the plate | Perturb: background_2 | Trial: 1/1 ---
+Saved side-by-side video: ./rollouts/2026_03_03/2026_03_03-01_44_31--openvla_oft_goal--episode=6--success=True--task=put_the_bowl_on_the_plate--sidebyside_put_openvla_oft_goal-background_2.mp4
+Success: True | Total: 3/6
+
+=== Final: 3/6 = 50.00% ===

@@ -1,0 +1,27 @@
+Color perturb tasks: ['put the bowl on the plate']
+2 color variants × 1 trials per task
+Using default initial states
+
+Task: put the bowl on the plate | Color variant: 0
+
+Task: put the bowl on the plate | Color variant 0 | Trial 1
+Starting episode 1...
+Saved side-by-side video: ./rollouts/2026_03_04/2026_03_04-02_35_27--openvla_oft_goal--episode=1--success=False--task=put_the_bowl_on_the_plate--sidebyside_put_openvla_oft_goal-color0.mp4
+Success: False
+# episodes so far: 1
+# successes: 0 (0.0%)
+
+Task: put the bowl on the plate | Color variant: 1
+
+Task: put the bowl on the plate | Color variant 1 | Trial 1
+Starting episode 2...
+Saved side-by-side video: ./rollouts/2026_03_04/2026_03_04-02_35_27--openvla_oft_goal--episode=2--success=False--task=put_the_bowl_on_the_plate--sidebyside_put_openvla_oft_goal-color1.mp4
+Success: False
+# episodes so far: 2
+# successes: 0 (0.0%)
+Task success rate: 0.0
+Total success rate: 0.0
+Final results:
+Total episodes: 2
+Total successes: 0
+Overall success rate: 0.0000 (0.0%)

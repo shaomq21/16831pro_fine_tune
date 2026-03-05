@@ -10,7 +10,7 @@
      PYTHONPATH=. python scripts/extract_hidden_states.py \\
        --image_path /path/to/your/test.png \\
        [--output_dir ./output_hidden_states] \\
-       [--load_in_8bit]  # 14GB 显存建议加此参数
+       [--load_in_4bit]  # 14GB 显存建议加此参数，比 8bit 更省显存
 
   两个 prompt（下划线已转为空格）:
     - pick up the book in the middle and place it on the cabinet shelf
@@ -46,9 +46,22 @@ MODEL_ID = "openvla/openvla-7b-finetuned-libero-10"
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
-def load_model_and_processor(load_in_8bit: bool = False):
+def load_model_and_processor(load_in_4bit: bool = False, load_in_8bit: bool = False):
     """从 HuggingFace 加载 openvla-7b-finetuned-libero-10 和 processor。"""
-    from transformers import AutoConfig, AutoImageProcessor, AutoModelForVision2Seq, AutoProcessor
+    from transformers import AutoConfig, AutoImageProcessor, AutoModelForVision2Seq, AutoProcessor, BitsAndBytesConfig
+
+    # 4-bit 量化时，dispatch_model 在 is_loaded_in_4bit 设置前被调用，会错误地执行 model.to()
+    # 必须 patch transformers.modeling_utils 中的引用（它已导入 accelerate.dispatch_model）
+    if load_in_4bit:
+        import transformers.modeling_utils as _modeling_utils
+        from accelerate import dispatch_model as _orig_dispatch
+
+        def _patched_dispatch(model, device_map=None, force_hooks=False, **kwargs):
+            if getattr(model, "is_quantized", False):
+                force_hooks = True
+            return _orig_dispatch(model, device_map=device_map, force_hooks=force_hooks, **kwargs)
+
+        _modeling_utils.dispatch_model = _patched_dispatch
 
     from prismatic.extern.hf.configuration_prismatic import OpenVLAConfig
     from prismatic.extern.hf.modeling_prismatic import OpenVLAForActionPrediction
@@ -67,11 +80,21 @@ def load_model_and_processor(load_in_8bit: bool = False):
         low_cpu_mem_usage=True,
         trust_remote_code=True,
     )
-    if load_in_8bit:
+    use_quantization = load_in_4bit or load_in_8bit
+    if load_in_4bit:
+        load_kwargs["quantization_config"] = BitsAndBytesConfig(
+            load_in_4bit=True,
+            bnb_4bit_compute_dtype=torch.bfloat16,
+            bnb_4bit_use_double_quant=True,
+            bnb_4bit_quant_type="nf4",
+        )
+        load_kwargs["device_map"] = "auto"
+    elif load_in_8bit:
         load_kwargs.update(load_in_8bit=True, device_map="auto")
-    model = AutoModelForVision2Seq.from_pretrained(MODEL_ID, **load_kwargs)
+    # 使用本地 OpenVLAForActionPrediction，确保 predict_action 返回 (actions, hidden_states)
+    model = OpenVLAForActionPrediction.from_pretrained(MODEL_ID, **load_kwargs)
 
-    if not load_in_8bit:
+    if not use_quantization:
         model = model.to(DEVICE)
     model.eval()
 
@@ -99,13 +122,23 @@ def get_hidden_states(model, processor, image: Image.Image, prompt: str, unnorm_
               for k, v in inputs.items()}
 
     with torch.inference_mode():
-        actions, hidden_states = model.predict_action(
+        result = model.predict_action(
             input_ids=inputs["input_ids"],
             attention_mask=inputs["attention_mask"],
             pixel_values=inputs["pixel_values"],
             unnorm_key=unnorm_key,
         )
-
+    if isinstance(result, tuple):
+        actions = result[0]
+        hidden_states = result[1] if len(result) > 1 else None
+    else:
+        actions = result
+        hidden_states = None
+    if hidden_states is None:
+        raise ValueError(
+            "predict_action 未返回 hidden_states。请确认使用的 OpenVLA 模型支持返回 hidden states "
+            "(如 prismatic.extern.hf 中的 OpenVLAForActionPrediction)。"
+        )
     return actions, hidden_states
 
 
@@ -130,9 +163,14 @@ def main():
         help="Action unnormalization 的 dataset key；不指定则用 model.norm_stats 里第一个",
     )
     parser.add_argument(
+        "--load_in_4bit",
+        action="store_true",
+        help="4bit 量化加载（比 8bit 更省显存），14GB 显存建议开启",
+    )
+    parser.add_argument(
         "--load_in_8bit",
         action="store_true",
-        help="8bit 量化加载，14GB 显存建议开启",
+        help="8bit 量化加载",
     )
     args = parser.parse_args()
 
@@ -146,8 +184,11 @@ def main():
     # 加载图片
     image = Image.open(image_path).convert("RGB")
 
-    # 加载模型
-    model, processor = load_model_and_processor(load_in_8bit=args.load_in_8bit)
+    # 加载模型（4bit 优先于 8bit）
+    model, processor = load_model_and_processor(
+        load_in_4bit=args.load_in_4bit,
+        load_in_8bit=args.load_in_8bit,
+    )
 
     unnorm_key = args.unnorm_key
     if unnorm_key is None and hasattr(model, "norm_stats") and model.norm_stats:

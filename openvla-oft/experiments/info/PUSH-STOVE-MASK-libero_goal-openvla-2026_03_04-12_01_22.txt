@@ -1,0 +1,8 @@
+Policy: mask_processor full image (red plate + green stove + gripper); raw: white at stove rect
+Jitter experiments: 6 shifts, 1 trial each: [(0, 0), (10, 0), (-10, 0), (0, 10), (0, -10), (5, 5)]
+
+--- Jitter experiment 1/6: shift=(0, 0) ---
+Using default initial states
+
+Task: push the plate to the front of the stove | Trial 1
+Starting episode 1...

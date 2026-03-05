@@ -1,0 +1,14 @@
+Push stove mask eval: push the plate to the front of the stove
+Policy: green solid at stove position; raw video: white at stove position
+3 trials
+Using default initial states
+
+Task: push the plate to the front of the stove | Trial 1
+Starting episode 1...
+Saved side-by-side video: ./rollouts/2026_03_04/2026_03_04-10_18_24--current--episode=1--success=False--task=push_the_plate_to_the_front_of_the_stove--sidebyside_push_stove_mask_current_trial1.mp4
+Success: False
+# episodes so far: 1
+# successes: 0 (0.0%)
+
+Task: push the plate to the front of the stove | Trial 2
+Starting episode 2...

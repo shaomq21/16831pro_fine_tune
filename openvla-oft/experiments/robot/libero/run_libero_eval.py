@@ -14,8 +14,9 @@ from enum import Enum
 from pathlib import Path
 from typing import Optional, Union
 
-import draccus
 import numpy as np
+from PIL import Image
+import draccus
 import tqdm
 from libero.libero import benchmark
 
@@ -106,10 +107,14 @@ class GenerateConfig:
     load_in_8bit: bool = False                       # (For OpenVLA only) Load with 8-bit quantization
     load_in_4bit: bool = False                       # (For OpenVLA only) Load with 4-bit quantization
 
+    base_vla_path: Optional[str] = None              # Base VLA path for adapter-only checkpoints
+    perturb_bowl: bool = False                       # If True: 深灰→亮红 (dark grey pixels to bright red)
+
     #################################################################################################################
     # LIBERO environment-specific parameters
     #################################################################################################################
     task_suite_name: str = TaskSuite.LIBERO_GOAL  # Task suite
+    task_ids: str = ""                               # Comma-separated task IDs to run (e.g. "5,8" for push+put only); empty = all
     num_steps_wait: int = 10                         # Number of steps to wait for objects to stabilize in sim
     num_trials_per_task: int = 10                    # Number of rollouts per task
     initial_states_path: str = "DEFAULT"             # "DEFAULT", or path to initial states JSON file
@@ -148,18 +153,21 @@ def initialize_model(cfg: GenerateConfig):
     # Load model
     model = get_model(cfg)
 
-    # Load proprio projector if needed
+    # Base openvla/openvla-7b uses built-in action prediction; no external action_head/proprio_projector
+    is_base_openvla_7b = str(cfg.pretrained_checkpoint) == "openvla/openvla-7b"
+
+    # Load proprio projector if needed (skip for base OpenVLA 7B)
     proprio_projector = None
-    if cfg.use_proprio:
+    if cfg.use_proprio and not is_base_openvla_7b:
         proprio_projector = get_proprio_projector(
             cfg,
             model.llm_dim,
             proprio_dim=8,  # 8-dimensional proprio for LIBERO
         )
 
-    # Load action head if needed
+    # Load action head if needed (skip for base OpenVLA 7B)
     action_head = None
-    if cfg.use_l1_regression or cfg.use_diffusion:
+    if (cfg.use_l1_regression or cfg.use_diffusion) and not is_base_openvla_7b:
         action_head = get_action_head(cfg, model.llm_dim)
 
     # Load noisy action projector if using diffusion
@@ -240,11 +248,32 @@ def load_initial_states(cfg: GenerateConfig, task_suite, task_id: int, log_file=
         return initial_states, None
 
 
-def prepare_observation(obs, resize_size):
+def _apply_bowl_perturbation(img) -> Union[np.ndarray, Image.Image]:
+    """图里定位深灰色像素，重设为亮红色。深灰：R≈G≈B 且亮度在 [50,140] 范围内。"""
+    arr = np.asarray(img).astype(np.float32)
+    if arr.ndim != 3 or arr.shape[-1] != 3:
+        return img
+    r, g, b = arr[..., 0], arr[..., 1], arr[..., 2]
+    mean_rgb = (r + g + b) / 3.0
+    spread = np.maximum(np.maximum(r, g), b) - np.minimum(np.minimum(r, g), b)
+    dark_grey_mask = (spread < 40) & (mean_rgb >= 50) & (mean_rgb <= 140)
+    arr[dark_grey_mask, 0] = 255
+    arr[dark_grey_mask, 1] = 40
+    arr[dark_grey_mask, 2] = 40
+    out = np.clip(arr, 0, 255).astype(np.uint8)
+    return Image.fromarray(out) if isinstance(img, Image.Image) else out
+
+
+def prepare_observation(obs, resize_size, perturb_bowl: bool = False):
     """Prepare observation for policy input."""
     # Get preprocessed images
     img = get_libero_image(obs)
     wrist_img = get_libero_wrist_image(obs)
+
+    # Optional: 深灰→亮红
+    if perturb_bowl:
+        img = _apply_bowl_perturbation(img)
+        wrist_img = _apply_bowl_perturbation(wrist_img)
 
     # Resize images to size expected by model
     img_resized = resize_image_for_policy(img, resize_size)
@@ -321,7 +350,7 @@ def run_episode(
                 continue
 
             # Prepare observation
-            observation, img = prepare_observation(obs, resize_size)
+            observation, img = prepare_observation(obs, resize_size, perturb_bowl=getattr(cfg, "perturb_bowl", False))
             replay_images.append(img)
 
             # If action queue is empty, requery model
@@ -380,15 +409,15 @@ def run_task(
     # Get initial states
     initial_states, all_initial_states = load_initial_states(cfg, task_suite, task_id, log_file)
 
-    # Initialize environment and get task description
+    # Initialize environment and get task description (original prompt from LIBERO BDDL; no rewrites)
     env, task_description = get_libero_env(task, cfg.model_family, resolution=cfg.env_img_res)
 
-    task_description = task_description.replace("cabinet", "the righmost square object, away from the edge")
-    task_description = task_description.replace("top", "upper")
-    task_description = task_description.replace("middle", "center")
-    task_description = task_description.replace("stove", "leftmost flat-shaped object")
-    task_description = task_description.replace("plate", "right flat-shaped object, next to the righmost square object")
-    task_description = task_description.replace("rack", "rightmost square object, close to the edge")
+    # task_description = task_description.replace("cabinet", "the righmost square object, away from the edge")
+    # task_description = task_description.replace("top", "upper")
+    # task_description = task_description.replace("middle", "center")
+    # task_description = task_description.replace("stove", "leftmost flat-shaped object")
+    # task_description = task_description.replace("plate", "right flat-shaped object, next to the righmost square object")
+    # task_description = task_description.replace("rack", "rightmost square object, close to the edge")
 
     # Start episodes
     task_episodes, task_successes = 0, 0
@@ -489,11 +518,18 @@ def eval_libero(cfg: GenerateConfig) -> float:
     task_suite = benchmark_dict[cfg.task_suite_name]()
     num_tasks = task_suite.n_tasks
 
+    task_id_list = range(num_tasks)
+    if cfg.task_ids:
+        task_id_list = [int(x.strip()) for x in cfg.task_ids.split(",") if x.strip()]
+        for tid in task_id_list:
+            assert 0 <= tid < num_tasks, f"task_id {tid} out of range [0, {num_tasks})"
+        log_message(f"Running only task IDs: {task_id_list}", log_file)
+
     log_message(f"Task suite: {cfg.task_suite_name}", log_file)
 
     # Start evaluation
     total_episodes, total_successes = 0, 0
-    for task_id in tqdm.tqdm(range(num_tasks)):
+    for task_id in tqdm.tqdm(task_id_list):
         total_episodes, total_successes = run_task(
             cfg,
             task_suite,

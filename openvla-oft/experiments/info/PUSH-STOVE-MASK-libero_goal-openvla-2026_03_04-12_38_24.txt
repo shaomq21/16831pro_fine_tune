@@ -1,0 +1,32 @@
+Policy: mask_processor full image (red plate + green stove + gripper); raw: white at stove rect
+Jitter experiments: 6 shifts, 1 trial each: [(0, 0), (10, 0), (-10, 0), (0, 10), (0, -10), (5, 5)]
+
+--- Jitter experiment 1/6: shift=(0, 0) ---
+Using default initial states
+
+Task: push the plate to the front of the stove | Trial 1
+Starting episode 1...
+Saved side-by-side video: ./rollouts/2026_03_04/2026_03_04-12_38_24--current--episode=1--success=False--task=push_the_plate_to_the_front_of_the_stove--sidebyside_push_stove_mask_current.mp4
+Success: False
+# episodes so far: 1
+# successes: 0 (0.0%)
+Task success rate: 0.0
+Total success rate: 0.0
+
+--- Jitter experiment 2/6: shift=(10, 0) ---
+Using default initial states
+
+Task: push the plate to the front of the stove | Trial 1
+Starting episode 1...
+Saved side-by-side video: ./rollouts/2026_03_04/2026_03_04-12_38_24--current--episode=2--success=False--task=push_the_plate_to_the_front_of_the_stove--sidebyside_push_stove_mask_current.mp4
+Success: False
+# episodes so far: 2
+# successes: 0 (0.0%)
+Task success rate: 0.0
+Total success rate: 0.0
+
+--- Jitter experiment 3/6: shift=(-10, 0) ---
+Using default initial states
+
+Task: push the plate to the front of the stove | Trial 1
+Starting episode 1...

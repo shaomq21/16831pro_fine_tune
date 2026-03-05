@@ -172,6 +172,166 @@ def mask_image_via_other_env(img_pil: Image.Image, lang: str, out_path: str) -> 
     return Image.open(out_path).convert("RGB")
 
 
+def get_green_mask_via_other_env(
+    img_pil: Image.Image,
+    lang: str,
+    green_mask_out_path: str,
+) -> str:
+    """Run mask_one to get green (destination) mask only; save as binary PNG (255=green, 0=else).
+    Used e.g. for 'push the plate to the front of the stove' to get stove mask. Returns green_mask_out_path."""
+    env = os.environ.copy()
+    for k in ["WORLD_SIZE", "RANK", "LOCAL_RANK", "LOCAL_WORLD_SIZE", "MASTER_ADDR", "MASTER_PORT"]:
+        env.pop(k, None)
+    tmp_dir = tempfile.mkdtemp(prefix="mask_tmp_")
+    in_path = os.path.join(tmp_dir, "in.png")
+    img_pil.save(in_path)
+    image_out_dummy = os.path.join(tmp_dir, "out.png")
+    cmd = [
+        str(VLA_PREPROCESS_PY),
+        "-u",
+        str(MASK_ONE_SCRIPT),
+        "--image_in", str(in_path),
+        "--image_out", str(image_out_dummy),
+        "--lang", str(lang),
+        "--dino_config", str(DINO_CONFIG),
+        "--dino_ckpt", str(DINO_CKPT),
+        "--sam_ckpt", str(SAM_CKPT),
+        "--sam_type", str(SAM_TYPE),
+        "--device", "cpu",
+        "--green_mask_out", str(green_mask_out_path),
+    ]
+    r = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, env=env)
+    if r.returncode != 0:
+        raise RuntimeError(
+            "mask_one.py (green_mask_out) failed\n"
+            f"cmd: {' '.join(cmd)}\nstdout:\n{r.stdout}\nstderr:\n{r.stderr}\n"
+        )
+    return green_mask_out_path
+
+
+def get_policy_image_and_green_mask_via_other_env(
+    img_pil: Image.Image,
+    lang: str,
+    policy_image_out_path: str,
+    green_mask_out_path: str,
+    hide_green: bool = True,
+) -> Tuple[Image.Image, str]:
+    """Run mask_one to get policy image and green (stove) mask.
+    If hide_green=True (default): image is black + red plate + gripper only; caller draws green rect.
+    If hide_green=False: image includes mask_processor's green stove shape. Returns (policy_pil, green_mask_out_path)."""
+    env = os.environ.copy()
+    for k in ["WORLD_SIZE", "RANK", "LOCAL_RANK", "LOCAL_WORLD_SIZE", "MASTER_ADDR", "MASTER_PORT"]:
+        env.pop(k, None)
+    tmp_dir = tempfile.mkdtemp(prefix="mask_tmp_")
+    in_path = os.path.join(tmp_dir, "in.png")
+    img_pil.save(in_path)
+    cmd = [
+        str(VLA_PREPROCESS_PY),
+        "-u",
+        str(MASK_ONE_SCRIPT),
+        "--image_in", str(in_path),
+        "--image_out", str(policy_image_out_path),
+        "--lang", str(lang),
+        "--dino_config", str(DINO_CONFIG),
+        "--dino_ckpt", str(DINO_CKPT),
+        "--sam_ckpt", str(SAM_CKPT),
+        "--sam_type", str(SAM_TYPE),
+        "--device", "cpu",
+        "--green_mask_out", str(green_mask_out_path),
+    ]
+    if hide_green:
+        cmd.append("--hide_green")
+    r = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, env=env)
+    if r.returncode != 0:
+        raise RuntimeError(
+            "mask_one.py (policy image + green mask) failed\n"
+            f"cmd: {' '.join(cmd)}\nstdout:\n{r.stdout}\nstderr:\n{r.stderr}\n"
+        )
+    return Image.open(policy_image_out_path).convert("RGB"), green_mask_out_path
+
+
+def get_red_green_masks_via_other_env(
+    img_pil: Image.Image,
+    lang: str,
+    red_mask_out_path: str,
+    green_mask_out_path: str,
+) -> Tuple[str, str]:
+    """Run mask_one to get both red (plate/source) and green (stove/destination) masks; save as binary PNGs.
+    Returns (red_mask_out_path, green_mask_out_path)."""
+    env = os.environ.copy()
+    for k in ["WORLD_SIZE", "RANK", "LOCAL_RANK", "LOCAL_WORLD_SIZE", "MASTER_ADDR", "MASTER_PORT"]:
+        env.pop(k, None)
+    tmp_dir = tempfile.mkdtemp(prefix="mask_tmp_")
+    in_path = os.path.join(tmp_dir, "in.png")
+    img_pil.save(in_path)
+    image_out_dummy = os.path.join(tmp_dir, "out.png")
+    cmd = [
+        str(VLA_PREPROCESS_PY),
+        "-u",
+        str(MASK_ONE_SCRIPT),
+        "--image_in", str(in_path),
+        "--image_out", str(image_out_dummy),
+        "--lang", str(lang),
+        "--dino_config", str(DINO_CONFIG),
+        "--dino_ckpt", str(DINO_CKPT),
+        "--sam_ckpt", str(SAM_CKPT),
+        "--sam_type", str(SAM_TYPE),
+        "--device", "cpu",
+        "--red_mask_out", str(red_mask_out_path),
+        "--green_mask_out", str(green_mask_out_path),
+    ]
+    r = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, env=env)
+    if r.returncode != 0:
+        raise RuntimeError(
+            "mask_one.py (red/green masks) failed\n"
+            f"cmd: {' '.join(cmd)}\nstdout:\n{r.stdout}\nstderr:\n{r.stderr}\n"
+        )
+    return red_mask_out_path, green_mask_out_path
+
+
+def mask_image_via_other_env_shifted_plate(
+    img_pil: Image.Image,
+    lang: str,
+    out_path: str,
+    shift_pixels: int = 80,
+    hide_plate_mask: bool = True,
+) -> Image.Image:
+    """Same as mask_image_via_other_env but shifts green (plate) mask by shift_pixels (right=positive).
+    Used for 'put the bowl on the plate': green is drawn only at shifted position (beside plate);
+    original plate area is excluded from red. hide_plate_mask=False draws the shifted green."""
+    env = os.environ.copy()
+    for k in ["WORLD_SIZE", "RANK", "LOCAL_RANK", "LOCAL_WORLD_SIZE", "MASTER_ADDR", "MASTER_PORT"]:
+        env.pop(k, None)
+    tmp_dir = tempfile.mkdtemp(prefix="mask_tmp_")
+    in_path = os.path.join(tmp_dir, "in.png")
+    img_pil.save(in_path)
+    cmd = [
+        str(VLA_PREPROCESS_PY),
+        "-u",
+        str(MASK_ONE_SCRIPT),
+        "--image_in", str(in_path),
+        "--image_out", str(out_path),
+        "--lang", str(lang),
+        "--dino_config", str(DINO_CONFIG),
+        "--dino_ckpt", str(DINO_CKPT),
+        "--sam_ckpt", str(SAM_CKPT),
+        "--sam_type", str(SAM_TYPE),
+        "--device", "cpu",
+        "--shift_plate_mask_x", str(shift_pixels),
+    ]
+    if hide_plate_mask:
+        cmd.append("--hide_green")
+    r = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, env=env)
+    if r.returncode != 0:
+        raise RuntimeError(
+            "mask_one.py failed\n"
+            f"cmd: {' '.join(cmd)}\n"
+            f"stdout:\n{r.stdout}\n"
+            f"stderr:\n{r.stderr}\n"
+        )
+    return Image.open(out_path).convert("RGB")
+
+
 import io
 from PIL import Image
 

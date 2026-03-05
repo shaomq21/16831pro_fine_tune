@@ -1,0 +1,16 @@
+Shifted plate mask eval: put the bowl on the plate
+Green mask positions (one episode each): [-80, -40, 0, 40, 80] pixels
+Using default initial states
+
+Task: put the bowl on the plate | Trial 1
+Starting episode 1...
+Saved side-by-side video: ./rollouts/2026_03_04/2026_03_04-03_41_07--current--episode=1--success=False--task=put_the_bowl_on_the_plate--sidebyside_put_current_shifted-80.mp4
+Success: False
+# episodes so far: 1
+# successes: 0 (0.0%)
+Task success rate: 0.0
+Total success rate: 0.0
+Using default initial states
+
+Task: put the bowl on the plate | Trial 1
+Starting episode 1...

@@ -1,0 +1,19 @@
+Shifted plate mask eval: put the bowl on the plate
+Green mask shifted by -80 pixels (region beside plate)
+1 trials
+Using default initial states
+
+Task: put the bowl on the plate | Trial 1
+Starting episode 1...
+Episode error: CUDA out of memory. Tried to allocate 20.00 MiB. GPU 0 has a total capacity of 14.58 GiB of which 5.56 MiB is free. Including non-PyTorch memory, this process has 14.57 GiB memory in use. Of the allocated memory 14.41 GiB is allocated by PyTorch, and 42.70 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
+Video had only 1 frame; duplicated for 3s playback.
+Saved side-by-side video: ./rollouts/2026_03_04/2026_03_04-02_21_42--current--episode=1--success=False--task=put_the_bowl_on_the_plate--sidebyside_put_current_shifted-80.mp4
+Success: False
+# episodes so far: 1
+# successes: 0 (0.0%)
+Task success rate: 0.0
+Total success rate: 0.0
+Final results:
+Total episodes: 1
+Total successes: 0
+Overall success rate: 0.0000 (0.0%)

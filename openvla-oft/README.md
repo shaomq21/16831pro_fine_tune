@@ -160,17 +160,28 @@ export ROBOFLOW_API_KEY="
   cd 16831pro_fine_tune/openvla-oft/mask_processor.py
 
    python experiments/robot/libero/run_single_chunk_inference.py \
-   --proprio "0.144657,-0.275468,0.876451,-0.160527,0.49422,0.430039,0.738271,1" \
+   --proprio "0.671691520561037,0.016602214,0.048589394,0.910049785,0.538836866,0.277672637,0.954056705,-0.96734364
+" \
    --load_in_8bit True
 
 
+./experiments/robot/libero/run_all_bg_perturb.sh
 
 
 
 
 
+./experiments/robot/libero/run_all_color_perturb.sh
 
 
+
+PYTHONPATH=/home/ubuntu/16831pro_fine_tune/LIBERO:$PYTHONPATH python experiments/robot/libero/run_libero_eval.py \
+  --pretrained_checkpoint "moojink/openvla-7b-oft-finetuned-libero-goal" \
+  --task_suite_name libero_goal \
+  --num_images_in_input 2 \
+  --num_trials_per_task 10 \
+  --task_ids "5,8" \
+  --load_in_8bit True
 
 
 
@@ -189,3 +200,52 @@ cd /home/ubuntu/16831pro_fine_tune/SimpleVLA-RL
 sudo fallocate -l 16G /swapfile && sudo chmod 600 /swapfile && sudo mkswap /swapfile && sudo swapon /swapfile
 export RAY_memory_monitor_refresh_ms=0
 bash examples/run_openvla_oft_rl_libero_push_perturb.sh
+
+
+
+/ubuntu/16831pro_fine_tune/openvla-oft
+PYTHONPATH=. python scripts/extract_hidden_states.py \
+  --image_path /home/ubuntu/16831pro_fine_tune/zt/test_book.png \
+  --load_in_4bit
+
+
+
+# Put bowl on plate 评测（无移位、无 plate 环境，mask 目标区为白色）
+# 不需要移位时直接跑下面即可（默认 use_no_plate_env=True, dest_mask_white=True）
+PYTHONPATH=/home/ubuntu/16831pro_fine_tune/LIBERO:$PYTHONPATH python experiments/robot/libero/run_libero_put_bowl_shifted_mask_eval.py \
+  --pretrained_checkpoint "$CURRENT_CHECKPOINT" \
+  --base_vla_path "${OPENVLA_OFT_ROOT}/checkpoints/openvla-7b" \
+  --model_label "current" \
+  --use_mask_for_policy True \
+  --num_trials_per_task 3
+# 可选：有 plate+移位 时加 --use_no_plate_env False --shift_plate_pixels 80
+
+
+  PYTHONPATH=/home/ubuntu/16831pro_fine_tune/LIBERO:$PYTHONPATH python experiments/robot/libero/run_libero_push_stove_mask_eval.py \
+  --use_mask_for_policy True --num_trials_per_task 3
+
+
+
+
+
+
+  cd /home/ubuntu/16831pro_fine_tune/openvla-oft
+export PYTHONPATH=/home/ubuntu/16831pro_fine_tune/LIBERO:$PYTHONPATH
+python experiments/robot/libero/run_libero_put_bowl_shifted_mask_eval.py \
+  --pretrained_checkpoint "$CURRENT_CHECKPOINT" \
+  --base_vla_path "${OPENVLA_OFT_ROOT}/checkpoints/openvla-7b" \
+  --model_label "current" \
+  --use_mask_for_policy True \
+  --num_trials_per_task 3
+
+
+
+
+  cd /home/ubuntu/16831pro_fine_tune/openvla-oft
+export PYTHONPATH=/home/ubuntu/16831pro_fine_tune/LIBERO:$PYTHONPATH
+python experiments/robot/libero/run_libero_put_bowl_shifted_mask_eval.py \
+  --pretrained_checkpoint "$CURRENT_CHECKPOINT" \
+  --base_vla_path "${OPENVLA_OFT_ROOT}/checkpoints/openvla-7b" \
+  --model_label "current" \
+  --use_mask_for_policy True \
+  --num_trials_per_task 3

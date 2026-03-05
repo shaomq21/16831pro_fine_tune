@@ -292,9 +292,18 @@ class GroundedSAMMasker:
         self.sam_predictor = SamPredictor(sam)
 
     @torch.inference_mode()
-    def _segment_phrases(self, image_rgb: np.ndarray, phrases: List[str], lang: str = "") -> np.ndarray:
+    def _segment_phrases(
+        self,
+        image_rgb: np.ndarray,
+        phrases: List[str],
+        lang: str = "",
+        shift_box_x_pixels: Optional[int] = None,
+        shift_phrase: Optional[str] = None,
+    ) -> np.ndarray:
         """
         Returns a union mask (H,W) bool for all phrases.
+        When shift_box_x_pixels and shift_phrase are set, shift the detected box
+        for that phrase (e.g. "plate") by offset before SAM - used for "plate beside" mask.
         """
         if not phrases:
             return np.zeros(image_rgb.shape[:2], dtype=bool)
@@ -344,6 +353,17 @@ class GroundedSAMMasker:
                 boxes_xyxy = boxes_xyxy[keep_mask]
             if len(boxes_xyxy) == 0:
                 continue
+
+            # Shift box for "plate beside" mask: same shape, different location
+            if (
+                shift_box_x_pixels is not None
+                and shift_phrase is not None
+                and shift_phrase.lower() in phrase.lower()
+            ):
+                boxes_xyxy = boxes_xyxy.copy()
+                boxes_xyxy[:, [0, 2]] = np.clip(
+                    boxes_xyxy[:, [0, 2]] + shift_box_x_pixels, 0, W
+                )
 
             # SAM expects boxes as torch tensor on device in XYXY
             boxes_t = torch.as_tensor(boxes_xyxy, dtype=torch.float32, device=self.device)
@@ -408,14 +428,16 @@ class GroundedSAMMasker:
         lang: str,
         *,
         return_masks: bool = False,
-        alpha: float = 0.35
+        alpha: float = 0.35,
+        shift_green_plate_pixels: Optional[int] = None,
+        draw_green: bool = True,
     ):
         """
         Output: PIL RGB image with black background and colored masks:
           - red objects -> (255,0,0)
-          - green objects -> (0,255,0)
+          - green objects -> (0,255,0)  (omitted if draw_green=False, e.g. hide plate mask)
 
-        If return_masks=True, also returns (red_mask, green_mask).
+        If return_masks=True, returns (out_pil, red_mask, green_mask).
         """
         # stove -> 左边的扁方块（白色矩形盒）
         lang = lang.replace("stove", "white rectangular box on the left")
@@ -438,7 +460,20 @@ class GroundedSAMMasker:
         if spec.green_points_xy:                      
             green_mask = self._segment_points(image_rgb, spec.green_points_xy)
         else:
-            green_mask = self._segment_phrases(image_rgb, spec.green_phrases, lang=lang)
+            green_mask = self._segment_phrases(
+                image_rgb,
+                spec.green_phrases,
+                lang=lang,
+                shift_box_x_pixels=shift_green_plate_pixels,
+                shift_phrase="plate" if shift_green_plate_pixels is not None else None,
+            )
+
+        # When shifting green (plate): exclude original plate region from red so plate is not painted red
+        if shift_green_plate_pixels is not None and spec.green_phrases:
+            original_plate_mask = self._segment_phrases(
+                image_rgb, spec.green_phrases, lang=lang,
+            )
+            red_mask = red_mask & (~original_plate_mask)
 
         if spec.red_points_xy or spec.green_points_xy:
             debug_rgb = Image.fromarray(image_rgb.copy(), mode="RGB")
@@ -460,7 +495,7 @@ class GroundedSAMMasker:
         if red_mask.any():
             tinted = (1.0 - alpha) * image_rgb[red_mask] + alpha * light_red
             out[red_mask] = np.clip(tinted, 0, 255).astype(np.uint8)
-        if green_mask.any():
+        if draw_green and green_mask.any():
             tinted = (1.0 - alpha) * image_rgb[green_mask] + alpha * light_green
             out[green_mask] = np.clip(tinted, 0, 255).astype(np.uint8)
 
@@ -479,6 +514,8 @@ class GroundedSAMMasker:
 
         # If nothing was drawn (all black): return original image
         if not red_mask.any() and not green_mask.any() and not gripper_centers:
+            if return_masks:
+                return img_pil, red_mask, green_mask
             return img_pil
 
         out_pil = Image.fromarray(out, mode="RGB")
@@ -490,8 +527,8 @@ class GroundedSAMMasker:
         if getattr(spec, "green_points_xy", None):
             out_pil = _draw_points_overlay(out_pil, spec.green_points_xy, color=(0, 255, 0), r=10, w=3)
 
-
-
+        if return_masks:
+            return out_pil, red_mask, green_mask
         return out_pil
 
 

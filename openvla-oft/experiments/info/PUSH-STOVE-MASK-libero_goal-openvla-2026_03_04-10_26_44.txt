@@ -1,0 +1,4 @@
+Push stove mask eval: push the plate to the front of the stove
+Policy: green solid at stove position; raw video: white at stove position
+3 trials
+Using default initial states

@@ -65,7 +65,7 @@ from experiments.robot.robot_utils import (
 class InferenceConfig:
     """单次推理配置，与 run_libero_eval_mask GenerateConfig 对齐的模型参数。"""
     # 用户必须传入
-    image_path: str = "/home/ubuntu/16831pro_fine_tune/zz/5.png"
+    image_path: str = "/home/ubuntu/16831pro_fine_tune/zz/0.png"
     task_description: str = "push_the_plate_to_the_front_of_the_stove"
     # 模型相关（与 run_libero_eval_mask GenerateConfig 一致）
     pretrained_checkpoint: Union[str, Path] = "/home/ubuntu/runs/openvla_adapters/openvla-7b+libero_goal_no_noops+b8+lr-0.0001+lora-r8+dropout-0.0+lora-attn-only--13500_chkpt"

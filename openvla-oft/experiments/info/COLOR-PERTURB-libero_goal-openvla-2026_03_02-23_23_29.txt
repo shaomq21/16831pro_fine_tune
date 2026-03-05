@@ -1,0 +1,22 @@
+Color perturb tasks: ['push the plate to the front of the stove', 'put the bowl on the plate']
+2 color variants × 3 trials per task
+Using default initial states
+
+Task: push the plate to the front of the stove | Color variant: 0
+
+Task: push the plate to the front of the stove | Color variant 0 | Trial 1
+Starting episode 1...
+Saved side-by-side video: ./rollouts/2026_03_02/2026_03_02-23_23_29--current--episode=1--success=False--task=push_the_plate_to_the_front_of_the_stove--sidebyside_push_current-color0_trial1.mp4
+Success: False
+# episodes so far: 1
+# successes: 0 (0.0%)
+
+Task: push the plate to the front of the stove | Color variant 0 | Trial 2
+Starting episode 2...
+Saved side-by-side video: ./rollouts/2026_03_02/2026_03_02-23_23_29--current--episode=2--success=False--task=push_the_plate_to_the_front_of_the_stove--sidebyside_push_current-color0_trial2.mp4
+Success: False
+# episodes so far: 2
+# successes: 0 (0.0%)
+
+Task: push the plate to the front of the stove | Color variant 0 | Trial 3
+Starting episode 3...

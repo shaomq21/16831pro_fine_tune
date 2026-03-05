@@ -1,18 +1,11 @@
 (define (problem LIBERO_Tabletop_Manipulation)
   (:domain robosuite)
-  (:language Push the plate to the front of the leftmost flat-shaped object)
+  (:language Push the plate to the front of the stove)
     (:regions
       (plate_region
           (:target main_table)
           (:ranges (
               (0.04 -0.03 0.060000000000000005 -0.01)
-            )
-          )
-      )
-      (left_region
-          (:target main_table)
-          (:ranges (
-              (0.03 -0.5 0.050000000000000005 0.5)
             )
           )
       )
@@ -129,7 +122,7 @@
   )
 
   (:goal
-    (And (On plate_1 main_table_left_region))
+    (And (On plate_1 main_table_stove_front_region))
   )
 
 )

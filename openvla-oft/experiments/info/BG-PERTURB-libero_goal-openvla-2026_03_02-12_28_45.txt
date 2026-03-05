@@ -1,0 +1,16 @@
+Running 2 tasks: ['push the plate to the front of the stove', 'put the bowl on the plate']
+Perturbations: background (3 variants) + baseline; 3 episodes per (task, perturb)
+
+--- Task: push the plate to the front of the stove | Perturb: background_0 | Trial: 1/3 ---
+Saved rollout MP4 at path ./rollouts/2026_03_02/2026_03_02-12_28_45--current--episode=1--success=False--task=push_the_plate_to_the_front_of_the_stove--raw_push_current-Background_perturb_0_trial1.mp4
+Saved rollout MP4 at path ./rollouts/2026_03_02/2026_03_02-12_28_45--current--episode=1--success=False--task=push_the_plate_to_the_front_of_the_stove--masked_push_current-Background_perturb_0_trial1.mp4
+Saved side-by-side video: ./rollouts/2026_03_02/2026_03_02-12_28_45--current--episode=1--success=False--task=push_the_plate_to_the_front_of_the_stove--sidebyside_push_current-Background_perturb_0_trial1.mp4
+Success: False | Total: 0/1
+
+--- Task: push the plate to the front of the stove | Perturb: background_0 | Trial: 2/3 ---
+Saved rollout MP4 at path ./rollouts/2026_03_02/2026_03_02-12_28_45--current--episode=2--success=False--task=push_the_plate_to_the_front_of_the_stove--raw_push_current-Background_perturb_0_trial2.mp4
+Saved rollout MP4 at path ./rollouts/2026_03_02/2026_03_02-12_28_45--current--episode=2--success=False--task=push_the_plate_to_the_front_of_the_stove--masked_push_current-Background_perturb_0_trial2.mp4
+Saved side-by-side video: ./rollouts/2026_03_02/2026_03_02-12_28_45--current--episode=2--success=False--task=push_the_plate_to_the_front_of_the_stove--sidebyside_push_current-Background_perturb_0_trial2.mp4
+Success: False | Total: 0/2
+
+--- Task: push the plate to the front of the stove | Perturb: background_0 | Trial: 3/3 ---

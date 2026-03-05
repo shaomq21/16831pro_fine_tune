@@ -15,7 +15,7 @@ from experiments.robot.robot_utils import (
 )
 
 
-def get_libero_env(task, model_family, resolution=256, use_segmentation_env=False):
+def get_libero_env(task, model_family, resolution=256, use_segmentation_env=False, bddl_file_override=None):
     """Initializes and returns the LIBERO environment, along with the task description.
 
     Args:
@@ -24,9 +24,12 @@ def get_libero_env(task, model_family, resolution=256, use_segmentation_env=Fals
         resolution: Camera height/width.
         use_segmentation_env: If True, use SegmentationRenderEnv so obs include
             agentview_segmentation_instance; enables mask-from-env (no Grounded-SAM).
+        bddl_file_override: If set, use this BDDL filename instead of task.bddl_file
+            (still under task.problem_folder). E.g. "put_the_bowl_on_the_plate_no_plate.bddl".
     """
     task_description = task.language
-    task_bddl_file = os.path.join(get_libero_path("bddl_files"), task.problem_folder, task.bddl_file)
+    bddl_file = (bddl_file_override or task.bddl_file).strip() if bddl_file_override else task.bddl_file
+    task_bddl_file = os.path.join(get_libero_path("bddl_files"), task.problem_folder, bddl_file)
     env_args = {"bddl_file_name": task_bddl_file, "camera_heights": resolution, "camera_widths": resolution}
     if use_segmentation_env:
         env = SegmentationRenderEnv(camera_segmentations="instance", **env_args)
@@ -92,18 +95,33 @@ def mask_image_from_libero_seg(rgb_np, seg_obs, env, alpha=0.5):
     return np.clip(out, 0, 255).astype(np.uint8)
 
 
-def save_rollout_video(rollout_images, idx, success, task_description, log_file=None, suffix=None, fps=30):
-    """Saves an MP4 replay of an episode. Same fps for raw and masked so they stay in sync."""
+def save_rollout_video(rollout_images, idx, success, task_description, log_file=None, suffix=None, fps=30, model_label=None):
+    """Saves an MP4 replay of an episode. Same fps for raw and masked so they stay in sync.
+    If model_label is provided, it is used in the filename (e.g. openvla_7b, openvla_oft_goal)."""
     rollout_dir = f"./rollouts/{DATE}"
     os.makedirs(rollout_dir, exist_ok=True)
     processed_task_description = task_description.lower().replace(" ", "_").replace("\n", "_").replace(".", "_")[:50]
     extra = f"--{suffix}" if suffix else ""
-    mp4_path = f"{rollout_dir}/{DATE_TIME}--openvla_oft--episode={idx}--success={success}--task={processed_task_description}{extra}.mp4"
-    video_writer = imageio.get_writer(mp4_path, fps=fps)
+    model_tag = (model_label if model_label else "openvla_oft")
+    mp4_path = f"{rollout_dir}/{DATE_TIME}--{model_tag}--episode={idx}--success={success}--task={processed_task_description}{extra}.mp4"
+    # Normalize every frame to uint8 HWC so all frames are written (avoid "only first frame" bug)
+    frames = []
     for img in rollout_images:
-        video_writer.append_data(img)
+        arr = np.asarray(img)
+        if arr.ndim == 2:
+            arr = np.stack([arr] * 3, axis=-1)
+        frames.append(np.clip(arr.astype(np.uint8), 0, 255))
+    if not frames:
+        frames = [np.zeros((256, 256, 3), dtype=np.uint8)]
+    n_original = len(frames)
+    # If only one frame, duplicate so the video is playable (e.g. 3 sec at 30fps)
+    if n_original == 1:
+        frames = frames * (fps * 3)
+    video_writer = imageio.get_writer(mp4_path, fps=fps)
+    for f in frames:
+        video_writer.append_data(f)
     video_writer.close()
-    print(f"Saved rollout MP4 at path {mp4_path}")
+    print(f"Saved rollout MP4 at path {mp4_path} ({n_original} frames -> {len(frames)} written)")
     if log_file is not None:
         log_file.write(f"Saved rollout MP4 at path {mp4_path}\n")
     return mp4_path

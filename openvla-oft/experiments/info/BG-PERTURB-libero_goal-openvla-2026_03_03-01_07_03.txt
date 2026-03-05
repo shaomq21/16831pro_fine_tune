@@ -1,0 +1,24 @@
+Running 2 tasks: ['push the plate to the front of the stove', 'put the bowl on the plate']
+Perturbations: hue(2) + channel_shuffle + posterize + invert; 1 per (task, perturb)
+
+--- Task: push the plate to the front of the stove | Perturb: hue_0 | Trial: 1/1 ---
+Saved side-by-side video: ./rollouts/2026_03_03/2026_03_03-01_07_03--openvla_oft_goal--episode=1--success=True--task=push_the_plate_to_the_front_of_the_stove--sidebyside_push_openvla_oft_goal-hue_0.mp4
+Success: True | Total: 1/1
+
+--- Task: push the plate to the front of the stove | Perturb: hue_1 | Trial: 1/1 ---
+Saved side-by-side video: ./rollouts/2026_03_03/2026_03_03-01_07_03--openvla_oft_goal--episode=2--success=True--task=push_the_plate_to_the_front_of_the_stove--sidebyside_push_openvla_oft_goal-hue_1.mp4
+Success: True | Total: 2/2
+
+--- Task: push the plate to the front of the stove | Perturb: channel_shuffle_0 | Trial: 1/1 ---
+Saved side-by-side video: ./rollouts/2026_03_03/2026_03_03-01_07_03--openvla_oft_goal--episode=3--success=True--task=push_the_plate_to_the_front_of_the_stove--sidebyside_push_openvla_oft_goal-channel_shuffle_0.mp4
+Success: True | Total: 3/3
+
+--- Task: push the plate to the front of the stove | Perturb: posterize_0 | Trial: 1/1 ---
+Saved side-by-side video: ./rollouts/2026_03_03/2026_03_03-01_07_03--openvla_oft_goal--episode=4--success=True--task=push_the_plate_to_the_front_of_the_stove--sidebyside_push_openvla_oft_goal-posterize_0.mp4
+Success: True | Total: 4/4
+
+--- Task: push the plate to the front of the stove | Perturb: invert_0 | Trial: 1/1 ---
+Saved side-by-side video: ./rollouts/2026_03_03/2026_03_03-01_07_03--openvla_oft_goal--episode=5--success=True--task=push_the_plate_to_the_front_of_the_stove--sidebyside_push_openvla_oft_goal-invert_0.mp4
+Success: True | Total: 5/5
+
+--- Task: put the bowl on the plate | Perturb: hue_0 | Trial: 1/1 ---

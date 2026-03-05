@@ -1,0 +1,116 @@
+Color perturb tasks: ['push the plate to the front of the stove', 'put the bowl on the plate']
+2 color variants × 3 trials per task
+Using default initial states
+
+Task: push the plate to the front of the stove | Color variant: 0
+
+Task: push the plate to the front of the stove | Color variant 0 | Trial 1
+Starting episode 1...
+Episode error: The following `model_kwargs` are not used by the model: ['proprio', 'proprio_projector', 'action_head', 'use_film'] (note: typos in the generate arguments will also show up in this list)
+Saved side-by-side video: ./rollouts/2026_03_04/2026_03_04-02_17_27--openvla_7b--episode=1--success=False--task=push_the_plate_to_the_front_of_the_stove--sidebyside_push_openvla_7b-color0_trial1.mp4
+Success: False
+# episodes so far: 1
+# successes: 0 (0.0%)
+
+Task: push the plate to the front of the stove | Color variant 0 | Trial 2
+Starting episode 2...
+Episode error: The following `model_kwargs` are not used by the model: ['proprio', 'proprio_projector', 'action_head', 'use_film'] (note: typos in the generate arguments will also show up in this list)
+Saved side-by-side video: ./rollouts/2026_03_04/2026_03_04-02_17_27--openvla_7b--episode=2--success=False--task=push_the_plate_to_the_front_of_the_stove--sidebyside_push_openvla_7b-color0_trial2.mp4
+Success: False
+# episodes so far: 2
+# successes: 0 (0.0%)
+
+Task: push the plate to the front of the stove | Color variant 0 | Trial 3
+Starting episode 3...
+Episode error: The following `model_kwargs` are not used by the model: ['proprio', 'proprio_projector', 'action_head', 'use_film'] (note: typos in the generate arguments will also show up in this list)
+Saved side-by-side video: ./rollouts/2026_03_04/2026_03_04-02_17_27--openvla_7b--episode=3--success=False--task=push_the_plate_to_the_front_of_the_stove--sidebyside_push_openvla_7b-color0_trial3.mp4
+Success: False
+# episodes so far: 3
+# successes: 0 (0.0%)
+
+Task: push the plate to the front of the stove | Color variant: 1
+
+Task: push the plate to the front of the stove | Color variant 1 | Trial 1
+Starting episode 4...
+Episode error: The following `model_kwargs` are not used by the model: ['proprio', 'proprio_projector', 'action_head', 'use_film'] (note: typos in the generate arguments will also show up in this list)
+Saved side-by-side video: ./rollouts/2026_03_04/2026_03_04-02_17_27--openvla_7b--episode=4--success=False--task=push_the_plate_to_the_front_of_the_stove--sidebyside_push_openvla_7b-color1_trial1.mp4
+Success: False
+# episodes so far: 4
+# successes: 0 (0.0%)
+
+Task: push the plate to the front of the stove | Color variant 1 | Trial 2
+Starting episode 5...
+Episode error: The following `model_kwargs` are not used by the model: ['proprio', 'proprio_projector', 'action_head', 'use_film'] (note: typos in the generate arguments will also show up in this list)
+Saved side-by-side video: ./rollouts/2026_03_04/2026_03_04-02_17_27--openvla_7b--episode=5--success=False--task=push_the_plate_to_the_front_of_the_stove--sidebyside_push_openvla_7b-color1_trial2.mp4
+Success: False
+# episodes so far: 5
+# successes: 0 (0.0%)
+
+Task: push the plate to the front of the stove | Color variant 1 | Trial 3
+Starting episode 6...
+Episode error: The following `model_kwargs` are not used by the model: ['proprio', 'proprio_projector', 'action_head', 'use_film'] (note: typos in the generate arguments will also show up in this list)
+Saved side-by-side video: ./rollouts/2026_03_04/2026_03_04-02_17_27--openvla_7b--episode=6--success=False--task=push_the_plate_to_the_front_of_the_stove--sidebyside_push_openvla_7b-color1_trial3.mp4
+Success: False
+# episodes so far: 6
+# successes: 0 (0.0%)
+Task success rate: 0.0
+Total success rate: 0.0
+Using default initial states
+
+Task: put the bowl on the plate | Color variant: 0
+
+Task: put the bowl on the plate | Color variant 0 | Trial 1
+Starting episode 1...
+Episode error: The following `model_kwargs` are not used by the model: ['proprio', 'proprio_projector', 'action_head', 'use_film'] (note: typos in the generate arguments will also show up in this list)
+Saved side-by-side video: ./rollouts/2026_03_04/2026_03_04-02_17_27--openvla_7b--episode=7--success=False--task=put_the_bowl_on_the_plate--sidebyside_put_openvla_7b-color0_trial1.mp4
+Success: False
+# episodes so far: 7
+# successes: 0 (0.0%)
+
+Task: put the bowl on the plate | Color variant 0 | Trial 2
+Starting episode 2...
+Episode error: The following `model_kwargs` are not used by the model: ['proprio', 'proprio_projector', 'action_head', 'use_film'] (note: typos in the generate arguments will also show up in this list)
+Saved side-by-side video: ./rollouts/2026_03_04/2026_03_04-02_17_27--openvla_7b--episode=8--success=False--task=put_the_bowl_on_the_plate--sidebyside_put_openvla_7b-color0_trial2.mp4
+Success: False
+# episodes so far: 8
+# successes: 0 (0.0%)
+
+Task: put the bowl on the plate | Color variant 0 | Trial 3
+Starting episode 3...
+Episode error: The following `model_kwargs` are not used by the model: ['proprio', 'proprio_projector', 'action_head', 'use_film'] (note: typos in the generate arguments will also show up in this list)
+Saved side-by-side video: ./rollouts/2026_03_04/2026_03_04-02_17_27--openvla_7b--episode=9--success=False--task=put_the_bowl_on_the_plate--sidebyside_put_openvla_7b-color0_trial3.mp4
+Success: False
+# episodes so far: 9
+# successes: 0 (0.0%)
+
+Task: put the bowl on the plate | Color variant: 1
+
+Task: put the bowl on the plate | Color variant 1 | Trial 1
+Starting episode 4...
+Episode error: The following `model_kwargs` are not used by the model: ['proprio', 'proprio_projector', 'action_head', 'use_film'] (note: typos in the generate arguments will also show up in this list)
+Saved side-by-side video: ./rollouts/2026_03_04/2026_03_04-02_17_27--openvla_7b--episode=10--success=False--task=put_the_bowl_on_the_plate--sidebyside_put_openvla_7b-color1_trial1.mp4
+Success: False
+# episodes so far: 10
+# successes: 0 (0.0%)
+
+Task: put the bowl on the plate | Color variant 1 | Trial 2
+Starting episode 5...
+Episode error: The following `model_kwargs` are not used by the model: ['proprio', 'proprio_projector', 'action_head', 'use_film'] (note: typos in the generate arguments will also show up in this list)
+Saved side-by-side video: ./rollouts/2026_03_04/2026_03_04-02_17_27--openvla_7b--episode=11--success=False--task=put_the_bowl_on_the_plate--sidebyside_put_openvla_7b-color1_trial2.mp4
+Success: False
+# episodes so far: 11
+# successes: 0 (0.0%)
+
+Task: put the bowl on the plate | Color variant 1 | Trial 3
+Starting episode 6...
+Episode error: The following `model_kwargs` are not used by the model: ['proprio', 'proprio_projector', 'action_head', 'use_film'] (note: typos in the generate arguments will also show up in this list)
+Saved side-by-side video: ./rollouts/2026_03_04/2026_03_04-02_17_27--openvla_7b--episode=12--success=False--task=put_the_bowl_on_the_plate--sidebyside_put_openvla_7b-color1_trial3.mp4
+Success: False
+# episodes so far: 12
+# successes: 0 (0.0%)
+Task success rate: 0.0
+Total success rate: 0.0
+Final results:
+Total episodes: 12
+Total successes: 0
+Overall success rate: 0.0000 (0.0%)

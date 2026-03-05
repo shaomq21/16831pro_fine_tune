@@ -373,10 +373,11 @@ def _apply_bowl_perturbation(img: Union[np.ndarray, Image.Image]) -> Union[np.nd
     if arr.ndim != 3 or arr.shape[-1] != 3:
         return img
     r, g, b = arr[..., 0], arr[..., 1], arr[..., 2]
-    # 深灰：三通道相近、亮度在指定范围
+    # 深灰/灰/银碗：R≈G≈B，亮度覆盖碗的典型范围
     mean_rgb = (r + g + b) / 3.0
     spread = np.maximum(np.maximum(r, g), b) - np.minimum(np.minimum(r, g), b)
-    dark_grey_mask = (spread < 50) & (mean_rgb >= 45) & (mean_rgb <= 160)
+    # spread<40 接近纯灰；mean_rgb [50,140] 覆盖深灰到浅银碗，排除过暗阴影和过亮桌面
+    dark_grey_mask = (spread < 40) & (mean_rgb >= 50) & (mean_rgb <= 140)
     arr[dark_grey_mask, 0] = 255
     arr[dark_grey_mask, 1] = 40
     arr[dark_grey_mask, 2] = 40
@@ -487,6 +488,7 @@ def run_episode(
     t = 0
     replay_images = []
     replay_masked_images = []  # same frame count as replay_images, for masked video
+    last_masked = None  # Reuse for video when not querying policy (mask subprocess is slow; only compute every 8 steps)
     max_steps = TASK_MAX_STEPS[cfg.task_suite_name]
 
     # loadinfo: collect action chunk and proprio for Excel
@@ -507,66 +509,55 @@ def run_episode(
                 obs, reward, done, info = env.step(get_libero_dummy_action(cfg.model_family))
                 t += 1
                 continue
-            
-            # If action queue is empty, requery model
+
+            # Every step: prepare frame and record for video
+            task_object = raw_task_description
+            proc_task_description = language_mask_processor(raw_task_description)
+            task_description = proc_task_description
+            observation, img = prepare_observation(obs, resize_size)
+            if getattr(cfg, "perturb_colors", False):
+                img = _apply_color_perturbation(img)
+            if getattr(cfg, "perturb_bowl", False):
+                img = _apply_bowl_perturbation(img)
+            replay_images.append(img)
+
+            # Only compute mask when we need to query policy (every num_open_loop_steps); reuse last_masked for other steps
             if len(action_queue) == 0:
                 try:
                     dev = next(model.parameters()).device
                 except Exception:
                     dev = "unknown"
                 ts(f"t={t} before get_action | model_device={dev} | cuda_avail={torch.cuda.is_available()}")
-                
-                task_object = raw_task_description
-            
+
                 safe_name = task_object.replace(" ", "_").replace("/", "_")
                 out_dir = "/home/ubuntu/16831pro_fine_tune/debug_masked_validation"
                 os.makedirs(out_dir, exist_ok=True)
                 out_path = os.path.join(out_dir, f"{safe_name}.png")
 
-            
-                proc_task_description = language_mask_processor(raw_task_description)
-
-                task_description = proc_task_description
-                print("task_description:",task_description )
-
-                
-                observation, img = prepare_observation(obs, resize_size)
-                if getattr(cfg, "perturb_colors", False):
-                    img = _apply_color_perturbation(img)
-                if getattr(cfg, "perturb_bowl", False):
-                    img = _apply_bowl_perturbation(img)
-                replay_images.append(img)
-
                 if getattr(cfg, "use_mask_from_env", False):
-                    # Mask from LIBERO instance segmentation (no Grounded-SAM subprocess)
                     img_np = np.asarray(img) if not isinstance(img, np.ndarray) else img
                     if img_np.ndim == 2:
                         img_np = np.stack([img_np] * 3, axis=-1)
                     seg_key = "agentview_segmentation_instance"
                     if seg_key in obs:
-                        masked = mask_image_from_libero_seg(
-                            img_np, obs[seg_key], env, alpha=0.5
-                        )
+                        masked = mask_image_from_libero_seg(img_np, obs[seg_key], env, alpha=0.5)
                     else:
                         masked = img_np
-                    replay_masked_images.append(np.asarray(masked))
+                    last_masked = np.asarray(masked)
+                    replay_masked_images.append(last_masked.copy())
                 else:
                     if isinstance(img, np.ndarray):
                         img_pil = Image.fromarray(img)
                     else:
-                        img_pil = img  # already PIL
+                        img_pil = img
                     masked = mask_image_via_other_env(
                         img_pil.convert("RGB"),
                         task_object,
                         out_path,
                     )
-                    replay_masked_images.append(np.asarray(masked))
-
-                observation["full_image"] = resize_image_for_policy(masked, resize_size)
-                
-
-                
-
+                    last_masked = np.asarray(masked)
+                    replay_masked_images.append(last_masked.copy())
+                observation["full_image"] = resize_image_for_policy(last_masked, resize_size)
 
                 # Query model to get action
                 actions = get_action(
@@ -585,12 +576,9 @@ def run_episode(
 
                 # loadinfo: save mask with step number, record action chunk and proprio
                 if cfg.loadinfo and loadinfo_ep_dir is not None:
-                    # Save mask image with step number clearly labeled
-                    masked_with_step = _draw_step_on_image(masked, t)
+                    masked_with_step = _draw_step_on_image(last_masked, t)
                     mask_path = os.path.join(loadinfo_ep_dir, f"mask_step_{t:04d}.png")
                     masked_with_step.save(mask_path)
-
-                    # Build row: step, action_chunk (flatten), proprio
                     row: Dict[str, Any] = {"step": t}
                     for i, a in enumerate(actions):
                         arr = np.asarray(a)
@@ -602,6 +590,8 @@ def run_episode(
                         for j in range(proprio_arr.size):
                             row[f"proprio_{j}"] = float(proprio_arr.flat[j])
                     loadinfo_rows.append(row)
+            else:
+                replay_masked_images.append(last_masked.copy())
 
             # Get action from queue
             action = action_queue.popleft()

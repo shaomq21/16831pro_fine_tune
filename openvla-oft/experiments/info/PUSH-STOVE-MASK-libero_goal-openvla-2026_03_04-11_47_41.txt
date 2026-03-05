@@ -1,0 +1,78 @@
+Policy: mask_processor full image (red plate + green stove + gripper); raw: white at stove rect
+Jitter experiments: 6 shifts, 1 trial each: [(0, 0), (10, 0), (-10, 0), (0, 10), (0, -10), (5, 5)]
+
+--- Jitter experiment 1/6: shift=(0, 0) ---
+Using default initial states
+
+Task: push the plate to the front of the stove | Trial 1
+Starting episode 1...
+Saved side-by-side video: ./rollouts/2026_03_04/2026_03_04-11_47_41--current--episode=1--success=False--task=push_the_plate_to_the_front_of_the_stove--sidebyside_push_stove_mask_current.mp4
+Success: False
+# episodes so far: 1
+# successes: 0 (0.0%)
+Task success rate: 0.0
+Total success rate: 0.0
+
+--- Jitter experiment 2/6: shift=(10, 0) ---
+Using default initial states
+
+Task: push the plate to the front of the stove | Trial 1
+Starting episode 1...
+Saved side-by-side video: ./rollouts/2026_03_04/2026_03_04-11_47_41--current--episode=2--success=False--task=push_the_plate_to_the_front_of_the_stove--sidebyside_push_stove_mask_current.mp4
+Success: False
+# episodes so far: 2
+# successes: 0 (0.0%)
+Task success rate: 0.0
+Total success rate: 0.0
+
+--- Jitter experiment 3/6: shift=(-10, 0) ---
+Using default initial states
+
+Task: push the plate to the front of the stove | Trial 1
+Starting episode 1...
+Saved side-by-side video: ./rollouts/2026_03_04/2026_03_04-11_47_41--current--episode=3--success=False--task=push_the_plate_to_the_front_of_the_stove--sidebyside_push_stove_mask_current.mp4
+Success: False
+# episodes so far: 3
+# successes: 0 (0.0%)
+Task success rate: 0.0
+Total success rate: 0.0
+
+--- Jitter experiment 4/6: shift=(0, 10) ---
+Using default initial states
+
+Task: push the plate to the front of the stove | Trial 1
+Starting episode 1...
+Saved side-by-side video: ./rollouts/2026_03_04/2026_03_04-11_47_41--current--episode=4--success=False--task=push_the_plate_to_the_front_of_the_stove--sidebyside_push_stove_mask_current.mp4
+Success: False
+# episodes so far: 4
+# successes: 0 (0.0%)
+Task success rate: 0.0
+Total success rate: 0.0
+
+--- Jitter experiment 5/6: shift=(0, -10) ---
+Using default initial states
+
+Task: push the plate to the front of the stove | Trial 1
+Starting episode 1...
+Saved side-by-side video: ./rollouts/2026_03_04/2026_03_04-11_47_41--current--episode=5--success=False--task=push_the_plate_to_the_front_of_the_stove--sidebyside_push_stove_mask_current.mp4
+Success: False
+# episodes so far: 5
+# successes: 0 (0.0%)
+Task success rate: 0.0
+Total success rate: 0.0
+
+--- Jitter experiment 6/6: shift=(5, 5) ---
+Using default initial states
+
+Task: push the plate to the front of the stove | Trial 1
+Starting episode 1...
+Saved side-by-side video: ./rollouts/2026_03_04/2026_03_04-11_47_41--current--episode=6--success=False--task=push_the_plate_to_the_front_of_the_stove--sidebyside_push_stove_mask_current.mp4
+Success: False
+# episodes so far: 6
+# successes: 0 (0.0%)
+Task success rate: 0.0
+Total success rate: 0.0
+Final results:
+Total episodes: 6
+Total successes: 0
+Overall success rate: 0.0000 (0.0%)

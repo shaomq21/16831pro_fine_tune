@@ -1,0 +1,6 @@
+model_id: openvla/openvla-7b-finetuned-libero-10
+image_path: /home/ubuntu/16831pro_fine_tune/zt/test_book.png
+unnorm_key: libero_10
+prompts:
+  1: pick up the book in the middle and place it on the cabinet shelf
+  2: pick up the book on the right and place it on the cabinet shelf

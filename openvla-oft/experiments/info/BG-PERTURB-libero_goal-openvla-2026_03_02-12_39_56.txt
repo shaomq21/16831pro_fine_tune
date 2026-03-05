@@ -1,0 +1,4 @@
+Running 2 tasks: ['push the plate to the front of the stove', 'put the bowl on the plate']
+Perturbations: background (3 variants) + baseline; 3 episodes per (task, perturb)
+
+--- Task: push the plate to the front of the stove | Perturb: background_0 | Trial: 1/3 ---

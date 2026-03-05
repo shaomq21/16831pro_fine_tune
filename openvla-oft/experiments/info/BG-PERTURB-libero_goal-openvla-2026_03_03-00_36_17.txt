@@ -1,0 +1,8 @@
+Running 2 tasks: ['push the plate to the front of the stove', 'put the bowl on the plate']
+Perturbations: background (3 variants) + baseline; 3 episodes per (task, perturb)
+
+--- Task: push the plate to the front of the stove | Perturb: baseline | Trial: 1/3 ---
+Saved side-by-side video: ./rollouts/2026_03_03/2026_03_03-00_36_17--openvla_oft_goal--episode=1--success=True--task=push_the_plate_to_the_front_of_the_stove--sidebyside_push_openvla_oft_goal-baseline_trial1.mp4
+Success: True | Total: 1/1
+
+--- Task: push the plate to the front of the stove | Perturb: baseline | Trial: 2/3 ---

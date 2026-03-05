@@ -1,0 +1,4 @@
+Running 2 tasks: ['push the plate to the front of the stove', 'put the bowl on the plate']
+Perturbations: background elliptical patches (3 variants) + baseline, 4 per task
+
+--- Task: push the plate to the front of the stove | Perturb: background_0 ---

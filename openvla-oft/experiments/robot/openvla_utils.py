@@ -15,6 +15,7 @@ import requests
 import tensorflow as tf
 import torch
 from huggingface_hub import HfApi, hf_hub_download
+from huggingface_hub.errors import EntryNotFoundError
 from PIL import Image
 from transformers import AutoConfig, AutoImageProcessor, AutoModelForVision2Seq, AutoProcessor
 
@@ -31,6 +32,7 @@ from prismatic.models.projectors import NoisyActionProjector, ProprioProjector
 from prismatic.vla.constants import (
     ACTION_DIM,
     ACTION_PROPRIO_NORMALIZATION_TYPE,
+    NUM_ACTIONS_CHUNK,
 )
 from prismatic.vla.datasets.rlds.utils.data_utils import NormalizationType
 
@@ -306,6 +308,32 @@ def get_vla(cfg: Any) -> torch.nn.Module:
         and not os.path.isfile(os.path.join(ckpt_path, "config.json"))
     )
 
+    def _make_load_kwargs():
+        use_quant = getattr(cfg, "load_in_8bit", False) or getattr(cfg, "load_in_4bit", False)
+        if use_quant:
+            from transformers import BitsAndBytesConfig
+            load_8 = getattr(cfg, "load_in_8bit", False)
+            load_4 = getattr(cfg, "load_in_4bit", False)
+            quantization_config = BitsAndBytesConfig(
+                load_in_8bit=load_8,
+                load_in_4bit=load_4,
+                llm_int8_enable_fp32_cpu_offload=True,
+            )
+            return dict(
+                torch_dtype=torch.bfloat16,
+                quantization_config=quantization_config,
+                low_cpu_mem_usage=True,
+                trust_remote_code=True,
+                device_map="auto",
+            )
+        return dict(
+            torch_dtype=torch.bfloat16,
+            load_in_8bit=False,
+            load_in_4bit=False,
+            low_cpu_mem_usage=True,
+            trust_remote_code=True,
+        )
+
     if is_adapter_only:
         # Load base from base_vla_path, then load adapter and merge
         if not model_is_on_hf_hub(base_path):
@@ -316,15 +344,7 @@ def get_vla(cfg: Any) -> torch.nn.Module:
             update_auto_map(base_path)
             check_model_logic_mismatch(base_path)
 
-        load_kwargs = dict(
-            torch_dtype=torch.bfloat16,
-            load_in_8bit=cfg.load_in_8bit,
-            load_in_4bit=cfg.load_in_4bit,
-            low_cpu_mem_usage=True,
-            trust_remote_code=True,
-        )
-        if getattr(cfg, "load_in_8bit", False) or getattr(cfg, "load_in_4bit", False):
-            load_kwargs["device_map"] = "auto"
+        load_kwargs = _make_load_kwargs()
         vla = AutoModelForVision2Seq.from_pretrained(base_path, **load_kwargs)
         if _dispatch_restore is not None:
             _dispatch_restore()
@@ -343,15 +363,7 @@ def get_vla(cfg: Any) -> torch.nn.Module:
             update_auto_map(ckpt_path)
             check_model_logic_mismatch(ckpt_path)
 
-        load_kwargs = dict(
-            torch_dtype=torch.bfloat16,
-            load_in_8bit=cfg.load_in_8bit,
-            load_in_4bit=cfg.load_in_4bit,
-            low_cpu_mem_usage=True,
-            trust_remote_code=True,
-        )
-        if getattr(cfg, "load_in_8bit", False) or getattr(cfg, "load_in_4bit", False):
-            load_kwargs["device_map"] = "auto"
+        load_kwargs = _make_load_kwargs()
         vla = AutoModelForVision2Seq.from_pretrained(ckpt_path, **load_kwargs)
         if _dispatch_restore is not None:
             _dispatch_restore()
@@ -360,10 +372,15 @@ def get_vla(cfg: Any) -> torch.nn.Module:
     if cfg.use_film:
         vla = _apply_film_to_vla(vla, cfg)
 
-    # Set number of images in model input
-    vla.vision_backbone.set_num_images_in_input(cfg.num_images_in_input)
+    # Set number of images in model input (only if vision backbone supports it; HF openvla/openvla-7b may use older backbone without this)
+    if hasattr(vla.vision_backbone, "set_num_images_in_input"):
+        vla.vision_backbone.set_num_images_in_input(cfg.num_images_in_input)
 
     vla.eval()
+
+    # Ensure llm_dim exists (HF base openvla/openvla-7b may use different attribute layout)
+    if not hasattr(vla, "llm_dim") and hasattr(vla.config, "text_config") and vla.config.text_config is not None:
+        vla.llm_dim = getattr(vla.config.text_config, "hidden_size", 4096)
 
     # Move model to device if not using quantization
     if not cfg.load_in_8bit and not cfg.load_in_4bit:
@@ -425,14 +442,26 @@ def _load_dataset_stats(vla: torch.nn.Module, checkpoint_path: str) -> None:
         checkpoint_path: Path to the checkpoint directory
     """
     if model_is_on_hf_hub(checkpoint_path):
-        # Download dataset stats directly from HF Hub
-        dataset_statistics_path = hf_hub_download(
-            repo_id=checkpoint_path,
-            filename="dataset_statistics.json",
-        )
+        # Download dataset stats from HF Hub (base models like openvla/openvla-7b may not have it)
+        try:
+            dataset_statistics_path = hf_hub_download(
+                repo_id=checkpoint_path,
+                filename="dataset_statistics.json",
+            )
+        except EntryNotFoundError:
+            dataset_statistics_path = None
+        # Base openvla/openvla-7b has no stats; use LIBERO stats from OFT model for eval
+        if dataset_statistics_path is None and checkpoint_path == "openvla/openvla-7b":
+            try:
+                dataset_statistics_path = hf_hub_download(
+                    repo_id="moojink/openvla-7b-oft-finetuned-libero-goal",
+                    filename="dataset_statistics.json",
+                )
+            except EntryNotFoundError:
+                pass
     else:
         dataset_statistics_path = os.path.join(checkpoint_path, "dataset_statistics.json")
-    if os.path.isfile(dataset_statistics_path):
+    if dataset_statistics_path is not None and os.path.isfile(dataset_statistics_path):
         with open(dataset_statistics_path, "r") as f:
             norm_stats = json.load(f)
         vla.norm_stats = norm_stats
@@ -494,14 +523,18 @@ def get_proprio_projector(cfg: Any, llm_dim: int, proprio_dim: int) -> ProprioPr
             "moojink/openvla-7b-oft-finetuned-libero-10": "proprio_projector--150000_checkpoint.pt",
             "moojink/openvla-7b-oft-finetuned-libero-spatial-object-goal-10": "proprio_projector--300000_checkpoint.pt",
         }
-        if cfg.pretrained_checkpoint not in model_path_to_proprio_projector_name.keys():
+        # Base openvla/openvla-7b has no separate component files; use random init
+        if cfg.pretrained_checkpoint == "openvla/openvla-7b":
+            pass  # keep randomly initialized projector
+        elif cfg.pretrained_checkpoint not in model_path_to_proprio_projector_name.keys():
             raise ValueError("Unsupported HF Hub pretrained checkpoint found!")
-        # Download proprio projector directly from HF Hub
-        proprio_projector_path = hf_hub_download(
-            repo_id=cfg.pretrained_checkpoint, filename=model_path_to_proprio_projector_name[cfg.pretrained_checkpoint]
-        )
-        state_dict = load_component_state_dict(proprio_projector_path)
-        proprio_projector.load_state_dict(state_dict)
+        else:
+            proprio_projector_path = hf_hub_download(
+                repo_id=cfg.pretrained_checkpoint,
+                filename=model_path_to_proprio_projector_name[cfg.pretrained_checkpoint],
+            )
+            state_dict = load_component_state_dict(proprio_projector_path)
+            proprio_projector.load_state_dict(state_dict)
     else:
         checkpoint_path = find_checkpoint_file(cfg.pretrained_checkpoint, "proprio_projector")
         state_dict = load_component_state_dict(checkpoint_path)
@@ -576,14 +609,18 @@ def get_action_head(cfg: Any, llm_dim: int) -> Union[L1RegressionActionHead]:
             "moojink/openvla-7b-oft-finetuned-libero-10": "action_head--150000_checkpoint.pt",
             "moojink/openvla-7b-oft-finetuned-libero-spatial-object-goal-10": "action_head--300000_checkpoint.pt",
         }
-        if cfg.pretrained_checkpoint not in model_path_to_action_head_name.keys():
+        # Base openvla/openvla-7b has no separate component files; use random init
+        if cfg.pretrained_checkpoint == "openvla/openvla-7b":
+            pass  # keep randomly initialized action head
+        elif cfg.pretrained_checkpoint not in model_path_to_action_head_name.keys():
             raise ValueError("Unsupported HF Hub pretrained checkpoint found!")
-        # Download proprio projector directly from HF Hub
-        action_head_path = hf_hub_download(
-            repo_id=cfg.pretrained_checkpoint, filename=model_path_to_action_head_name[cfg.pretrained_checkpoint]
-        )
-        state_dict = load_component_state_dict(action_head_path)
-        action_head.load_state_dict(state_dict)
+        else:
+            action_head_path = hf_hub_download(
+                repo_id=cfg.pretrained_checkpoint,
+                filename=model_path_to_action_head_name[cfg.pretrained_checkpoint],
+            )
+            state_dict = load_component_state_dict(action_head_path)
+            action_head.load_state_dict(state_dict)
     else:
         checkpoint_path = find_checkpoint_file(cfg.pretrained_checkpoint, "action_head")
         state_dict = load_component_state_dict(checkpoint_path)
@@ -854,8 +891,15 @@ def get_vla_action(
 
         # Generate action
         if action_head is None:
-            # Standard VLA output (single-image inputs, discrete actions)
-            action, _ = vla.predict_action(**inputs, unnorm_key=cfg.unnorm_key, do_sample=False)
+            # Standard VLA output (HF base model returns only actions; OFT returns (actions, hidden_states))
+            result = vla.predict_action(**inputs, unnorm_key=cfg.unnorm_key, do_sample=False)
+            action = result[0] if isinstance(result, tuple) else result
+            if action.ndim == 1:
+                if action.size == NUM_ACTIONS_CHUNK * ACTION_DIM:
+                    action = action.reshape(NUM_ACTIONS_CHUNK, ACTION_DIM)
+                else:
+                    # Base model may output single 7-dim action; tile to (8, 7) chunk
+                    action = np.tile(action.reshape(1, -1), (NUM_ACTIONS_CHUNK, 1))
         else:
             # Custom action head for continuous actions
             action, _ = vla.predict_action(
