@@ -25,6 +25,7 @@ def main():
     ap.add_argument("--dino_ckpt", required=True)
     ap.add_argument("--sam_ckpt", required=True)
     ap.add_argument("--sam_type", default="vit_h")
+    ap.add_argument("--sam_backend", default="sam1", choices=["sam1", "sam3"])
     ap.add_argument("--device", default="cuda")
     ap.add_argument("--alpha", type=float, default=0.35, help="0=black bg + original objects, 0.35=red/green overlay")
     ap.add_argument("--shift_plate_mask_x", type=int, default=None, help="For 'put bowl on plate': shift green plate box by N pixels (right=positive); mask will be beside plate.")
@@ -39,6 +40,7 @@ def main():
         dino_checkpoint_path=args.dino_ckpt,
         sam_checkpoint_path=args.sam_ckpt,
         sam_type=args.sam_type,
+        sam_backend=args.sam_backend,
         device=args.device,
     )
     masker = GroundedSAMMasker(cfg)

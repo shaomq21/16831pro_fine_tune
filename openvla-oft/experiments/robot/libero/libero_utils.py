@@ -70,6 +70,24 @@ def mask_image_from_libero_seg(rgb_np, seg_obs, env, alpha=0.5):
     Returns:
         RGB image (H,W,3) uint8 with red tint on first obj_of_interest, green on second.
     """
+    try:
+        from libero_sim_mask import compose_black_bg_mask, flip_agentview, instance_masks_from_seg
+
+        rgb = np.asarray(rgb_np, dtype=np.uint8)
+        if rgb.ndim == 2:
+            rgb = np.stack([rgb] * 3, axis=-1)
+        # rgb_np is already flipped; build masks in camera frame then flip
+        masks = instance_masks_from_seg(env, seg_obs)
+        objs = list(getattr(env, "obj_of_interest", []))[:2]
+        if len(objs) < 2:
+            return rgb_np
+        red_m = flip_agentview(np.squeeze(masks[objs[0]]))
+        green_m = flip_agentview(np.squeeze(masks[objs[1]]))
+        return compose_black_bg_mask(rgb, red_m, green_m, alpha=alpha)
+    except ImportError:
+        pass
+
+    # Legacy alpha overlay path
     # get_segmentation_instances expects raw camera-frame seg
     seg_dict = env.get_segmentation_instances(seg_obs.copy())
     obj_of_interest = getattr(env, "obj_of_interest", [])

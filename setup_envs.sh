@@ -1,12 +1,36 @@
 #!/bin/bash
 # 双环境安装脚本：vla-preprocess (Grounding DINO + SAM) 和 simplevla
-# 核心策略：torch 单独先装，避免版本冲突
+# 核心策略：torch 单独先装，避免版本冲突；大文件/cache 放 /dev/mapper/vg--powKoU-lv
 
 set -e
 CONDA_ROOT="${HOME}/miniconda3"
-# openvla-oft 根目录，可通过环境变量覆盖，例如: OPENVLA_ROOT=/你的路径 bash setup_envs.sh
-OPENVLA_ROOT="${OPENVLA_ROOT:-${HOME}/16831pro_fine_tune/openvla-oft}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# openvla-oft 根目录，可通过环境变量覆盖
+OPENVLA_ROOT="${OPENVLA_ROOT:-${SCRIPT_DIR}/openvla-oft}"
+# 大容量盘挂载点（/dev/mapper/vg--powKoU-lv -> /var/lib/docker）
+STORAGE_ROOT="${STORAGE_ROOT:-/var/lib/docker/data/checkpoints/fan-test/16831pro_fine_tune}"
 echo "[INFO] openvla-oft 路径: $OPENVLA_ROOT (pip -e 仅链接，不覆盖源码)"
+echo "[INFO] 大文件存储路径: $STORAGE_ROOT (ckpt/data/cache)"
+
+# pip / HF / conda 包缓存指向大盘，避免根分区爆满
+mkdir -p "${STORAGE_ROOT}/"{pip_cache,hf_cache,conda_pkgs,ckpts,datasets,runs}
+export PIP_CACHE_DIR="${STORAGE_ROOT}/pip_cache"
+export HF_HOME="${STORAGE_ROOT}/hf_cache"
+export TRANSFORMERS_CACHE="${STORAGE_ROOT}/hf_cache"
+export CONDA_PKGS_DIRS="${STORAGE_ROOT}/conda_pkgs"
+
+# 确保 openvla-oft 下 checkpoints/datasets/runs 链接到大盘
+for name in ckpts:checkpoints datasets:datasets runs:runs; do
+    sub="${name%%:*}"
+    link="${name##*:}"
+    target="${STORAGE_ROOT}/${sub}"
+    link_path="${OPENVLA_ROOT}/${link}"
+    if [ -e "$link_path" ] && [ ! -L "$link_path" ]; then
+        cp -a "${link_path}/." "$target/" 2>/dev/null || true
+        rm -rf "$link_path"
+    fi
+    ln -sfn "$target" "$link_path"
+done
 
 # 必须加载 conda，否则后续 conda/pip 不可用
 if [ ! -f "${CONDA_ROOT}/etc/profile.d/conda.sh" ]; then
@@ -15,6 +39,15 @@ if [ ! -f "${CONDA_ROOT}/etc/profile.d/conda.sh" ]; then
     exit 1
 fi
 source "${CONDA_ROOT}/etc/profile.d/conda.sh"
+
+# 若环境已存在（含上次失败残留），先删除再重建
+remove_env_if_exists () {
+    local env_name="$1"
+    if conda env list | awk '{print $1}' | grep -qx "$env_name"; then
+        echo "[INFO] 删除已有环境: $env_name"
+        conda env remove -n "$env_name" -y
+    fi
+}
 
 # 检测是否有 GPU
 if command -v nvidia-smi &>/dev/null && nvidia-smi &>/dev/null; then
@@ -28,6 +61,7 @@ fi
 # ========== 1. vla-preprocess (Grounding DINO + SAM) ==========
 echo ""
 echo "========== 创建 vla-preprocess 环境 =========="
+remove_env_if_exists vla-preprocess
 conda create -n vla-preprocess python=3.9 -y
 conda activate vla-preprocess
 
@@ -76,6 +110,7 @@ echo "[vla-preprocess] 环境安装完成"
 echo ""
 echo "========== 创建 simplevla 环境 =========="
 conda deactivate
+remove_env_if_exists simplevla
 conda create -n simplevla python=3.10 -y
 conda activate simplevla
 

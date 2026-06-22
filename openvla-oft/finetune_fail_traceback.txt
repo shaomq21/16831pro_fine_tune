@@ -1,22 +1,61 @@
 Traceback (most recent call last):
-  File "/home/ubuntu/16831pro_fine_tune/openvla-oft/vla-scripts/finetune.py", line 1338, in <module>
+  File "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/vla-scripts/finetune.py", line 1340, in <module>
     finetune()
-  File "/home/ubuntu/miniconda3/envs/simplevla/lib/python3.10/site-packages/draccus/argparsing.py", line 203, in wrapper_inner
+  File "/var/lib/docker/data/checkpoints/fan-test/16831pro_fine_tune/conda_envs/simplevla/lib/python3.10/site-packages/draccus/argparsing.py", line 203, in wrapper_inner
     response = fn(cfg, *args, **kwargs)
-  File "/home/ubuntu/16831pro_fine_tune/openvla-oft/vla-scripts/finetune.py", line 1230, in finetune
-    loss, metrics = run_forward_pass(
-  File "/home/ubuntu/16831pro_fine_tune/openvla-oft/vla-scripts/finetune.py", line 369, in run_forward_pass
-    output: CausalLMOutputWithPast = vla(
-  File "/home/ubuntu/miniconda3/envs/simplevla/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1511, in _wrapped_call_impl
-    return self._call_impl(*args, **kwargs)
-  File "/home/ubuntu/miniconda3/envs/simplevla/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1520, in _call_impl
-    return forward_call(*args, **kwargs)
-  File "/home/ubuntu/miniconda3/envs/simplevla/lib/python3.10/site-packages/torch/nn/parallel/distributed.py", line 1519, in forward
-    inputs, kwargs = self._pre_forward(*inputs, **kwargs)
-  File "/home/ubuntu/miniconda3/envs/simplevla/lib/python3.10/site-packages/torch/nn/parallel/distributed.py", line 1413, in _pre_forward
-    if torch.is_grad_enabled() and self.reducer._rebuild_buckets():
-RuntimeError: Expected to have finished reduction in the prior iteration before starting a new one. This error indicates that your module has parameters that were not used in producing loss. You can enable unused parameter detection by passing the keyword argument `find_unused_parameters=True` to `torch.nn.parallel.DistributedDataParallel`, and by 
-making sure all `forward` function outputs participate in calculating loss. 
-If you already have done the above, then the distributed data parallel module wasn't able to locate the output tensors in the return value of your module's `forward` function. Please include the loss function and the structure of the return value of `forward` of your module when reporting this issue (e.g. list, dict, iterable).
-Parameter indices which did not receive grad for rank 0: 92 93 94 95 200 201 202 203
- In addition, you can set the environment variable TORCH_DISTRIBUTED_DEBUG to either INFO or DETAIL to print out information about which particular parameters did not receive gradient on this rank as part of this error
+  File "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/vla-scripts/finetune.py", line 878, in finetune
+    dist.barrier()
+  File "/var/lib/docker/data/checkpoints/fan-test/16831pro_fine_tune/conda_envs/simplevla/lib/python3.10/site-packages/torch/distributed/c10d_logger.py", line 72, in wrapper
+    return func(*args, **kwargs)
+  File "/var/lib/docker/data/checkpoints/fan-test/16831pro_fine_tune/conda_envs/simplevla/lib/python3.10/site-packages/torch/distributed/distributed_c10d.py", line 3439, in barrier
+    work = default_pg.barrier(opts=opts)
+torch.distributed.DistBackendError: [4] is setting up NCCL communicator and retrieving ncclUniqueId from [0] via c10d key-value store by key '0', but store->get('0') got error: Connection reset by peer
+Exception raised from recvBytes at ../torch/csrc/distributed/c10d/Utils.hpp:670 (most recent call first):
+frame #0: c10::Error::Error(c10::SourceLocation, std::string) + 0x57 (0x7f0ed9f81d87 in /var/lib/docker/data/checkpoints/fan-test/16831pro_fine_tune/conda_envs/simplevla/lib/python3.10/site-packages/torch/lib/libc10.so)
+frame #1: <unknown function> + 0x5894fde (0x7f0ec6e1cfde in /var/lib/docker/data/checkpoints/fan-test/16831pro_fine_tune/conda_envs/simplevla/lib/python3.10/site-packages/torch/lib/libtorch_cpu.so)
+frame #2: c10d::TCPStore::doWait(c10::ArrayRef<std::string>, std::chrono::duration<long, std::ratio<1l, 1000l> >) + 0x360 (0x7f0ec6e177f0 in /var/lib/docker/data/checkpoints/fan-test/16831pro_fine_tune/conda_envs/simplevla/lib/python3.10/site-packages/torch/lib/libtorch_cpu.so)
+frame #3: c10d::TCPStore::doGet(std::string const&) + 0x32 (0x7f0ec6e17b32 in /var/lib/docker/data/checkpoints/fan-test/16831pro_fine_tune/conda_envs/simplevla/lib/python3.10/site-packages/torch/lib/libtorch_cpu.so)
+frame #4: c10d::TCPStore::get(std::string const&) + 0xa1 (0x7f0ec6e18961 in /var/lib/docker/data/checkpoints/fan-test/16831pro_fine_tune/conda_envs/simplevla/lib/python3.10/site-packages/torch/lib/libtorch_cpu.so)
+frame #5: c10d::PrefixStore::get(std::string const&) + 0x31 (0x7f0ec6dcddd1 in /var/lib/docker/data/checkpoints/fan-test/16831pro_fine_tune/conda_envs/simplevla/lib/python3.10/site-packages/torch/lib/libtorch_cpu.so)
+frame #6: c10d::PrefixStore::get(std::string const&) + 0x31 (0x7f0ec6dcddd1 in /var/lib/docker/data/checkpoints/fan-test/16831pro_fine_tune/conda_envs/simplevla/lib/python3.10/site-packages/torch/lib/libtorch_cpu.so)
+frame #7: c10d::PrefixStore::get(std::string const&) + 0x31 (0x7f0ec6dcddd1 in /var/lib/docker/data/checkpoints/fan-test/16831pro_fine_tune/conda_envs/simplevla/lib/python3.10/site-packages/torch/lib/libtorch_cpu.so)
+frame #8: c10d::ProcessGroupNCCL::broadcastUniqueNCCLID(ncclUniqueId*, bool, std::string const&, int) + 0xa9 (0x7f0e9000bc69 in /var/lib/docker/data/checkpoints/fan-test/16831pro_fine_tune/conda_envs/simplevla/lib/python3.10/site-packages/torch/lib/libtorch_cuda.so)
+frame #9: c10d::ProcessGroupNCCL::getNCCLComm(std::string const&, std::vector<c10::Device, std::allocator<c10::Device> > const&, c10d::OpType, int, bool) + 0x22b (0x7f0e90012c5b in /var/lib/docker/data/checkpoints/fan-test/16831pro_fine_tune/conda_envs/simplevla/lib/python3.10/site-packages/torch/lib/libtorch_cuda.so)
+frame #10: <unknown function> + 0x10ad03d (0x7f0e9001c03d in /var/lib/docker/data/checkpoints/fan-test/16831pro_fine_tune/conda_envs/simplevla/lib/python3.10/site-packages/torch/lib/libtorch_cuda.so)
+frame #11: c10d::ProcessGroupNCCL::allreduce_impl(std::vector<at::Tensor, std::allocator<at::Tensor> >&, c10d::AllreduceOptions const&) + 0x21 (0x7f0e9001d8e1 in /var/lib/docker/data/checkpoints/fan-test/16831pro_fine_tune/conda_envs/simplevla/lib/python3.10/site-packages/torch/lib/libtorch_cuda.so)
+frame #12: c10d::ProcessGroupNCCL::allreduce(std::vector<at::Tensor, std::allocator<at::Tensor> >&, c10d::AllreduceOptions const&) + 0x3bf (0x7f0e9001f8ff in /var/lib/docker/data/checkpoints/fan-test/16831pro_fine_tune/conda_envs/simplevla/lib/python3.10/site-packages/torch/lib/libtorch_cuda.so)
+frame #13: c10d::ProcessGroupNCCL::barrier(c10d::BarrierOptions const&) + 0xb0e (0x7f0e9002ed4e in /var/lib/docker/data/checkpoints/fan-test/16831pro_fine_tune/conda_envs/simplevla/lib/python3.10/site-packages/torch/lib/libtorch_cuda.so)
+frame #14: <unknown function> + 0x5838872 (0x7f0ec6dc0872 in /var/lib/docker/data/checkpoints/fan-test/16831pro_fine_tune/conda_envs/simplevla/lib/python3.10/site-packages/torch/lib/libtorch_cpu.so)
+frame #15: <unknown function> + 0x5843590 (0x7f0ec6dcb590 in /var/lib/docker/data/checkpoints/fan-test/16831pro_fine_tune/conda_envs/simplevla/lib/python3.10/site-packages/torch/lib/libtorch_cpu.so)
+frame #16: <unknown function> + 0x5843695 (0x7f0ec6dcb695 in /var/lib/docker/data/checkpoints/fan-test/16831pro_fine_tune/conda_envs/simplevla/lib/python3.10/site-packages/torch/lib/libtorch_cpu.so)
+frame #17: <unknown function> + 0x4e8937c (0x7f0ec641137c in /var/lib/docker/data/checkpoints/fan-test/16831pro_fine_tune/conda_envs/simplevla/lib/python3.10/site-packages/torch/lib/libtorch_cpu.so)
+frame #18: <unknown function> + 0x1a08a38 (0x7f0ec2f90a38 in /var/lib/docker/data/checkpoints/fan-test/16831pro_fine_tune/conda_envs/simplevla/lib/python3.10/site-packages/torch/lib/libtorch_cpu.so)
+frame #19: <unknown function> + 0x584cca4 (0x7f0ec6dd4ca4 in /var/lib/docker/data/checkpoints/fan-test/16831pro_fine_tune/conda_envs/simplevla/lib/python3.10/site-packages/torch/lib/libtorch_cpu.so)
+frame #20: <unknown function> + 0x584da55 (0x7f0ec6dd5a55 in /var/lib/docker/data/checkpoints/fan-test/16831pro_fine_tune/conda_envs/simplevla/lib/python3.10/site-packages/torch/lib/libtorch_cpu.so)
+frame #21: <unknown function> + 0xc93e88 (0x7f0ed964ae88 in /var/lib/docker/data/checkpoints/fan-test/16831pro_fine_tune/conda_envs/simplevla/lib/python3.10/site-packages/torch/lib/libtorch_python.so)
+frame #22: <unknown function> + 0x413ef4 (0x7f0ed8dcaef4 in /var/lib/docker/data/checkpoints/fan-test/16831pro_fine_tune/conda_envs/simplevla/lib/python3.10/site-packages/torch/lib/libtorch_python.so)
+frame #23: <unknown function> + 0x13bd86 (0x564aad410d86 in /var/lib/docker/data/checkpoints/fan-test/16831pro_fine_tune/conda_envs/simplevla/bin/python)
+frame #24: _PyObject_MakeTpCall + 0x24b (0x564aad409e1b in /var/lib/docker/data/checkpoints/fan-test/16831pro_fine_tune/conda_envs/simplevla/bin/python)
+frame #25: <unknown function> + 0x149257 (0x564aad41e257 in /var/lib/docker/data/checkpoints/fan-test/16831pro_fine_tune/conda_envs/simplevla/bin/python)
+frame #26: _PyEval_EvalFrameDefault + 0x130f (0x564aad40205f in /var/lib/docker/data/checkpoints/fan-test/16831pro_fine_tune/conda_envs/simplevla/bin/python)
+frame #27: _PyFunction_Vectorcall + 0x6c (0x564aad41125c in /var/lib/docker/data/checkpoints/fan-test/16831pro_fine_tune/conda_envs/simplevla/bin/python)
+frame #28: _PyEval_EvalFrameDefault + 0x2d09 (0x564aad403a59 in /var/lib/docker/data/checkpoints/fan-test/16831pro_fine_tune/conda_envs/simplevla/bin/python)
+frame #29: _PyFunction_Vectorcall + 0x6c (0x564aad41125c in /var/lib/docker/data/checkpoints/fan-test/16831pro_fine_tune/conda_envs/simplevla/bin/python)
+frame #30: _PyEval_EvalFrameDefault + 0x49ae (0x564aad4056fe in /var/lib/docker/data/checkpoints/fan-test/16831pro_fine_tune/conda_envs/simplevla/bin/python)
+frame #31: _PyFunction_Vectorcall + 0x6c (0x564aad41125c in /var/lib/docker/data/checkpoints/fan-test/16831pro_fine_tune/conda_envs/simplevla/bin/python)
+frame #32: _PyEval_EvalFrameDefault + 0x2d09 (0x564aad403a59 in /var/lib/docker/data/checkpoints/fan-test/16831pro_fine_tune/conda_envs/simplevla/bin/python)
+frame #33: _PyFunction_Vectorcall + 0x6c (0x564aad41125c in /var/lib/docker/data/checkpoints/fan-test/16831pro_fine_tune/conda_envs/simplevla/bin/python)
+frame #34: _PyEval_EvalFrameDefault + 0x313 (0x564aad401063 in /var/lib/docker/data/checkpoints/fan-test/16831pro_fine_tune/conda_envs/simplevla/bin/python)
+frame #35: <unknown function> + 0x1d2a4c (0x564aad4a7a4c in /var/lib/docker/data/checkpoints/fan-test/16831pro_fine_tune/conda_envs/simplevla/bin/python)
+frame #36: PyEval_EvalCode + 0x85 (0x564aad4a7995 in /var/lib/docker/data/checkpoints/fan-test/16831pro_fine_tune/conda_envs/simplevla/bin/python)
+frame #37: <unknown function> + 0x20478a (0x564aad4d978a in /var/lib/docker/data/checkpoints/fan-test/16831pro_fine_tune/conda_envs/simplevla/bin/python)
+frame #38: <unknown function> + 0x1ff0f3 (0x564aad4d40f3 in /var/lib/docker/data/checkpoints/fan-test/16831pro_fine_tune/conda_envs/simplevla/bin/python)
+frame #39: <unknown function> + 0x97365 (0x564aad36c365 in /var/lib/docker/data/checkpoints/fan-test/16831pro_fine_tune/conda_envs/simplevla/bin/python)
+frame #40: _PyRun_SimpleFileObject + 0x1bb (0x564aad4ce99b in /var/lib/docker/data/checkpoints/fan-test/16831pro_fine_tune/conda_envs/simplevla/bin/python)
+frame #41: _PyRun_AnyFileObject + 0x44 (0x564aad4ce6f4 in /var/lib/docker/data/checkpoints/fan-test/16831pro_fine_tune/conda_envs/simplevla/bin/python)
+frame #42: Py_RunMain + 0x371 (0x564aad4cb6e1 in /var/lib/docker/data/checkpoints/fan-test/16831pro_fine_tune/conda_envs/simplevla/bin/python)
+frame #43: Py_BytesMain + 0x37 (0x564aad49a287 in /var/lib/docker/data/checkpoints/fan-test/16831pro_fine_tune/conda_envs/simplevla/bin/python)
+frame #44: <unknown function> + 0x29d90 (0x7f0edb38fd90 in /lib/x86_64-linux-gnu/libc.so.6)
+frame #45: __libc_start_main + 0x80 (0x7f0edb38fe40 in /lib/x86_64-linux-gnu/libc.so.6)
+frame #46: _start + 0x2e (0x564aad49a17e in /var/lib/docker/data/checkpoints/fan-test/16831pro_fine_tune/conda_envs/simplevla/bin/python)
+. This may indicate a possible application crash on rank 0 or a network set up issue.

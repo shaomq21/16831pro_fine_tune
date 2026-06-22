@@ -1,23 +1,40 @@
 #!/usr/bin/env bash
 set -u  
 
-RUN_ROOT="/home/ubuntu/runs/openvla"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "$SCRIPT_DIR"
+STORAGE_ROOT="${STORAGE_ROOT:-/var/lib/docker/data/checkpoints/fan-test/16831pro_fine_tune}"
+
+RUN_ROOT="${STORAGE_ROOT}/runs/openvla"
 # adapter 专用：列举/保存都在这里，和 pretrained base 分开
-ADAPTER_RUN_ROOT="/home/ubuntu/runs/openvla_adapters"
-DATA_ROOT="/home/ubuntu/16831pro_fine_tune/openvla-oft/datasets/masked_libero_rlds"
+ADAPTER_RUN_ROOT="${STORAGE_ROOT}/runs/openvla_adapters"
+DATA_ROOT="${SCRIPT_DIR}/datasets/masked_libero_rlds"
+mkdir -p "${RUN_ROOT}" "${ADAPTER_RUN_ROOT}"
 
 DATASET_NAME="libero_goal_no_noops"
 
-# pretrained base：官方 openvla-7b（已下载）；如需用之前 OFT 2200 可改回下一行
-BASE_VLA_PATH="${RUN_ROOT}/openvla-7b"
+# pretrained base：官方 openvla-7b（已下载到 checkpoints/openvla-7b）
+BASE_VLA_PATH="${SCRIPT_DIR}/checkpoints/openvla-7b"
 # BASE_VLA_PATH="${RUN_ROOT}/openvla-7b-oft-finetuned-libero-goal+libero_goal_no_noops+b4+lr-0.0005+lora-r32+dropout-0.0--image_aug--2200_chkpt"
 
-# 单卡：只有一张 GPU 时用 0，多卡时指定卡号
-GPU_ID=0
-export CUDA_VISIBLE_DEVICES="${GPU_ID}"
+# 多卡：8 GPU；可通过环境变量覆盖，例如 NUM_GPUS=4 CUDA_VISIBLE_DEVICES=0,1,2,3
+NUM_GPUS="${NUM_GPUS:-8}"
+CUDA_VISIBLE_DEVICES="${CUDA_VISIBLE_DEVICES:-0,1,2,3,4,5,6,7}"
+export CUDA_VISIBLE_DEVICES
+export NCCL_P2P_DISABLE="${NCCL_P2P_DISABLE:-0}"
+
+# wandb：默认当前登录账号；离线跑: export WANDB_MODE=offline
+WANDB_ENTITY="${WANDB_ENTITY:-vla}"
+WANDB_PROJECT="${WANDB_PROJECT:-openvla_gripper_proprio_fast}"
+export WANDB_MODE="${WANDB_MODE:-online}"
+
 SAVE_FREQ=750
 VAL_FREQ=100000
 SLEEP_SECS=10
+
+# 8 卡：每卡 batch=4，grad_accum=1 → global batch=32（可用 BATCH_SIZE/GRAD_ACCUM 覆盖）
+BATCH_SIZE="${BATCH_SIZE:-4}"
+GRAD_ACCUM="${GRAD_ACCUM:-1}"
 
 # resume 时用的学习率（finetune.py 不加载 optimizer 状态，每次都用当前 --learning_rate 新建 optimizer，所以这里改了就生效）
 LEARNING_RATE=5e-5
@@ -26,7 +43,7 @@ LEARNING_RATE=5e-5
 export DATASET_DEBUG_SAVE=1
 export DATASET_DEBUG_SAVE_EVERY=5000
 
-KEEP_LAST_N=20   # 只保留最近N个ckpt，防止爆盘（建议3~5）
+KEEP_LAST_N="${KEEP_LAST_N:-5}"   # 只保留最近N个ckpt，防止爆盘
 
 # ---- --fast_model：LoRA r=8、只 LoRA attention（qkv+proj）、action head + proprio，proprio 用更低 LR
 LORA_RANK=32
@@ -163,7 +180,7 @@ while true; do
     echo "===== $(date) : [fast_model] lora_rank=${LORA_RANK}, lora_target=${LORA_TARGET_MODULES}, proprio_projector_lr=${PROPRIO_PROJECTOR_LR} ====="
   fi
 
-  echo "===== $(date) : Starting training (learning_rate=${LEARNING_RATE}) ${RESUME_ARG} ====="
+  echo "===== $(date) : Starting training (gpus=${NUM_GPUS}, effective_batch=$((BATCH_SIZE * NUM_GPUS * GRAD_ACCUM)), lr=${LEARNING_RATE}) ${RESUME_ARG} ====="
 
   EXTRA_OPTS=()
   [[ -n "${LORA_TARGET_MODULES:-}" ]] && EXTRA_OPTS+=(--lora_target_modules "${LORA_TARGET_MODULES}")
@@ -172,7 +189,7 @@ while true; do
   RESUME_STEP_OPTS=()
   [[ -n "${RESUME_STEP:-}" ]] && RESUME_STEP_OPTS=(--resume_step "${RESUME_STEP}")
 
-  PYTHONUNBUFFERED=1 torchrun --standalone --nnodes 1 --nproc-per-node 1 vla-scripts/finetune.py \
+  PYTHONUNBUFFERED=1 torchrun --standalone --nnodes 1 --nproc-per-node "${NUM_GPUS}" vla-scripts/finetune.py \
     --vla_path "${VLA_PATH}" \
     --base_vla_path "${BASE_VLA_PATH}" \
     --data_root_dir "${DATA_ROOT}" \
@@ -182,18 +199,17 @@ while true; do
     --lora_rank "${LORA_RANK}" \
     "${EXTRA_OPTS[@]}" \
     --merge_lora_during_training False \
-    --batch_size 1 \
-    --grad_accumulation_steps 8 \
+    --batch_size "${BATCH_SIZE}" \
+    --grad_accumulation_steps "${GRAD_ACCUM}" \
     --learning_rate "${LEARNING_RATE}" \
     --image_aug False \
-    --wandb_project "openvla_gripper_proprio_fast" \
-    --wandb_entity "maggiesh-carnegie-mellon-university" \
+    --wandb_project "${WANDB_PROJECT}" \
+    --wandb_entity "${WANDB_ENTITY}" \
     --save_freq "${SAVE_FREQ}" \
     ${RESUME_ARG} \
     "${RESUME_STEP_OPTS[@]}" \
     --use_proprio True \
-    --use_l1_regression True \
-    --resume True
+    --use_l1_regression True
  
  
   

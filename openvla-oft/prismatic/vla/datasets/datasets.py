@@ -85,6 +85,12 @@ def language_mask_processor(lang: str) -> str:
             count=1,
         )
 
+    elif s.startswith("pick up "):
+        s = re.sub(r"\bpick up the\b", "pick up the red masked", s, count=1)
+        s = re.sub(r"\band place it on top of the\b", "and place it on top of the green masked", s, count=1)
+        s = re.sub(r"\band place it under the\b", "and place it under the green masked", s, count=1)
+        s = re.sub(r"\band place it on the\b", "and place it on the green masked", s, count=1)
+
     # -------- object category replacement --------
     # cabinet / rack -> square object
     s = re.sub(r"\bcabinet\b", "square object", s)
