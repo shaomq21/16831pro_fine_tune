@@ -7,6 +7,7 @@ Schedule: background(3 variants) + baseline, 4 per task.
 """
 import os
 import sys
+import time
 
 os.environ.setdefault("MUJOCO_GL", "osmesa")
 os.environ.setdefault("PYOPENGL_PLATFORM", "osmesa")
@@ -74,39 +75,83 @@ def _torch_load_safe(*args, **kwargs):
 torch.load = _torch_load_safe
 
 
-# Only these two tasks
+# Legacy default when --tasks is unset and suite is libero_goal.
 GENERALIZATION_TASKS = [
     "push the plate to the front of the stove",
     "put the bowl on the plate",
 ]
 
 
+def _parse_task_allowlist(tasks_cfg: str, task_suite_name: str):
+    """Return lowercased allowlist, or None to run every task in the suite.
+
+    --tasks:
+      '' / 'all' / '*': all tasks (except libero_goal keeps legacy GENERALIZATION_TASKS
+                         unless tasks='all'|'*' is explicit)
+      pipe/comma-separated language strings otherwise
+    """
+    raw = (tasks_cfg or "").strip()
+    if raw.lower() in ("all", "*"):
+        return None
+    if not raw:
+        if task_suite_name == "libero_goal":
+            return [t.strip().lower() for t in GENERALIZATION_TASKS]
+        return None
+    parts = [p.strip().lower() for p in raw.replace("|", ",").split(",") if p.strip()]
+    return parts or None
+
+
 def _task_short_name(task_description: str) -> str:
-    """Return short name for video: 'push' or 'put'."""
+    """Short slug for video filenames."""
     d = (task_description or "").strip().lower()
-    if "push" in d:
+    if "push" in d and "plate" in d:
         return "push"
-    if "put" in d:
+    if "put" in d and "bowl" in d and "plate" in d:
         return "put"
-    return "task"
+    # first ~4 content words
+    words = [w for w in d.replace(",", " ").split() if w not in {"the", "a", "an", "and", "on", "to", "of", "in"}]
+    return "_".join(words[:4]) if words else "task"
 
 
 def _task_description_for_policy(raw_description: str, cfg: "BackgroundPerturbConfig") -> str:
-    """For OFT/7B (no mask): rewrite push 'plate'->'flat shaped object on the right'; put 'bowl'->'gray bowl'."""
+    """Rewrite raw task language for non-mask policies.
+
+    lang_mode:
+      - origin: keep LIBERO raw instruction
+      - l1: plate→flat shaped object / bowl→gray bowl (default for OFT/7B)
+      - l2: stronger rephrase (right/leftmost flat-shaped object)
+    Masked policies always keep raw (language_mask_processor applied later).
+    """
     if getattr(cfg, "use_mask_for_policy", True):
         return raw_description
+    mode = getattr(cfg, "lang_mode", "l1") or "l1"
     d = (raw_description or "").strip().lower()
+    if mode == "origin":
+        return raw_description
+    if mode == "l2":
+        if "push" in d and "plate" in d:
+            return "push the right flat-shaped object to the front of the leftmost flat-shaped object"
+        if "put" in d and "bowl" in d:
+            return "put the bowl on the right flat-shaped object"
+        return raw_description
+    # l1
     out = raw_description
     if "push" in d and "plate" in d:
         out = out.replace("the plate", "the flat shaped object on the right")
     if "put" in d and "bowl" in d:
         out = out.replace("the bowl", "the gray bowl")
+        out = out.replace("the plate", "the flat shaped object")
     return out
 
-# Task suite for LIBERO_GOAL (contains these tasks)
+# Default suite (overridable via --task_suite_name)
 TASK_SUITE_NAME = "libero_goal"
-# Match run_libero_eval: libero_goal longest demo ~270 steps
-TASK_MAX_STEPS = 300
+TASK_MAX_STEPS = {
+    "libero_spatial": 220,
+    "libero_object": 280,
+    "libero_goal": 300,
+    "libero_10": 520,
+    "libero_90": 400,
+}
 
 
 class PerturbType(str, Enum):
@@ -294,6 +339,7 @@ class BackgroundPerturbConfig:
     load_in_4bit: bool = False
 
     task_suite_name: str = TASK_SUITE_NAME
+    tasks: str = ""  # '' = suite default; 'all'|'*' = every task; else pipe/comma langs
     num_steps_wait: int = 10
     num_trials_per_task: int = 3  # Episodes per (task, background) combination
     initial_states_path: str = "DEFAULT"
@@ -303,14 +349,19 @@ class BackgroundPerturbConfig:
     model_label: str = "openvla_oft"  # For video naming: e.g. "openvla_7b", "openvla_oft_goal", "current"
     local_log_dir: str = "./experiments/info"
     use_mask_for_policy: bool = True  # If False (e.g. openvla_7b, oft_goal), policy sees raw image; only new model uses mask
-    use_mask_from_env: bool = False  # False = use mask_processor (Grounded-SAM)
+    use_mask_from_env: bool = False  # False = use mask_processor (Grounded-SAM / SAM3)
+    # Match dual-masked training: goal→sam1 (Grounded-DINO+SAM), spatial→sam3 (+temporal tracker)
+    sam_backend: str = "sam1"  # sam1 | sam3
+    mask_alpha: float = 0.35
+    lang_mode: str = "l1"  # origin | l1 | l2 — raw-lang rewrite for non-mask policies
     dino_config_path: str = "GroundingDINO/groundingdino/config/GroundingDINO_SwinT_OGC.py"
     dino_ckpt_path: str = "groundingdino_swint_ogc.pth"
     sam_ckpt_path: str = "sam_vit_b_01ec64.pth"
     sam_type: str = "vit_b"
-    mask_device: str = "cpu"  # Use CPU for mask to save GPU memory for VLA; subprocess path also runs on CPU
+    mask_device: str = "cuda"  # Worker GPU (set MASK_GPU / CUDA in launcher); sam3 needs CUDA
     perturb_bowl: bool = False  # If True: 深灰/灰碗像素→亮红
     run_baseline: bool = True  # If False (OFT/7B): skip baseline, only run perturb conditions
+    run_background: bool = True  # If False: skip background_0/1/2 (baseline-only / origin)
     use_wandb: bool = False
     wandb_entity: str = "maggiesh-carnegie-mellon-university"
     wandb_project: str = "validation"
@@ -354,11 +405,25 @@ def _initialize_model(cfg: BackgroundPerturbConfig):
     processor = None
     if cfg.model_family == "openvla":
         processor = get_processor(cfg)
-        unnorm_key = cfg.task_suite_name
-        if unnorm_key not in model.norm_stats and f"{unnorm_key}_no_noops" in model.norm_stats:
-            unnorm_key = f"{unnorm_key}_no_noops"
-        assert unnorm_key in model.norm_stats, f"unnorm_key {unnorm_key} not found!"
-        cfg.unnorm_key = unnorm_key
+        preset = str(cfg.unnorm_key or "").strip()
+        if preset and preset in model.norm_stats:
+            cfg.unnorm_key = preset
+        else:
+            unnorm_key = cfg.task_suite_name
+            if unnorm_key not in model.norm_stats and f"{unnorm_key}_no_noops" in model.norm_stats:
+                unnorm_key = f"{unnorm_key}_no_noops"
+            for candidate in (
+                f"simu_{unnorm_key}",
+                f"simu_{cfg.task_suite_name}_no_noops",
+                "simu_libero_90_study_scene4_no_noops",
+                f"sam_{unnorm_key}",
+                f"sam_{cfg.task_suite_name}_no_noops",
+            ):
+                if candidate in model.norm_stats:
+                    unnorm_key = candidate
+                    break
+            assert unnorm_key in model.norm_stats, f"unnorm_key {unnorm_key} not found in {list(model.norm_stats)[:12]}!"
+            cfg.unnorm_key = unnorm_key
 
     return model, action_head, proprio_projector, noisy_action_projector, processor
 
@@ -386,23 +451,172 @@ def _process_action(action, model_family: str):
 
 
 _mask_processor_masker = None
+_mask_episode_tracker = None
 _use_mask_subprocess = False
+_mask_worker_proc = None
+_mask_worker_cfg_key = None
 
-# Mask subprocess config (same as datasets.py, but env forces CPU)
-_VLA_PREPROCESS_PY = "/home/ubuntu/miniconda3/envs/vla-preprocess/bin/python"
-_MASK_ONE_SCRIPT = Path(__file__).resolve().parents[3].parent / "tools" / "mask_one.py"
+# Mask subprocess config (vla-preprocess has GroundingDINO + ultralytics SAM3)
+_VLA_PREPROCESS_PY = os.environ.get(
+    "VLA_PREPROCESS_PY",
+    "/var/lib/docker/data/checkpoints/fan-test/16831pro_fine_tune/conda_envs/vla-preprocess/bin/python",
+)
+_REPO_ROOT = Path(__file__).resolve().parents[3].parent
+_MASK_ONE_SCRIPT = _REPO_ROOT / "tools" / "mask_one.py"
+_MASK_WORKER_SCRIPT = _REPO_ROOT / "tools" / "mask_episode_worker.py"
 _DINO_CONFIG = "GroundingDINO/groundingdino/config/GroundingDINO_SwinT_OGC.py"
 _DINO_CKPT = "groundingdino_swint_ogc.pth"
 _SAM_CKPT = "sam_vit_b_01ec64.pth"
 _SAM_TYPE = "vit_b"
 
 
-def _mask_via_subprocess_cpu(img_pil: Image.Image, lang: str, alpha: float = 0.35) -> Image.Image:
-    """Run mask_one.py in subprocess with CUDA hidden; mask uses CPU only. alpha=0 => black bg, objects in original color."""
+def _mask_worker_env(cfg: "BackgroundPerturbConfig") -> dict:
+    """Env for persistent mask worker. MASK_GPU selects a physical GPU (default: hide CUDA → CPU for sam1)."""
+    env = os.environ.copy()
+    for k in ["WORLD_SIZE", "RANK", "LOCAL_RANK", "LOCAL_WORLD_SIZE", "MASTER_ADDR", "MASTER_PORT"]:
+        env.pop(k, None)
+    mask_gpu = os.environ.get("MASK_GPU", "").strip()
+    if mask_gpu:
+        env["CUDA_VISIBLE_DEVICES"] = mask_gpu
+        env.pop("NVIDIA_VISIBLE_DEVICES", None)
+    elif getattr(cfg, "sam_backend", "sam1") == "sam3" or str(getattr(cfg, "mask_device", "")).startswith("cuda"):
+        # sam3 needs GPU; if MASK_GPU unset, share visible devices with parent
+        pass
+    else:
+        env["CUDA_VISIBLE_DEVICES"] = ""
+        env["NVIDIA_VISIBLE_DEVICES"] = ""
+    return env
+
+
+def _ensure_mask_worker(cfg: "BackgroundPerturbConfig"):
+    """Start / reuse persistent mask worker (loads model once; sam3 keeps EpisodeMaskTracker)."""
+    global _mask_worker_proc, _mask_worker_cfg_key
+    import subprocess
+
+    key = (
+        getattr(cfg, "sam_backend", "sam1"),
+        getattr(cfg, "mask_device", "cuda"),
+        os.environ.get("MASK_GPU", ""),
+        str(cfg.dino_config_path),
+        str(cfg.dino_ckpt_path),
+        str(cfg.sam_ckpt_path),
+        str(cfg.sam_type),
+    )
+    if _mask_worker_proc is not None and _mask_worker_cfg_key == key:
+        if _mask_worker_proc.poll() is None:
+            return _mask_worker_proc
+        logger.warning("mask worker died; restarting")
+        _mask_worker_proc = None
+
+    if not _MASK_WORKER_SCRIPT.is_file():
+        raise FileNotFoundError(f"mask worker missing: {_MASK_WORKER_SCRIPT}")
+
+    device = "cuda" if (
+        os.environ.get("MASK_GPU", "").strip()
+        or (getattr(cfg, "sam_backend", "sam1") == "sam3")
+        or str(getattr(cfg, "mask_device", "")).startswith("cuda")
+    ) else "cpu"
+    # When CUDA is hidden for sam1 CPU path, force device=cpu
+    env = _mask_worker_env(cfg)
+    if env.get("CUDA_VISIBLE_DEVICES", None) == "":
+        device = "cpu"
+
+    cmd = [
+        _VLA_PREPROCESS_PY, "-u", str(_MASK_WORKER_SCRIPT),
+        "--sam_backend", getattr(cfg, "sam_backend", "sam1"),
+        "--device", device,
+        "--dino_config", cfg.dino_config_path,
+        "--dino_ckpt", cfg.dino_ckpt_path,
+        "--sam_ckpt", cfg.sam_ckpt_path,
+        "--sam_type", cfg.sam_type,
+    ]
+    logger.info("Starting mask worker: backend=%s device=%s MASK_GPU=%s",
+                getattr(cfg, "sam_backend", "sam1"), device, os.environ.get("MASK_GPU", ""))
+    proc = subprocess.Popen(
+        cmd,
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+        bufsize=1,
+        env=env,
+        cwd=str(_REPO_ROOT / "openvla-oft"),
+    )
+    # Wait for READY
+    while True:
+        line = proc.stdout.readline()
+        if not line:
+            err = proc.stderr.read() if proc.stderr else ""
+            raise RuntimeError(f"mask worker exited before READY: {err[-2000:]}")
+        line = line.strip()
+        if line == "READY":
+            break
+        logger.info("mask worker: %s", line)
+    _mask_worker_proc = proc
+    _mask_worker_cfg_key = key
+    return proc
+
+
+def _mask_worker_cmd(cfg: "BackgroundPerturbConfig", cmd: str, timeout: float = 180.0) -> str:
+    import select
+    proc = _ensure_mask_worker(cfg)
+    assert proc.stdin is not None and proc.stdout is not None
+    proc.stdin.write(cmd + "\n")
+    proc.stdin.flush()
+    deadline = time.time() + timeout
+    while time.time() < deadline:
+        if proc.poll() is not None:
+            err = proc.stderr.read() if proc.stderr else ""
+            raise RuntimeError(f"mask worker died: {err[-2000:]}")
+        ready, _, _ = select.select([proc.stdout], [], [], 1.0)
+        if not ready:
+            continue
+        line = proc.stdout.readline()
+        if not line:
+            continue
+        line = line.strip()
+        if line.startswith("OK") or line.startswith("ERROR"):
+            return line
+        logger.info("mask worker: %s", line)
+    raise TimeoutError(f"mask worker timeout on: {cmd[:120]}")
+
+
+def reset_mask_episode(cfg: "BackgroundPerturbConfig") -> None:
+    """Clear SAM3 temporal tracker at episode start."""
+    global _mask_episode_tracker
+    if getattr(cfg, "use_mask_from_env", False) or not getattr(cfg, "use_mask_for_policy", True):
+        return
+    if _mask_episode_tracker is not None:
+        _mask_episode_tracker.reset()
+        return
+    if _use_mask_subprocess or _mask_worker_proc is not None:
+        resp = _mask_worker_cmd(cfg, "RESET")
+        if not resp.startswith("OK"):
+            logger.warning("mask RESET failed: %s", resp)
+
+
+def _mask_via_worker(img_pil: Image.Image, lang: str, cfg: "BackgroundPerturbConfig", alpha: float = 0.35) -> Image.Image:
+    import tempfile
+    import shutil
+    tmp_dir = tempfile.mkdtemp(prefix="bg_perturb_mask_tmp_")
+    try:
+        in_path = os.path.join(tmp_dir, "in.png")
+        out_path = os.path.join(tmp_dir, "out.png")
+        img_pil.save(in_path)
+        # lang may contain spaces — worker splits MASK with max 4 parts
+        resp = _mask_worker_cmd(cfg, f"MASK {in_path} {out_path} {alpha} {lang}")
+        if not resp.startswith("OK"):
+            raise RuntimeError(f"mask worker failed: {resp}")
+        return Image.open(out_path).convert("RGB")
+    finally:
+        shutil.rmtree(tmp_dir, ignore_errors=True)
+
+
+def _mask_via_subprocess_cpu(img_pil: Image.Image, lang: str, alpha: float = 0.35, sam_backend: str = "sam1") -> Image.Image:
+    """One-shot mask_one.py (no temporal state). Prefer _mask_via_worker for eval."""
     import subprocess
     import tempfile
     import shutil
-    # Free GPU cache in main process before mask (leaves more room for VLA)
     if torch.cuda.is_available():
         torch.cuda.empty_cache()
         torch.cuda.synchronize()
@@ -424,7 +638,7 @@ def _mask_via_subprocess_cpu(img_pil: Image.Image, lang: str, alpha: float = 0.3
             'CUDA_VISIBLE_DEVICES="" NVIDIA_VISIBLE_DEVICES="" '
             f'"{_VLA_PREPROCESS_PY}" -u "{_MASK_ONE_SCRIPT}" '
             f'--image_in "{in_path}" --image_out "{out_path}" --lang {lang_safe} '
-            f'--alpha {alpha} '
+            f'--alpha {alpha} --sam_backend {sam_backend} '
             f'--dino_config "{_DINO_CONFIG}" --dino_ckpt "{_DINO_CKPT}" '
             f'--sam_ckpt "{_SAM_CKPT}" --sam_type "{_SAM_TYPE}" --device cpu'
         )
@@ -440,37 +654,49 @@ def _get_mask_bg_black(
     img_pil: Image.Image, lang: str, cfg: BackgroundPerturbConfig
 ) -> Image.Image:
     """Black background, only target objects in original color (alpha=0)."""
-    masker = _get_mask_processor_masker(cfg)
     img_rgb = img_pil.convert("RGB") if hasattr(img_pil, "convert") else Image.fromarray(np.asarray(img_pil)).convert("RGB")
-    if masker is not None:
-        out = masker.mask_image_from_lang(img_rgb, lang, alpha=0.0)
-    else:
-        out = _mask_via_subprocess_cpu(img_rgb, lang, alpha=0.0)
+    out = _apply_generated_mask(img_rgb, lang, cfg, alpha=0.0)
     return out.convert("RGB") if hasattr(out, "convert") else Image.fromarray(np.asarray(out)).convert("RGB")
 
 
 def _get_mask_processor_masker(cfg: BackgroundPerturbConfig):
-    """Lazy-load GroundedSAMMasker. Falls back to subprocess if groundingdino not in current env."""
-    global _mask_processor_masker, _use_mask_subprocess
+    """Lazy-load GroundedSAMMasker (+ EpisodeMaskTracker for sam3). Falls back to worker subprocess."""
+    global _mask_processor_masker, _mask_episode_tracker, _use_mask_subprocess
     if _mask_processor_masker is not None:
         return _mask_processor_masker
     if _use_mask_subprocess:
         return None
     try:
-        from mask_processor import GroundedSAMMasker, GroundedSAMConfig
+        from mask_processor import GroundedSAMMasker, GroundedSAMConfig, EpisodeMaskTracker
         mask_cfg = GroundedSAMConfig(
             dino_config_path=cfg.dino_config_path,
             dino_checkpoint_path=cfg.dino_ckpt_path,
             sam_checkpoint_path=cfg.sam_ckpt_path,
             sam_type=cfg.sam_type,
+            sam_backend=getattr(cfg, "sam_backend", "sam1"),
             device=cfg.mask_device,
         )
         _mask_processor_masker = GroundedSAMMasker(mask_cfg)
+        if getattr(cfg, "sam_backend", "sam1") == "sam3":
+            _mask_episode_tracker = EpisodeMaskTracker(_mask_processor_masker)
         return _mask_processor_masker
     except ModuleNotFoundError as e:
-        logger.info("mask_processor in-process not available (%s), using subprocess (vla-preprocess)", e)
+        logger.info("mask_processor in-process not available (%s), using persistent worker (vla-preprocess)", e)
         _use_mask_subprocess = True
         return None
+
+
+def _apply_generated_mask(
+    img_pil: Image.Image, lang: str, cfg: BackgroundPerturbConfig, alpha: float = 0.35
+) -> Image.Image:
+    """Apply Grounded-SAM (sam1) or SAM3(+temporal) mask matching training."""
+    global _mask_episode_tracker
+    masker = _get_mask_processor_masker(cfg)
+    if masker is not None:
+        if _mask_episode_tracker is not None:
+            return _mask_episode_tracker.mask_image_from_lang(img_pil, lang, alpha=alpha)
+        return masker.mask_image_from_lang(img_pil, lang, alpha=alpha)
+    return _mask_via_worker(img_pil, lang, cfg, alpha=alpha)
 
 
 def _save_sidebyside_video(
@@ -531,6 +757,10 @@ def run_episode(
     else:
         obs = env.get_observation()
 
+    # Match training: SAM3 EpisodeMaskTracker is per-episode
+    if cfg.use_mask_for_policy and not cfg.use_mask_from_env:
+        reset_mask_episode(cfg)
+
     action_queue = deque(maxlen=cfg.num_open_loop_steps)
     t = 0
     replay_images = []
@@ -538,7 +768,7 @@ def run_episode(
     last_masked = None  # Reuse for video when not calling policy (mask subprocess is slow)
     last_masked_full = None  # For MASK_BG_BLACK reuse
     last_masked_wrist = None
-    max_steps = TASK_MAX_STEPS
+    max_steps = TASK_MAX_STEPS.get(cfg.task_suite_name, 300) if isinstance(TASK_MAX_STEPS, dict) else TASK_MAX_STEPS
     success = False
 
     try:
@@ -599,27 +829,21 @@ def run_episode(
                         if seg_key in obs:
                             try:
                                 masked = mask_image_from_libero_seg(
-                                    img_for_replay, obs[seg_key], env, alpha=0.5
+                                    img_for_replay, obs[seg_key], env, alpha=0.35
                                 )
-                            except (TypeError, AttributeError):
-                                masked = img_for_replay
+                            except Exception as e:
+                                logger.warning("mask_from_env failed (%s); black frame", e)
+                                masked = np.zeros_like(img_for_replay)
                         else:
-                            masked = img_for_replay
+                            logger.warning("no %s in obs; black frame", seg_key)
+                            masked = np.zeros_like(img_for_replay)
                     else:
-                        masker = _get_mask_processor_masker(cfg)
                         img_pil_rgb = Image.fromarray(img_for_replay).convert("RGB")
-                        if masker is not None:
-                            masked_pil = masker.mask_image_from_lang(
-                                img_pil_rgb,
-                                raw_task_description,
-                                alpha=0.35,
-                            )
-                            masked = np.asarray(masked_pil)
-                        else:
-                            masked_pil = _mask_via_subprocess_cpu(
-                                img_pil_rgb, raw_task_description
-                            )
-                            masked = np.asarray(masked_pil)
+                        alpha = float(getattr(cfg, "mask_alpha", 0.35))
+                        masked_pil = _apply_generated_mask(
+                            img_pil_rgb, raw_task_description, cfg, alpha=alpha
+                        )
+                        masked = np.asarray(masked_pil)
                     last_masked = np.asarray(masked)
                     replay_masked_images.append(last_masked.copy())
                     observation["full_image"] = resize_image_for_policy(masked, resize_size)
@@ -694,7 +918,7 @@ def run_background_perturb_eval(cfg: BackgroundPerturbConfig) -> float:
     model, action_head, proprio_projector, noisy_action_projector, processor = _initialize_model(cfg)
     resize_size = get_image_resize_size(cfg)
 
-    run_id = f"BG-PERTURB-{TASK_SUITE_NAME}-{cfg.model_family}-{DATE_TIME}"
+    run_id = f"BG-PERTURB-{cfg.task_suite_name}-{cfg.model_family}-{DATE_TIME}"
     if cfg.run_id_note:
         run_id += f"--{cfg.run_id_note}"
     os.makedirs(cfg.local_log_dir, exist_ok=True)
@@ -705,16 +929,17 @@ def run_background_perturb_eval(cfg: BackgroundPerturbConfig) -> float:
     benchmark_dict = benchmark.get_benchmark_dict()
     task_suite = benchmark_dict[cfg.task_suite_name]()
     num_tasks = task_suite.n_tasks
+    allow = _parse_task_allowlist(getattr(cfg, "tasks", ""), cfg.task_suite_name)
 
     task_ids_to_run = []
     for task_id in range(num_tasks):
         task = task_suite.get_task(task_id)
         desc = (task.language or "").strip().lower()
-        if desc in [t.strip().lower() for t in GENERALIZATION_TASKS]:
+        if allow is None or desc in allow:
             task_ids_to_run.append((task_id, task.language))
 
     if not task_ids_to_run:
-        log_file.write("No matching tasks found. Check GENERALIZATION_TASKS.\n")
+        log_file.write(f"No matching tasks found. tasks={getattr(cfg, 'tasks', '')!r} allow={allow}\n")
         log_file.close()
         return 0.0
 
@@ -728,8 +953,13 @@ def run_background_perturb_eval(cfg: BackgroundPerturbConfig) -> float:
     schedule = []
     if cfg.run_baseline:
         schedule.append((PerturbType.NONE, 0))
-    for v in range(3):
-        schedule.append((PerturbType.BACKGROUND, v))
+    if getattr(cfg, "run_background", True):
+        for v in range(3):
+            schedule.append((PerturbType.BACKGROUND, v))
+    if not schedule:
+        log_file.write("Empty schedule (run_baseline=False and run_background=False).\n")
+        log_file.close()
+        return 0.0
 
     total_episodes = 0
     total_successes = 0

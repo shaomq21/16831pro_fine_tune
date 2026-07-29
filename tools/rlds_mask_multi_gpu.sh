@@ -19,7 +19,7 @@ export MUJOCO_GL="${MUJOCO_GL:-egl}"
 FAST="${FAST:-1}"
 RESUME="${RESUME:-1}"
 BACKGROUND="${BACKGROUND:-0}"
-DEBUG_EVERY_EPISODES="${DEBUG_EVERY_EPISODES:-1}"
+DEBUG_EVERY_EPISODES="${DEBUG_EVERY_EPISODES:-0}"
 DEBUG_FRAMES="${DEBUG_FRAMES:-1}"
 MAX_DEBUG_IMAGES="${MAX_DEBUG_IMAGES:-20}"
 
@@ -38,6 +38,12 @@ fi
 if (( NUM_GPUS == 0 )); then
   echo "No GPUs specified"
   exit 1
+fi
+
+if pgrep -f "tools/rlds_mask.py.*${DATA_MIX}" >/dev/null 2>&1; then
+  n="$(pgrep -f "tools/rlds_mask.py.*${DATA_MIX}" | wc -l)"
+  echo "Workers already running for ${DATA_MIX} (${n} process(es)); skip launch."
+  exit 0
 fi
 
 EXTRA_ARGS=()

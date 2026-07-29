@@ -78,8 +78,9 @@ class FinetuneConfig:
     # fmt: off
     vla_path: str = "openvla/openvla-7b"             # Path to OpenVLA model (on HuggingFace Hub or stored locally).
                                                      # When resume=True and only saving adapter: path to ckpt dir (run_dir--step_chkpt).
-    base_vla_path: Optional[str] = None               # Fixed base model path. When resume + only saving adapter: load base from here,
-                                                     # then merge with latest adapter at start, then add new LoRA for training.
+    base_vla_path: Optional[str] = None               # Fixed / merged base model path. Resume loads this backbone, then
+                                                     # continues the saved LoRA adapter when target_modules match; otherwise
+                                                     # merges the old adapter and attaches a fresh LoRA.
 
     # Dataset
     data_root_dir: Path = Path("datasets/rlds")      # Directory containing RLDS datasets
@@ -102,7 +103,7 @@ class FinetuneConfig:
     lr_warmup_steps: int = 200                       # Number of steps to warm up learning rate (from 10% to 100%)
     num_steps_before_decay: int = 100_000            # Number of steps before LR decays by 10x
     grad_accumulation_steps: int = 1                 # Number of gradient accumulation steps
-    max_steps: int = 200_000                         # Max number of training steps
+    max_steps: int = 650_000                         # Max number of training steps (global)
     use_val_set: bool = False                        # If True, uses validation set and log validation metrics
     val_freq: int = 10_000                           # (When `use_val_set==True`) Validation set logging frequency in steps
     val_time_limit: int = 180                        # (When `use_val_set==True`) Time limit for computing validation metrics
@@ -131,6 +132,7 @@ class FinetuneConfig:
     run_id_note: Optional[str] = None                # Extra note to add to end of run ID for logging
     run_id_override: Optional[str] = None            # Optional string to override the run ID with
     wandb_log_freq: int = 10                         # WandB logging frequency in steps
+    lr_schedule_reset: bool = False                  # If True, LR schedule starts fresh from this launch (phase-2 restarts)
 
     # fmt: on
 
@@ -220,10 +222,15 @@ def load_checkpoint(module_name: str, path: str, step: int, device: str = "cpu")
 def load_checkpoint_if_exists(module_name: str, path: str, step: int, device: str = "cpu"):
     """Like load_checkpoint but returns None if file does not exist (e.g. ckpt saved without that module)."""
     checkpoint_path = os.path.join(path, f"{module_name}--{step}_checkpoint.pt")
-    if not os.path.isfile(checkpoint_path):
-        print(f"Checkpoint not found (skipping): {checkpoint_path}")
-        return None
-    return load_checkpoint(module_name, path, step, device)
+    latest_path = os.path.join(path, f"{module_name}--latest_checkpoint.pt")
+    if os.path.isfile(checkpoint_path):
+        return load_checkpoint(module_name, path, step, device)
+    if os.path.isfile(latest_path):
+        print(f"Loading latest checkpoint: {latest_path}")
+        state_dict = torch.load(latest_path, weights_only=True, map_location=device)
+        return remove_ddp_in_checkpoint(state_dict)
+    print(f"Checkpoint not found (skipping): {checkpoint_path}")
+    return None
 
 
 def wrap_ddp(module: nn.Module, device_id: int, find_unused: bool = False) -> DDP:
@@ -664,7 +671,9 @@ def save_training_checkpoint(
 
     # Save model components (main process only)
     if distributed_state.is_main_process:
-        # Save processor and LoRA adapter (adapter 只含 vision_backbone；resume 时从 base + 此处 adapter 加载后 merge 再挂新 LoRA)
+        # Save processor and LoRA adapter. With USE_MERGED_BASE / resume:
+        # - first launch after merge: fresh LoRA on merged full backbone
+        # - later resumes: continue the same adapter (do not remount a new random LoRA)
         processor.save_pretrained(checkpoint_dir)
         vla.module.vision_backbone.save_pretrained(adapter_dir)
 
@@ -908,10 +917,22 @@ def finetune(cfg: FinetuneConfig) -> None:
             )
         # PEFT with target_modules=str uses re.fullmatch(pattern, key). Only match paths ending with .attn.<suffix>
         lora_target_list = r"^.*\.attn\.(" + "|".join(re.escape(s) for s in sorted(attn_linear_suffixes)) + r")$"
+    elif lora_target == "all-linear":
+        # timm vision_backbone is not PreTrainedModel; PEFT "all-linear" magic string fails — discover Linear layers explicitly
+        linear_modules = [
+            name for name, mod in vla.vision_backbone.named_modules() if isinstance(mod, torch.nn.Linear)
+        ]
+        if not linear_modules:
+            raise ValueError("all-linear: no Linear layers found in vision_backbone")
+        lora_target_list = linear_modules
     else:
-        lora_target_list = "all-linear"
+        lora_target_list = lora_target
     print("=" * 80)
-    mods_display = lora_target_list if lora_target_list == "all-linear" else (lora_target_list if isinstance(lora_target_list, list) else "regex .attn.(qkv|proj|...)")
+    mods_display = (
+        "all-linear (%d modules)" % len(lora_target_list)
+        if lora_target == "all-linear"
+        else (lora_target_list if isinstance(lora_target_list, list) else "regex .attn.(qkv|proj|...)")
+    )
     print("[TRAIN CONFIG] LoRA rank=%s, target=%s (modules: %s)" % (cfg.lora_rank, lora_target, mods_display))
     print("  use_proprio=%s, use_l1_regression=%s (action head), proprio_projector_lr=%s" % (
         cfg.use_proprio, cfg.use_l1_regression, cfg.proprio_projector_lr))
@@ -926,15 +947,60 @@ def finetune(cfg: FinetuneConfig) -> None:
     # LoRA 只挂在 vision_backbone 上，不对 language_model 注入 LoRA（最稳做法）
     if cfg.use_lora:
         adapter_dir = os.path.join(cfg.vla_path, "lora_adapter")
-        adapter_exists = os.path.exists(os.path.join(adapter_dir, "adapter_config.json"))
-        if cfg.resume and adapter_exists:
-            # 本次加载的是 base（base_load_path != vla_path）时才加载 adapter 并 merge；若加载的是 merged 全量 ckpt 则不再 load adapter
-            if base_load_path != cfg.vla_path:
-                vla.vision_backbone = PeftModel.from_pretrained(vla.vision_backbone, adapter_dir)
-                vla.vision_backbone = vla.vision_backbone.merge_and_unload()
+        adapter_cfg_path = os.path.join(adapter_dir, "adapter_config.json")
+        adapter_exists = os.path.exists(adapter_cfg_path)
+
+        def _saved_adapter_compatible_with_target() -> bool:
+            """True if on-disk adapter targets match the LoRA we are about to train."""
+            try:
+                import json
+
+                with open(adapter_cfg_path, "r") as f:
+                    saved = json.load(f)
+            except Exception as e:
+                print(f"[LoRA] Could not read {adapter_cfg_path}: {e}")
+                return False
+            saved_targets = saved.get("target_modules")
+            if lora_target == "all-linear":
+                # Explicit module list vs regex/"all-linear" string — treat list with mlp as all-linear.
+                if isinstance(saved_targets, list):
+                    return any("mlp" in str(t) for t in saved_targets) or len(saved_targets) > 100
+                return saved_targets in (None, "all-linear")
+            if lora_target == "attn-only":
+                if isinstance(saved_targets, list):
+                    return bool(saved_targets) and all("mlp" not in str(t) for t in saved_targets)
+                return isinstance(saved_targets, str) and "attn" in saved_targets
+            return saved_targets == lora_target_list or saved_targets == lora_target
+
+        if cfg.resume and adapter_exists and _saved_adapter_compatible_with_target():
+            # Continue the same LoRA on the (merged) base — do NOT remount a fresh adapter.
+            # Must use is_trainable=True: checkpoint may have inference_mode=true (0 grads → DDP crash).
+            print(
+                f"[LoRA] Continuing adapter from {adapter_dir} on base ({base_load_path}) "
+                f"(target={lora_target}, is_trainable=True)"
+            )
+            vla.vision_backbone = PeftModel.from_pretrained(
+                vla.vision_backbone, adapter_dir, is_trainable=True
+            )
+            vla.vision_backbone.print_trainable_parameters()
+        elif cfg.resume and adapter_exists:
+            # Target modules changed (e.g. attn-only -> all-linear): bake old adapter, attach new.
+            print(
+                f"[LoRA] Adapter at {adapter_dir} incompatible with target={lora_target}; "
+                f"merging into base ({base_load_path}) then attaching fresh LoRA"
+            )
+            vla.vision_backbone = PeftModel.from_pretrained(
+                vla.vision_backbone, adapter_dir, is_trainable=False
+            )
+            vla.vision_backbone = vla.vision_backbone.merge_and_unload()
             vla.vision_backbone = get_peft_model(vla.vision_backbone, lora_config)
             vla.vision_backbone.print_trainable_parameters()
         else:
+            if cfg.resume and not adapter_exists:
+                print(
+                    f"[LoRA] Resume with no adapter at {adapter_dir}; "
+                    f"attaching fresh LoRA on base ({base_load_path})"
+                )
             vla.vision_backbone = get_peft_model(vla.vision_backbone, lora_config)
             vla.vision_backbone.print_trainable_parameters()
         print("[LoRA] Applied ONLY to vision_backbone (language_model has no LoRA)")
@@ -1124,12 +1190,18 @@ def finetune(cfg: FinetuneConfig) -> None:
     # Record original learning rate
     original_lr = optimizer.param_groups[0]["lr"]
 
-    # Create learning rate scheduler
+    # Create learning rate scheduler (milestones are LOCAL optimizer steps since this launch)
+    if cfg.lr_schedule_reset or cfg.resume_step is None:
+        decay_milestone = max(1, cfg.num_steps_before_decay)
+    else:
+        # Continue phase-1 schedule: decay when global step reaches num_steps_before_decay
+        decay_milestone = max(1, cfg.num_steps_before_decay - cfg.resume_step)
     scheduler = MultiStepLR(
         optimizer,
-        milestones=[cfg.num_steps_before_decay],  # Number of steps after which LR will change
-        gamma=0.1,  # Multiplicative factor of learning rate decay
+        milestones=[decay_milestone],
+        gamma=0.1,
     )
+    print(f"[LR] schedule: start_lr={optimizer.param_groups[0]['lr']}, decay@local_step={decay_milestone}, reset={cfg.lr_schedule_reset}")
 
     # Create Action Tokenizer
     action_tokenizer = ActionTokenizer(processor.tokenizer)

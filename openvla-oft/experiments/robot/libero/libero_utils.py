@@ -58,70 +58,67 @@ def get_libero_wrist_image(obs):
     return img
 
 
-def mask_image_from_libero_seg(rgb_np, seg_obs, env, alpha=0.5):
-    """Paint red/green overlay from LIBERO instance segmentation to match Grounded-SAM mask style.
+def mask_image_from_libero_seg(rgb_np, seg_obs, env, alpha=0.35):
+    """Black-bg red/green mask matching training (libero_sim_mask / dual_masked RLDS).
 
-    Args:
-        rgb_np: RGB image (H,W,3) in same geometry as get_libero_image(obs), i.e. already flipped.
-        seg_obs: Raw segmentation from obs["agentview_segmentation_instance"] (camera frame).
-        env: SegmentationRenderEnv (must have get_segmentation_instances, obj_of_interest).
-        alpha: Blend strength for overlay (0=no tint, 1=full color).
-
-    Returns:
-        RGB image (H,W,3) uint8 with red tint on first obj_of_interest, green on second.
+    ``rgb_np`` must already be in RLDS/OpenVLA orientation (``get_libero_image`` flip).
+    Maps BDDL ``obj_of_interest`` (incl. goal regions like stove_front_region) onto
+    instance-seg keys via ``resolve_seg_instance``.
     """
-    try:
-        from libero_sim_mask import compose_black_bg_mask, flip_agentview, instance_masks_from_seg
+    from libero_sim_mask import (
+        _interest_pair,
+        _instance_mask,
+        compose_black_bg_mask,
+        draw_white_dots,
+        gripper_finger_pixels,
+        instance_masks_from_seg,
+    )
 
-        rgb = np.asarray(rgb_np, dtype=np.uint8)
-        if rgb.ndim == 2:
-            rgb = np.stack([rgb] * 3, axis=-1)
-        # rgb_np is already flipped; build masks in camera frame then flip
-        masks = instance_masks_from_seg(env, seg_obs)
-        objs = list(getattr(env, "obj_of_interest", []))[:2]
-        if len(objs) < 2:
-            return rgb_np
-        red_m = flip_agentview(np.squeeze(masks[objs[0]]))
-        green_m = flip_agentview(np.squeeze(masks[objs[1]]))
-        return compose_black_bg_mask(rgb, red_m, green_m, alpha=alpha)
-    except ImportError:
-        pass
+    rgb = np.asarray(rgb_np, dtype=np.uint8)
+    if rgb.ndim == 2:
+        rgb = np.stack([rgb] * 3, axis=-1)
+    h, w = rgb.shape[:2]
+    red_m = np.zeros((h, w), dtype=bool)
+    green_m = np.zeros((h, w), dtype=bool)
 
-    # Legacy alpha overlay path
-    # get_segmentation_instances expects raw camera-frame seg
-    seg_dict = env.get_segmentation_instances(seg_obs.copy())
-    obj_of_interest = getattr(env, "obj_of_interest", [])
-    if not obj_of_interest:
-        return rgb_np
+    masks = instance_masks_from_seg(env, seg_obs)
+    red_name, green_name = _interest_pair(env)
+    if red_name:
+        try:
+            red_m = np.asarray(_instance_mask(red_name, masks), dtype=bool)
+        except KeyError:
+            red_m = np.zeros((h, w), dtype=bool)
+    if green_name:
+        try:
+            green_m = np.asarray(_instance_mask(green_name, masks), dtype=bool)
+        except KeyError:
+            green_m = np.zeros((h, w), dtype=bool)
 
-    out = np.array(rgb_np, dtype=np.float64)
-    red = np.array([255, 0, 0], dtype=np.float64)
-    green = np.array([0, 255, 0], dtype=np.float64)
+    if not red_m.any() and not green_m.any():
+        # Do not silently return raw — still black bg so video failure is obvious.
+        return np.zeros_like(rgb)
 
-    # RGB from get_libero_image is flipped; seg_dict masks are in camera frame → flip masks to align
-    for i, obj_name in enumerate(obj_of_interest[:2]):
-        mask = seg_dict.get(obj_name)
-        if mask is None:
-            continue
-        mask_f = (mask[::-1, ::-1] > 0).astype(np.float64)
-        if mask_f.sum() == 0:
-            continue
-        color = red if i == 0 else green
-        for c in range(3):
-            out[:, :, c] = (1 - alpha * mask_f) * out[:, :, c] + alpha * mask_f * color[c]
-
-    return np.clip(out, 0, 255).astype(np.uint8)
+    out = compose_black_bg_mask(rgb, red_m, green_m, alpha=float(alpha), draw_green=True)
+    sim_obj = getattr(env, "sim", None)
+    if sim_obj is not None:
+        dots = gripper_finger_pixels(sim_obj, height=h, width=w)
+        out = draw_white_dots(out, dots, radius=max(2, min(5, min(h, w) // 70)))
+    return out
 
 
-def save_rollout_video(rollout_images, idx, success, task_description, log_file=None, suffix=None, fps=30, model_label=None):
+def save_rollout_video(rollout_images, idx, success, task_description, log_file=None, suffix=None, fps=30, model_label=None, rollout_dir=None, video_basename=None):
     """Saves an MP4 replay of an episode. Same fps for raw and masked so they stay in sync.
-    If model_label is provided, it is used in the filename (e.g. openvla_7b, openvla_oft_goal)."""
-    rollout_dir = f"./rollouts/{DATE}"
+    If model_label is provided, it is used in the filename (e.g. openvla_7b, openvla_oft_goal).
+    If video_basename is set, saves as {rollout_dir}/{video_basename}.mp4 (suffix ignored)."""
+    rollout_dir = rollout_dir or f"./rollouts/{DATE}"
     os.makedirs(rollout_dir, exist_ok=True)
     processed_task_description = task_description.lower().replace(" ", "_").replace("\n", "_").replace(".", "_")[:50]
     extra = f"--{suffix}" if suffix else ""
     model_tag = (model_label if model_label else "openvla_oft")
-    mp4_path = f"{rollout_dir}/{DATE_TIME}--{model_tag}--episode={idx}--success={success}--task={processed_task_description}{extra}.mp4"
+    if video_basename:
+        mp4_path = os.path.join(rollout_dir, f"{video_basename}.mp4")
+    else:
+        mp4_path = f"{rollout_dir}/{DATE_TIME}--{model_tag}--episode={idx}--success={success}--task={processed_task_description}{extra}.mp4"
     # Normalize every frame to uint8 HWC so all frames are written (avoid "only first frame" bug)
     frames = []
     for img in rollout_images:

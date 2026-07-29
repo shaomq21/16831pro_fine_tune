@@ -1,0 +1,4 @@
+raw: push the plate to the front of the stove
+to_model: push the red masked flat-shaped object to the green masked place
+image_key: steps/observation/image
+note: training uses num_images_in_input=1 (main/agentview), not wrist

@@ -71,11 +71,10 @@ gpu_csv=$(IFS=,; echo "${selected[*]}")
 echo "Idle GPUs: [${idle_gpus[*]}]"
 echo "Using ${num_workers} workers on GPUs: [${gpu_csv}]"
 
-# Stop stale workers (if any)
 if pgrep -f "tools/rlds_mask.py.*${DATA_MIX}" >/dev/null 2>&1; then
-  echo "Stopping existing rlds_mask workers..."
-  pkill -f "tools/rlds_mask.py.*${DATA_MIX}" || true
-  sleep 3
+  echo "Workers already running for ${DATA_MIX}; not starting another fleet."
+  pgrep -af "tools/rlds_mask.py.*${DATA_MIX}" || true
+  exit 0
 fi
 
 RESUME=1 BACKGROUND="${BACKGROUND:-1}" bash "$REPO_ROOT/tools/rlds_mask_multi_gpu.sh" \

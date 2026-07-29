@@ -45,7 +45,8 @@ DEFAULT_DATA_ROOT = os.environ.get("RLDS_DATA_ROOT", str(_REPO_ROOT / "openvla-o
 DEFAULT_OUT_ROOT = os.environ.get("RLDS_OUT_ROOT", str(_REPO_ROOT / "openvla-oft/datasets/masked_libero_rlds"))
 RESUME_FILE = ".rlds_resume.json"
 PROGRESS_FILE = ".rlds_mask_progress.json"
-SAVE_PROGRESS_EVERY = 10  # episodes
+SAVE_PROGRESS_EVERY = 1  # flush resume after every episode (was 10; stale done=108 for hours)
+PROGRESS_WRITE_EVERY_STEPS = 1  # watchdog/monitor need fresh timestamps during long episodes
 NUM_SHARDS = 16
 # Map data_mix name to tfrecord filename prefix (from dataset_info.json "name")
 TFRECORD_PREFIX = {
@@ -69,18 +70,24 @@ def _to_numpy(x):
 
 
 def _append_tfrecord(path: Path, serialized: bytes):
-    """Append one TFRecord example to an existing shard file."""
-    import struct
-    import zlib
+    """Append one TFRecord example using TensorFlow's writer (correct CRC32C framing)."""
+    import os
+    import tempfile
 
-    def _masked_crc(data: bytes) -> int:
-        return zlib.crc32(data) & 0xFFFFFFFF
+    import tensorflow as tf
 
-    with open(path, "ab") as f:
-        f.write(struct.pack("<Q", len(serialized)))
-        f.write(struct.pack("<I", _masked_crc(serialized)))
-        f.write(serialized)
-        f.write(struct.pack("<I", _masked_crc(serialized)))
+    fd, tmp_name = tempfile.mkstemp(suffix=".tfrecord", dir=path.parent)
+    os.close(fd)
+    tmp_path = Path(tmp_name)
+    try:
+        with tf.io.TFRecordWriter(str(tmp_path)) as w:
+            w.write(serialized)
+        with open(path, "ab") as out, open(tmp_path, "rb") as inp:
+            out.write(inp.read())
+            out.flush()
+            os.fsync(out.fileno())
+    finally:
+        tmp_path.unlink(missing_ok=True)
 
 
 def _decode_str(s):
@@ -218,18 +225,19 @@ def _worker_owned_shards(worker_id: int, num_workers: int, n_shards: int):
 
 
 def _finalize_multi_worker(out_root: Path, data_mix: str, num_workers: int, n_shards: int, src_dir: Path):
-    """Merge per-worker shard counts into dataset_info.json after all workers finish."""
+    """Write dataset_info.json shardLengths from readable TFRecord records on disk."""
+    from rlds_mask_state import integrity_summary, shard_record_counts
+
     out_dir = out_root / data_mix / "1.0.0"
-    tfrecord_prefix = TFRECORD_PREFIX.get(data_mix, data_mix.replace("_no_noops", ""))
-    shard_counts = [0] * n_shards
-    for w in range(num_workers):
-        counts_path = out_root / f".rlds_shard_counts_{data_mix}_w{w}.json"
-        if not counts_path.exists():
-            raise FileNotFoundError(f"Missing worker shard counts: {counts_path} (worker {w} not done?)")
-        with open(counts_path) as f:
-            partial = json.load(f)
-        for sid, cnt in partial.items():
-            shard_counts[int(sid)] += int(cnt)
+    shard_counts = shard_record_counts(out_root, data_mix, n_shards)
+    summary = integrity_summary(out_root, data_mix, num_workers)
+    tf_total = summary["tfrecord_done"]
+    resume_total = summary["resume_done"]
+    if resume_total > tf_total:
+        print(
+            f"WARNING: resume claims {resume_total} done but only {tf_total} "
+            f"readable TFRecord episodes — do not train until repaired"
+        )
 
     for name in ["dataset_info.json", "features.json"]:
         src = src_dir / name
@@ -248,7 +256,7 @@ def _finalize_multi_worker(out_root: Path, data_mix: str, num_workers: int, n_sh
         with open(info_path, "w") as f:
             json.dump(info, f, indent=1)
     print(f"Finalized {data_mix}: shardLengths={shard_counts}")
-    print(f"Total episodes: {sum(shard_counts)}")
+    print(f"Total episodes (TFRecord scan): {sum(shard_counts)}")
 
 
 def _main():
@@ -408,9 +416,17 @@ def _main():
     ]
     writers = {}
     writer_modes = {}
+    from rlds_mask_state import truncate_shard_to_valid_prefix
+
     for sid in owned_shards:
         shard_path = shard_files[sid]
         if args.resume and shard_path.exists() and shard_path.stat().st_size > 0:
+            kept, removed = truncate_shard_to_valid_prefix(shard_path)
+            if removed > 0:
+                print(
+                    f"Worker {worker_id}: truncated shard {sid} "
+                    f"({removed / 1024 / 1024:.1f} MB garbage after {kept} valid records)"
+                )
             writers[sid] = None
             writer_modes[sid] = "append"
         else:
@@ -462,7 +478,12 @@ def _main():
             def on_step(step_idx, step_total):
                 ep_state["step"] = step_idx
                 ep_state["total"] = step_total
-                _emit_progress(step_idx, phase="masking")
+                if (
+                    step_idx == 0
+                    or step_idx == step_total
+                    or step_idx % PROGRESS_WRITE_EVERY_STEPS == 0
+                ):
+                    _emit_progress(step_idx, phase="masking")
 
             def _emit_progress(episode_step: int, phase: str = "masking"):
                 ep_total = ep_state["total"] or 1
@@ -525,7 +546,11 @@ def _main():
             lane_done.add(global_ep)
             _emit_progress(ep_state["total"], phase="writing")
 
-            if debug_dir and (worker_completed == 1 or worker_completed % debug_every_episodes == 0):
+            if (
+                debug_dir
+                and debug_every_episodes > 0
+                and (worker_completed == 1 or worker_completed % debug_every_episodes == 0)
+            ):
                 lang_dbg = ep_state["lang"] or _decode_str(
                     orig_steps[0].get("language_instruction", b"")
                 ).lower()

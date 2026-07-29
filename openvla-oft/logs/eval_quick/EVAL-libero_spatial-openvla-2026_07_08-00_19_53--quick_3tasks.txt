@@ -1,0 +1,39 @@
+Task suite: libero_spatial
+Evaluating tasks 0..2 of 10
+Using default initial states
+
+Task: pick up the black bowl between the plate and the ramekin and place it on the plate
+Starting episode 1...
+Saved rollout MP4 at path ./rollouts/2026_07_08/2026_07_08-00_19_53--openvla_oft--episode=1--success=False--task=pick_up_the_black_bowl_between_the_plate_and_the_r.mp4
+Saved rollout MP4 at path ./rollouts/2026_07_08/2026_07_08-00_19_53--openvla_oft--episode=1--success=False--task=pick_up_the_black_bowl_between_the_plate_and_the_r--masked.mp4
+Success: False
+# episodes completed so far: 1
+# successes: 0 (0.0%)
+Current task success rate: 0.0
+Current total success rate: 0.0
+Using default initial states
+
+Task: pick up the black bowl next to the ramekin and place it on the plate
+Starting episode 1...
+Saved rollout MP4 at path ./rollouts/2026_07_08/2026_07_08-00_19_53--openvla_oft--episode=2--success=False--task=pick_up_the_black_bowl_next_to_the_ramekin_and_pla.mp4
+Saved rollout MP4 at path ./rollouts/2026_07_08/2026_07_08-00_19_53--openvla_oft--episode=2--success=False--task=pick_up_the_black_bowl_next_to_the_ramekin_and_pla--masked.mp4
+Success: False
+# episodes completed so far: 2
+# successes: 0 (0.0%)
+Current task success rate: 0.0
+Current total success rate: 0.0
+Using default initial states
+
+Task: pick up the black bowl from table center and place it on the plate
+Starting episode 1...
+Saved rollout MP4 at path ./rollouts/2026_07_08/2026_07_08-00_19_53--openvla_oft--episode=3--success=False--task=pick_up_the_black_bowl_from_table_center_and_place.mp4
+Saved rollout MP4 at path ./rollouts/2026_07_08/2026_07_08-00_19_53--openvla_oft--episode=3--success=False--task=pick_up_the_black_bowl_from_table_center_and_place--masked.mp4
+Success: False
+# episodes completed so far: 3
+# successes: 0 (0.0%)
+Current task success rate: 0.0
+Current total success rate: 0.0
+Final results:
+Total episodes: 3
+Total successes: 0
+Overall success rate: 0.0000 (0.0%)

@@ -213,6 +213,32 @@ OXE_NAMED_MIXTURES: Dict[str, List[Tuple[str, float]]] = {
         ("libero_10_no_noops", 1.0),
     ],
 
+    # Sim + SAM masked LIBERO (spatial/goal/object only; no libero_10)
+    "dual_masked_all_suites": [
+        ("simu_libero_spatial_no_noops", 1.0),
+        ("sam_libero_spatial_no_noops", 1.0),
+        ("simu_libero_goal_no_noops", 1.0),
+        ("sam_libero_goal_no_noops", 1.0),
+        ("simu_libero_object_no_noops", 1.0),
+        ("simu_libero_90_study_scene4_no_noops", 1.0),
+    ],
+
+    # === Per-suite masked mixtures (for training each suite as an independent run) ===
+    "dual_masked_spatial": [
+        ("simu_libero_spatial_no_noops", 1.0),
+        ("sam_libero_spatial_no_noops", 1.0),
+    ],
+    "dual_masked_object": [
+        ("simu_libero_object_no_noops", 1.0),
+    ],
+    "dual_masked_goal": [
+        ("simu_libero_goal_no_noops", 1.0),
+        ("sam_libero_goal_no_noops", 1.0),
+    ],
+    "dual_masked_study_scene4": [
+        ("simu_libero_90_study_scene4_no_noops", 1.0),
+    ],
+
     # === ALOHA Fine-Tuning Datasets ===
     "aloha1_fold_shorts_20_demos": [
         ("aloha1_fold_shorts_20_demos", 1.0),

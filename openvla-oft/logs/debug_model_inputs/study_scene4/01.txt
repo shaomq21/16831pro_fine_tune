@@ -1,0 +1,4 @@
+raw: pick up the book in the middle and place it on the cabinet shelf
+to_model: pick up the red masked book and place it on the green masked object
+image_key: steps/observation/image
+note: training uses num_images_in_input=1 (main/agentview), not wrist

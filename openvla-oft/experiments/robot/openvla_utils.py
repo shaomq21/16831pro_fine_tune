@@ -74,20 +74,24 @@ def update_auto_map(pretrained_checkpoint: str) -> None:
         print(f"Warning: No config.json found at {config_path}")
         return
 
-    # Create timestamped backup
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    backup_path = os.path.join(pretrained_checkpoint, f"config.json.back.{timestamp}")
-    shutil.copy2(config_path, backup_path)
-    print(f"Created backup of original config at: {os.path.abspath(backup_path)}")
-
     # Read and update the config
     with open(config_path, "r") as f:
         config = json.load(f)
 
-    config["auto_map"] = {
+    desired_auto_map = {
         "AutoConfig": "configuration_prismatic.OpenVLAConfig",
         "AutoModelForVision2Seq": "modeling_prismatic.OpenVLAForActionPrediction",
     }
+    if config.get("auto_map") == desired_auto_map:
+        return
+
+    # Single reusable backup (avoid filling the disk with per-launch timestamped copies)
+    backup_path = os.path.join(pretrained_checkpoint, "config.json.back")
+    if not os.path.exists(backup_path):
+        shutil.copy2(config_path, backup_path)
+        print(f"Created backup of original config at: {os.path.abspath(backup_path)}")
+
+    config["auto_map"] = desired_auto_map
 
     # Write back the updated config
     with open(config_path, "w") as f:
@@ -367,6 +371,16 @@ def get_vla(cfg: Any) -> torch.nn.Module:
         vla = AutoModelForVision2Seq.from_pretrained(ckpt_path, **load_kwargs)
         if _dispatch_restore is not None:
             _dispatch_restore()
+
+        # Phase-3+ runs keep a full merged backbone on disk but continue writing LoRA into
+        # lora_adapter/. If that adapter exists, merge it so eval/inference uses the latest
+        # rescue / continued-finetune vision weights (not the stale pre-LoRA safetensors).
+        if os.path.isdir(adapter_dir) and os.path.isfile(os.path.join(adapter_dir, "adapter_config.json")):
+            from peft import PeftModel
+
+            print("Merging on-disk LoRA adapter into loaded checkpoint: %s" % adapter_dir)
+            vla.vision_backbone = PeftModel.from_pretrained(vla.vision_backbone, adapter_dir)
+            vla.vision_backbone = vla.vision_backbone.merge_and_unload()
 
     # If using FiLM, wrap the vision backbone to allow for infusion of language inputs
     if cfg.use_film:

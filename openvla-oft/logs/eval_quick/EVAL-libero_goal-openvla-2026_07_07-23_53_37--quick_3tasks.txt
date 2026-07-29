@@ -1,0 +1,3 @@
+Task suite: libero_goal
+Evaluating tasks 0..2 of 10
+Using default initial states

@@ -1,0 +1,7 @@
+Task suite: libero_spatial
+Evaluating tasks 0..2 of 10
+Using default initial states
+
+Task: pick up the black bowl between the plate and the ramekin and place it on the plate
+Starting episode 1...
+Episode error: [Errno 13] Permission denied: '/home/ubuntu'

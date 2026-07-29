@@ -60,7 +60,9 @@ def instance_masks_from_seg(env, seg: np.ndarray) -> Dict[str, np.ndarray]:
     out: Dict[str, np.ndarray] = {}
     mapping = getattr(env, "segmentation_id_mapping", {}) or {}
     for seg_id, name in mapping.items():
-        out[name] = np.squeeze(seg == (seg_id + 1))
+        if seg_id is None:
+            continue
+        out[name] = np.squeeze(seg == (int(seg_id) + 1))
     return out
 
 
@@ -271,6 +273,34 @@ def _interest_pair(env) -> Tuple[Optional[str], Optional[str]]:
     return None, None
 
 
+def perturb_mask_bool(
+    mask: np.ndarray,
+    rng: np.random.Generator,
+    *,
+    strength: int = 2,
+) -> np.ndarray:
+    """Slightly erode/dilate mask edges so boundaries look less perfectly regular."""
+    from scipy import ndimage
+
+    mask = np.asarray(mask, dtype=bool)
+    if not mask.any():
+        return mask
+    k = int(rng.integers(1, max(2, strength + 1)))
+    if rng.random() < 0.5:
+        mask = ndimage.binary_erosion(mask, iterations=k)
+    else:
+        mask = ndimage.binary_dilation(mask, iterations=k)
+    edge = mask ^ ndimage.binary_erosion(mask, iterations=1)
+    if edge.any() and rng.random() < 0.55:
+        noise_rate = 0.015 * k
+        jitter = (rng.random(mask.shape) < noise_rate) & ndimage.binary_dilation(edge, iterations=2)
+        if rng.random() < 0.5:
+            mask = mask | jitter
+        else:
+            mask = mask & ~jitter
+    return mask
+
+
 def compose_black_bg_mask(
     rgb: np.ndarray,
     red_mask: np.ndarray,
@@ -302,6 +332,9 @@ def mask_rgb_from_obs(
     draw_green: bool = True,
     draw_gripper: bool = True,
     sim=None,
+    perturb: bool = False,
+    rng: Optional[np.random.Generator] = None,
+    perturb_strength: int = 2,
 ) -> Tuple[np.ndarray, Optional[str], Optional[str]]:
     """
     Build masked RGB (flipped, RLDS orientation) from sim obs.
@@ -319,6 +352,13 @@ def mask_rgb_from_obs(
         red_m = _instance_mask(red_name, masks)
     if green_name:
         green_m = _instance_mask(green_name, masks)
+
+    if perturb:
+        gen = rng if rng is not None else np.random.default_rng()
+        if red_m.any():
+            red_m = perturb_mask_bool(red_m, gen, strength=perturb_strength)
+        if green_m.any():
+            green_m = perturb_mask_bool(green_m, gen, strength=perturb_strength)
 
     masked = compose_black_bg_mask(rgb, red_m, green_m, alpha=alpha, draw_green=draw_green)
     if draw_gripper:
@@ -480,8 +520,64 @@ class LiberoSimMasker:
         actions = np.asarray(actions, dtype=np.float64)
         for t in range(max(0, step_idx)):
             act = dummy if t < num_steps_wait else actions[t - num_steps_wait]
-            obs, _, _, _ = env.step(act)
+            try:
+                obs, _, done, _ = env.step(act)
+                if done:
+                    break
+            except ValueError:
+                break
         return obs, env
+
+    def iter_masked_rlds_steps(
+        self,
+        lang: str,
+        actions: np.ndarray,
+        *,
+        init_idx: int = 0,
+        num_steps_wait: int = 10,
+        alpha: float = 0.35,
+        perturb_prob: float = 0.0,
+        perturb_strength: int = 2,
+        rng: Optional[np.random.Generator] = None,
+    ):
+        """
+        Incrementally replay one RLDS episode and yield masked RGB per step.
+
+        Much faster than calling ``obs_at_rlds_step`` per frame (O(n) vs O(n^2)).
+        """
+        self._ensure_libero()
+        task_id = self.task_id_from_lang(lang)
+        env = self._get_env(task_id)
+        init_states = self._load_init_states(task_id)
+        obs = env.set_init_state(init_states[init_idx % len(init_states)])
+        dummy = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -1.0], dtype=np.float64)
+        actions = np.asarray(actions, dtype=np.float64)
+        gen = rng if rng is not None else np.random.default_rng()
+        terminated = False
+
+        for step_idx in range(len(actions)):
+            do_perturb = perturb_prob > 0 and gen.random() < perturb_prob
+            masked, _, _ = mask_rgb_from_obs(
+                obs["agentview_image"],
+                obs["agentview_segmentation_instance"],
+                env,
+                alpha=alpha,
+                sim=env.sim,
+                draw_gripper=True,
+                perturb=do_perturb,
+                rng=gen if do_perturb else None,
+                perturb_strength=perturb_strength,
+            )
+            yield masked
+
+            if terminated:
+                continue
+            act = dummy if step_idx < num_steps_wait else actions[step_idx - num_steps_wait]
+            try:
+                obs, _, done, _ = env.step(act)
+                terminated = bool(done)
+            except ValueError:
+                terminated = True
 
     def mask_at_rlds_step(
         self,

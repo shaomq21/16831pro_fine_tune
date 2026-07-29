@@ -1,0 +1,4 @@
+raw: pick up the black bowl next to the cookie box and place it on the plate
+to_model: pick up the red masked bowl and place it on the green masked flat-shaped object
+image_key: steps/observation/image
+note: training uses num_images_in_input=1 (main/agentview), not wrist

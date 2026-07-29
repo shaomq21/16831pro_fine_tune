@@ -18,6 +18,18 @@ from prismatic.vla.datasets.rlds.oxe.transforms import OXE_STANDARDIZATION_TRANS
 overwatch = initialize_overwatch(__name__)
 
 
+def resolve_oxe_dataset_name(dataset_name: str) -> str:
+    """Map symlinked dataset dirs (e.g. simu_/sam_ prefixes) to base OXE config names."""
+    if dataset_name in OXE_DATASET_CONFIGS:
+        return dataset_name
+    for prefix in ("simu_", "sam_"):
+        if dataset_name.startswith(prefix):
+            base = dataset_name[len(prefix) :]
+            if base in OXE_DATASET_CONFIGS:
+                return base
+    raise KeyError(f"Unknown OXE dataset `{dataset_name}` (no config and no simu_/sam_ alias)")
+
+
 def make_oxe_dataset_kwargs(
     dataset_name: str,
     data_root_dir: Path,
@@ -28,7 +40,8 @@ def make_oxe_dataset_kwargs(
     action_proprio_normalization_type = ACTION_PROPRIO_NORMALIZATION_TYPE,
 ) -> Dict[str, Any]:
     """Generates config (kwargs) for given dataset from Open-X Embodiment."""
-    dataset_kwargs = deepcopy(OXE_DATASET_CONFIGS[dataset_name])
+    config_name = resolve_oxe_dataset_name(dataset_name)
+    dataset_kwargs = deepcopy(OXE_DATASET_CONFIGS[config_name])
     if dataset_kwargs["action_encoding"] not in [ActionEncoding.EEF_POS, ActionEncoding.EEF_R6, ActionEncoding.JOINT_POS_BIMANUAL]:
         raise ValueError(f"Cannot load `{dataset_name}`; only EEF_POS & EEF_R6 & JOINT_POS_BIMANUAL actions supported!")
 
@@ -70,7 +83,7 @@ def make_oxe_dataset_kwargs(
         dataset_kwargs["language_key"] = "language_instruction"
 
     # Specify Standardization Transform
-    dataset_kwargs["standardize_fn"] = OXE_STANDARDIZATION_TRANSFORMS[dataset_name]
+    dataset_kwargs["standardize_fn"] = OXE_STANDARDIZATION_TRANSFORMS[config_name]
 
     # Add any aux arguments
     if "aux_kwargs" in dataset_kwargs:

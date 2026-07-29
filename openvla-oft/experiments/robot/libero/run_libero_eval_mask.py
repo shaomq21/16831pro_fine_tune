@@ -46,7 +46,6 @@ from experiments.robot.libero.libero_utils import (
     get_libero_env,
     get_libero_image,
     get_libero_wrist_image,
-    mask_image_from_libero_seg,
     quat2axisangle,
     save_rollout_video,
 )
@@ -58,6 +57,7 @@ from experiments.robot.openvla_utils import (
     resize_image_for_policy,
 )
 from experiments.robot.robot_utils import (
+    DATE,
     DATE_TIME,
     get_action,
     get_image_resize_size,
@@ -178,6 +178,11 @@ class GenerateConfig:
     task_suite_name: str = TaskSuite.LIBERO_GOAL  # Task suite
     num_steps_wait: int = 10                         # Number of steps to wait for objects to stabilize in sim
     num_trials_per_task: int = 1                    # Number of rollouts per task
+    max_tasks: Optional[int] = None                 # If set, only evaluate task_id in [0, max_tasks)
+    task_ids: Optional[str] = None                  # Comma-separated task ids, e.g. "0,1,2" or "5"
+    skip_filtered_tasks: bool = True                # If False, evaluate tasks even if in SKIP_TASK_DESCRIPTIONS
+    rollout_video_dir: Optional[str] = None         # Directory for rollout MP4s (default: ./rollouts/DATE)
+    save_video_mode: str = "both"                   # masked | raw | both — one video per task when num_trials_per_task=1
     initial_states_path: str = "DEFAULT"             # "DEFAULT", or path to initial states JSON file
     env_img_res: int = 256                           # Resolution for environment images (not policy input resolution)
 
@@ -190,7 +195,8 @@ class GenerateConfig:
     loadinfo: bool = False                           # If True: save mask images per step, action chunk and proprio to Excel
     perturb_colors: bool = False                    # If True: white→yellow, red→blue (plate/stove yellow, plate rim blue)
     perturb_bowl: bool = False                      # If True: 图里定位深灰色→亮红
-    use_mask_from_env: bool = True                  # If True: get mask from LIBERO SegmentationRenderEnv (same red/green style, no Grounded-SAM)
+    use_mask_from_env: bool = True                  # If True: sim seg mask via mask_rgb_from_obs (same as simu RLDS)
+    mask_alpha: float = 0.35                        # Match libero_sim_mask / simu RLDS default
 
     use_wandb: bool = False                          # Whether to also log results in Weights & Biases
     wandb_entity: str = "maggiesh-carnegie-mellon-university"          # Name of WandB entity
@@ -270,13 +276,25 @@ def initialize_model(cfg: GenerateConfig):
 
 def check_unnorm_key(cfg: GenerateConfig, model) -> None:
     """Check that the model contains the action un-normalization key."""
-    # Initialize unnorm_key
+    preset = str(cfg.unnorm_key or "").strip()
+    if preset and preset in model.norm_stats:
+        cfg.unnorm_key = preset
+        return
+
     unnorm_key = cfg.task_suite_name
 
     # In some cases, the key must be manually modified (e.g. after training on a modified version of the dataset
     # with the suffix "_no_noops" in the dataset name)
     if unnorm_key not in model.norm_stats and f"{unnorm_key}_no_noops" in model.norm_stats:
         unnorm_key = f"{unnorm_key}_no_noops"
+    for candidate in (
+        f"simu_{unnorm_key}",
+        f"simu_{cfg.task_suite_name}_no_noops",
+        "simu_libero_90_study_scene4_no_noops",
+    ):
+        if candidate in model.norm_stats:
+            unnorm_key = candidate
+            break
 
     assert unnorm_key in model.norm_stats, f"Action un-norm key {unnorm_key} not found in VLA `norm_stats`!"
 
@@ -530,20 +548,29 @@ def run_episode(
                 ts(f"t={t} before get_action | model_device={dev} | cuda_avail={torch.cuda.is_available()}")
 
                 safe_name = task_object.replace(" ", "_").replace("/", "_")
-                out_dir = "/home/ubuntu/16831pro_fine_tune/debug_masked_validation"
+                out_dir = os.path.join(cfg.local_log_dir, "debug_masked_validation")
                 os.makedirs(out_dir, exist_ok=True)
                 out_path = os.path.join(out_dir, f"{safe_name}.png")
 
                 if getattr(cfg, "use_mask_from_env", False):
-                    img_np = np.asarray(img) if not isinstance(img, np.ndarray) else img
-                    if img_np.ndim == 2:
-                        img_np = np.stack([img_np] * 3, axis=-1)
+                    from libero_sim_mask import mask_rgb_from_obs
+
                     seg_key = "agentview_segmentation_instance"
-                    if seg_key in obs:
-                        masked = mask_image_from_libero_seg(img_np, obs[seg_key], env, alpha=0.5)
+                    if seg_key in obs and "agentview_image" in obs:
+                        masked, red_name, green_name = mask_rgb_from_obs(
+                            obs["agentview_image"],
+                            obs[seg_key],
+                            env,
+                            alpha=getattr(cfg, "mask_alpha", 0.35),
+                            sim=getattr(env, "sim", None),
+                        )
+                        last_masked = np.asarray(masked)
                     else:
-                        masked = img_np
-                    last_masked = np.asarray(masked)
+                        log_message(
+                            f"WARNING: missing seg/image in obs; using unmasked frame at t={t}",
+                            log_file,
+                        )
+                        last_masked = np.asarray(img)
                     replay_masked_images.append(last_masked.copy())
                 else:
                     if isinstance(img, np.ndarray):
@@ -609,7 +636,9 @@ def run_episode(
             t += 1
 
     except Exception as e:
+        import traceback
         log_message(f"Episode error: {e}", log_file)
+        log_message(traceback.format_exc(), log_file)
 
     # loadinfo: save Excel with action chunk and proprio
     if cfg.loadinfo and loadinfo_ep_dir is not None and loadinfo_rows:
@@ -651,7 +680,9 @@ def run_task(
     def _should_skip(desc: str) -> bool:
         return (desc or "").strip().lower() in SKIP_TASK_DESCRIPTIONS
 
-    if _should_skip(task_description) or _should_skip(processed_description):
+    if getattr(cfg, "skip_filtered_tasks", True) and (
+        _should_skip(task_description) or _should_skip(processed_description)
+    ):
         log_message(
             f"Skipping task_id={task_id} (in skip list): raw={task_description!r} processed={processed_description!r}",
             log_file,
@@ -713,25 +744,35 @@ def run_task(
             task_successes += 1
             total_successes += 1
 
-        # Save rollout videos (raw and masked, same fps and frame count)
+        # Save rollout videos (policy-view masked by default for debugging)
+        video_dir = getattr(cfg, "rollout_video_dir", None) or f"./rollouts/{DATE}"
+        os.makedirs(video_dir, exist_ok=True)
+        video_base = f"{cfg.task_suite_name}_task{task_id:02d}_success={success}"
+        save_mode = getattr(cfg, "save_video_mode", "both")
         raw_suffix = "perturbed" if (getattr(cfg, "perturb_colors", False) or getattr(cfg, "perturb_bowl", False)) else None
-        save_rollout_video(
-            replay_images,
-            total_episodes,
-            success=success,
-            task_description=task_description,
-            log_file=log_file,
-            suffix=raw_suffix,
-        )
-        masked_suffix = "masked_perturbed" if (getattr(cfg, "perturb_colors", False) or getattr(cfg, "perturb_bowl", False)) else "masked"
-        save_rollout_video(
-            replay_masked_images,
-            total_episodes,
-            success=success,
-            task_description=task_description,
-            log_file=log_file,
-            suffix=masked_suffix,
-        )
+        if save_mode in ("raw", "both"):
+            save_rollout_video(
+                replay_images,
+                total_episodes,
+                success=success,
+                task_description=task_description,
+                log_file=log_file,
+                suffix=raw_suffix,
+                rollout_dir=video_dir,
+                video_basename=f"{video_base}_raw",
+            )
+        if save_mode in ("masked", "both"):
+            masked_suffix = "masked_perturbed" if (getattr(cfg, "perturb_colors", False) or getattr(cfg, "perturb_bowl", False)) else "masked"
+            save_rollout_video(
+                replay_masked_images,
+                total_episodes,
+                success=success,
+                task_description=task_description,
+                log_file=log_file,
+                suffix=masked_suffix,
+                rollout_dir=video_dir,
+                video_basename=f"{video_base}_masked",
+            )
 
         # Log results
         log_message(f"Success: {success}", log_file)
@@ -789,12 +830,19 @@ def eval_libero(cfg: GenerateConfig) -> float:
     benchmark_dict = benchmark.get_benchmark_dict()
     task_suite = benchmark_dict[cfg.task_suite_name]()
     num_tasks = task_suite.n_tasks
+    if cfg.task_ids:
+        task_id_list = [int(x.strip()) for x in cfg.task_ids.split(",") if x.strip()]
+    elif cfg.max_tasks is not None:
+        task_id_list = list(range(min(cfg.max_tasks, num_tasks)))
+    else:
+        task_id_list = list(range(num_tasks))
 
     log_message(f"Task suite: {cfg.task_suite_name}", log_file)
+    log_message(f"Evaluating task ids: {task_id_list}", log_file)
 
     # Start evaluation
     total_episodes, total_successes = 0, 0
-    for task_id in tqdm.tqdm(range(num_tasks)):
+    for task_id in tqdm.tqdm(task_id_list):
         total_episodes, total_successes = run_task(
             cfg,
             task_suite,

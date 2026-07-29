@@ -1,0 +1,4 @@
+raw: pick up the chocolate pudding and place it in the basket
+to_model: pick up the red masked object and place it in the basket
+image_key: steps/observation/image
+note: training uses num_images_in_input=1 (main/agentview), not wrist

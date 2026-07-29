@@ -97,27 +97,48 @@ class TaskSuite(str, Enum):
     LIBERO_90 = "libero_90"
 
 
-# Only put task for color perturb eval (set to both tasks to run push + put)
+# Legacy default when --tasks unset on libero_goal.
 COLOR_TASKS = [
     "put the bowl on the plate",
 ]
 
 
+def _parse_task_allowlist(tasks_cfg: str, task_suite_name: str):
+    raw = (tasks_cfg or "").strip()
+    if raw.lower() in ("all", "*"):
+        return None
+    if not raw:
+        if task_suite_name == "libero_goal":
+            return [t.strip().lower() for t in COLOR_TASKS]
+        return None
+    parts = [p.strip().lower() for p in raw.replace("|", ",").split(",") if p.strip()]
+    return parts or None
+
+
 def _task_short_name(task_description: str) -> str:
-    """Return short name for video: 'push' or 'put'."""
     d = (task_description or "").strip().lower()
-    if "push" in d:
+    if "push" in d and "plate" in d:
         return "push"
-    if "put" in d:
+    if "put" in d and "bowl" in d and "plate" in d:
         return "put"
-    return "task"
+    words = [w for w in d.replace(",", " ").split() if w not in {"the", "a", "an", "and", "on", "to", "of", "in"}]
+    return "_".join(words[:4]) if words else "task"
 
 
 def _task_description_for_policy(raw_description: str, cfg) -> str:
-    """For OFT/7B only: push plate->flat shaped object on the right; put bowl->gray bowl."""
+    """Rewrite raw task language for non-mask policies (see lang_mode)."""
     if getattr(cfg, "use_mask_for_policy", True):
         return raw_description  # current model: no modification
+    mode = getattr(cfg, "lang_mode", "l1") or "l1"
     d = (raw_description or "").strip().lower()
+    if mode == "origin":
+        return raw_description
+    if mode == "l2":
+        if "push" in d and "plate" in d:
+            return "push the right flat-shaped object to the front of the leftmost flat-shaped object"
+        if "put" in d and "bowl" in d:
+            return "put the bowl on the right flat-shaped object"
+        return raw_description
     out = raw_description
     if "push" in d and "plate" in d:
         out = out.replace("the plate", "the flat shaped object on the right").replace(
@@ -166,6 +187,7 @@ class GenerateConfig:
     load_in_4bit: bool = False
 
     task_suite_name: str = TaskSuite.LIBERO_GOAL
+    tasks: str = ""  # '' = suite default; 'all'|'*' = every task; else pipe/comma langs
     num_steps_wait: int = 10
     num_trials_per_task: int = 3
     initial_states_path: str = "DEFAULT"
@@ -179,7 +201,16 @@ class GenerateConfig:
     perturb_colors: bool = False
     perturb_bowl: bool = False
     use_mask_for_policy: bool = False   # True only for your trained model; openvla_oft_goal and 7b use raw image
-    use_mask_from_env: bool = True      # When use_mask_for_policy: get mask from LIBERO seg vs Grounded-SAM
+    use_mask_from_env: bool = True      # When use_mask_for_policy: get mask from LIBERO seg vs Grounded-SAM/SAM3
+    # Match dual-masked training non-simu half: goal→sam1, spatial→sam3
+    sam_backend: str = "sam1"  # sam1 | sam3
+    mask_alpha: float = 0.35
+    mask_device: str = "cuda"
+    dino_config_path: str = "GroundingDINO/groundingdino/config/GroundingDINO_SwinT_OGC.py"
+    dino_ckpt_path: str = "groundingdino_swint_ogc.pth"
+    sam_ckpt_path: str = "sam_vit_b_01ec64.pth"
+    sam_type: str = "vit_b"
+    lang_mode: str = "l1"               # origin | l1 | l2 for non-mask policies
 
     use_wandb: bool = False
     wandb_entity: str = "maggiesh-carnegie-mellon-university"
@@ -225,11 +256,25 @@ def initialize_model(cfg: GenerateConfig):
     processor = None
     if cfg.model_family == "openvla":
         processor = get_processor(cfg)
-        unnorm_key = cfg.task_suite_name
-        if unnorm_key not in model.norm_stats and f"{unnorm_key}_no_noops" in model.norm_stats:
-            unnorm_key = f"{unnorm_key}_no_noops"
-        assert unnorm_key in model.norm_stats, f"unnorm_key {unnorm_key} not found!"
-        cfg.unnorm_key = unnorm_key
+        preset = str(cfg.unnorm_key or "").strip()
+        if preset and preset in model.norm_stats:
+            cfg.unnorm_key = preset
+        else:
+            unnorm_key = cfg.task_suite_name
+            if unnorm_key not in model.norm_stats and f"{unnorm_key}_no_noops" in model.norm_stats:
+                unnorm_key = f"{unnorm_key}_no_noops"
+            for candidate in (
+                f"simu_{unnorm_key}",
+                f"simu_{cfg.task_suite_name}_no_noops",
+                "simu_libero_90_study_scene4_no_noops",
+                f"sam_{unnorm_key}",
+                f"sam_{cfg.task_suite_name}_no_noops",
+            ):
+                if candidate in model.norm_stats:
+                    unnorm_key = candidate
+                    break
+            assert unnorm_key in model.norm_stats, f"unnorm_key {unnorm_key} not found in {list(model.norm_stats)[:12]}!"
+            cfg.unnorm_key = unnorm_key
     return model, action_head, proprio_projector, noisy_action_projector, processor
 
 
@@ -411,6 +456,11 @@ def run_episode(
     else:
         obs = env.get_observation()
 
+    # Match training: SAM3 EpisodeMaskTracker is per-episode
+    if getattr(cfg, "use_mask_for_policy", False) and not getattr(cfg, "use_mask_from_env", False):
+        from experiments.robot.libero.run_libero_background_perturb_eval import reset_mask_episode
+        reset_mask_episode(cfg)
+
     action_queue = deque(maxlen=cfg.num_open_loop_steps)
     t = 0
     replay_images = []
@@ -474,21 +524,29 @@ def run_episode(
                             img_np = np.stack([img_np] * 3, axis=-1)
                         seg_key = "agentview_segmentation_instance"
                         if seg_key in obs:
-                            masked = mask_image_from_libero_seg(img_np, obs[seg_key], env, alpha=0.5)
+                            try:
+                                masked = mask_image_from_libero_seg(img_np, obs[seg_key], env, alpha=0.35)
+                            except Exception as e:
+                                logger.warning("mask_from_env failed (%s); black frame", e)
+                                masked = np.zeros_like(img_np)
                         else:
-                            masked = img_np
+                            logger.warning("no %s in obs; black frame", seg_key)
+                            masked = np.zeros_like(img_np)
                         last_masked = np.asarray(masked)
                         replay_masked_images.append(last_masked.copy())
                     else:
+                        from experiments.robot.libero.run_libero_background_perturb_eval import (
+                            _apply_generated_mask,
+                        )
                         if isinstance(img_perturbed, np.ndarray):
                             img_pil = Image.fromarray(img_perturbed)
                         else:
                             img_pil = img_perturbed
-                        out_dir = "/home/ubuntu/16831pro_fine_tune/debug_masked_validation"
-                        os.makedirs(out_dir, exist_ok=True)
-                        out_path = os.path.join(out_dir, f"{raw_task_description.replace(' ', '_')}.png")
-                        masked = mask_image_via_other_env(img_pil.convert("RGB"), raw_task_description, out_path)
-                        last_masked = np.asarray(masked)
+                        alpha = float(getattr(cfg, "mask_alpha", 0.35))
+                        masked_pil = _apply_generated_mask(
+                            img_pil.convert("RGB"), raw_task_description, cfg, alpha=alpha
+                        )
+                        last_masked = np.asarray(masked_pil)
                         replay_masked_images.append(last_masked.copy())
                     observation["full_image"] = resize_image_for_policy(last_masked, resize_size)
                     observation["wrist_image"] = resize_image_for_policy(wrist_img_perturbed, resize_size)
@@ -659,14 +717,15 @@ def eval_libero(cfg: GenerateConfig) -> float:
     num_tasks = task_suite.n_tasks
 
     task_ids_to_run = []
+    allow = _parse_task_allowlist(getattr(cfg, "tasks", ""), cfg.task_suite_name)
     for task_id in range(num_tasks):
         task = task_suite.get_task(task_id)
         desc = (task.language or "").strip().lower()
-        if desc in [t.strip().lower() for t in COLOR_TASKS]:
+        if allow is None or desc in allow:
             task_ids_to_run.append((task_id, task.language))
 
     if not task_ids_to_run:
-        log_message("No matching tasks for COLOR_TASKS.", log_file)
+        log_message(f"No matching tasks. tasks={getattr(cfg, 'tasks', '')!r} allow={allow}", log_file)
         log_file.close()
         return 0.0
 

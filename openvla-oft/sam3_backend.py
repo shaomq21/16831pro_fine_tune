@@ -50,9 +50,19 @@ class SAM3Segmenter:
         )
         self.predictor = SAM3SemanticPredictor(overrides=overrides)
         self._current_path: Optional[str] = None
+        self._image_cache_key: Optional[tuple] = None
 
     def set_image(self, image_rgb: np.ndarray) -> None:
         """Cache image features for repeated queries on the same frame."""
+        # Red/green/point paths each call set_image on the same frame; skip re-encode.
+        cache_key = (
+            int(image_rgb.__array_interface__["data"][0]),
+            image_rgb.shape,
+            image_rgb.strides,
+        )
+        if cache_key == self._image_cache_key:
+            return
+        self._image_cache_key = cache_key
         tmp = os.path.join("/tmp", f"sam3_frame_{id(self)}.png")
         Image.fromarray(image_rgb).save(tmp)
         self.predictor.set_image(tmp)

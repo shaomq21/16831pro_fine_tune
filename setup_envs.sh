@@ -13,10 +13,15 @@ echo "[INFO] openvla-oft 路径: $OPENVLA_ROOT (pip -e 仅链接，不覆盖源�
 echo "[INFO] 大文件存储路径: $STORAGE_ROOT (ckpt/data/cache)"
 
 # pip / HF / conda 包缓存指向大盘，避免根分区爆满
-mkdir -p "${STORAGE_ROOT}/"{pip_cache,hf_cache,conda_pkgs,ckpts,datasets,runs}
+mkdir -p "${STORAGE_ROOT}/"{pip_cache,hf_cache,conda_pkgs,ckpts,datasets,runs,lerobot_datasets,torch_cache}
+mkdir -p "${STORAGE_ROOT}/ckpts/pi05"
 export PIP_CACHE_DIR="${STORAGE_ROOT}/pip_cache"
 export HF_HOME="${STORAGE_ROOT}/hf_cache"
+export HF_HUB_CACHE="${STORAGE_ROOT}/hf_cache/hub"
 export TRANSFORMERS_CACHE="${STORAGE_ROOT}/hf_cache"
+export HF_DATASETS_CACHE="${STORAGE_ROOT}/hf_cache/datasets"
+export HF_LEROBOT_HOME="${STORAGE_ROOT}/lerobot_datasets"
+export TORCH_HOME="${STORAGE_ROOT}/torch_cache"
 export CONDA_PKGS_DIRS="${STORAGE_ROOT}/conda_pkgs"
 
 # 确保 openvla-oft 下 checkpoints/datasets/runs 链接到大盘

@@ -1,0 +1,171 @@
+[
+  {
+    "suite": "spatial",
+    "idx": 1,
+    "raw_lang": "pick up the black bowl next to the cookie box and place it on the plate",
+    "masked_lang_to_model": "pick up the red masked bowl and place it on the green masked flat-shaped object",
+    "main_image": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/logs/debug_model_inputs/spatial/01_main.png",
+    "main_key": "steps/observation/image",
+    "main_size": [
+      256,
+      256
+    ],
+    "wrist_image": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/logs/debug_model_inputs/spatial/01_wrist.png"
+  },
+  {
+    "suite": "spatial",
+    "idx": 2,
+    "raw_lang": "pick up the black bowl next to the plate and place it on the plate",
+    "masked_lang_to_model": "pick up the red masked bowl and place it on the green masked flat-shaped object",
+    "main_image": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/logs/debug_model_inputs/spatial/02_main.png",
+    "main_key": "steps/observation/image",
+    "main_size": [
+      256,
+      256
+    ],
+    "wrist_image": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/logs/debug_model_inputs/spatial/02_wrist.png"
+  },
+  {
+    "suite": "spatial",
+    "idx": 3,
+    "raw_lang": "pick up the black bowl on the stove and place it on the plate",
+    "masked_lang_to_model": "pick up the red masked bowl and place it on the green masked flat-shaped object",
+    "main_image": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/logs/debug_model_inputs/spatial/03_main.png",
+    "main_key": "steps/observation/image",
+    "main_size": [
+      256,
+      256
+    ],
+    "wrist_image": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/logs/debug_model_inputs/spatial/03_wrist.png"
+  },
+  {
+    "suite": "goal",
+    "idx": 1,
+    "raw_lang": "put the bowl on the plate",
+    "masked_lang_to_model": "put the red masked bowl on the green masked flat-shaped object",
+    "main_image": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/logs/debug_model_inputs/goal/01_main.png",
+    "main_key": "steps/observation/image",
+    "main_size": [
+      256,
+      256
+    ],
+    "wrist_image": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/logs/debug_model_inputs/goal/01_wrist.png"
+  },
+  {
+    "suite": "goal",
+    "idx": 2,
+    "raw_lang": "put the bowl on the stove",
+    "masked_lang_to_model": "put the red masked bowl on the green masked flat-shaped object",
+    "main_image": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/logs/debug_model_inputs/goal/02_main.png",
+    "main_key": "steps/observation/image",
+    "main_size": [
+      256,
+      256
+    ],
+    "wrist_image": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/logs/debug_model_inputs/goal/02_wrist.png"
+  },
+  {
+    "suite": "goal",
+    "idx": 3,
+    "raw_lang": "push the plate to the front of the stove",
+    "masked_lang_to_model": "push the red masked flat-shaped object to the green masked place",
+    "main_image": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/logs/debug_model_inputs/goal/03_main.png",
+    "main_key": "steps/observation/image",
+    "main_size": [
+      256,
+      256
+    ],
+    "wrist_image": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/logs/debug_model_inputs/goal/03_wrist.png"
+  },
+  {
+    "suite": "object",
+    "idx": 1,
+    "raw_lang": "pick up the orange juice and place it in the basket",
+    "masked_lang_to_model": "pick up the red masked object and place it in the basket",
+    "main_image": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/logs/debug_model_inputs/object/01_main.png",
+    "main_key": "steps/observation/image",
+    "main_size": [
+      256,
+      256
+    ],
+    "wrist_image": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/logs/debug_model_inputs/object/01_wrist.png"
+  },
+  {
+    "suite": "object",
+    "idx": 2,
+    "raw_lang": "pick up the chocolate pudding and place it in the basket",
+    "masked_lang_to_model": "pick up the red masked object and place it in the basket",
+    "main_image": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/logs/debug_model_inputs/object/02_main.png",
+    "main_key": "steps/observation/image",
+    "main_size": [
+      256,
+      256
+    ],
+    "wrist_image": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/logs/debug_model_inputs/object/02_wrist.png"
+  },
+  {
+    "suite": "object",
+    "idx": 3,
+    "raw_lang": "pick up the tomato sauce and place it in the basket",
+    "masked_lang_to_model": "pick up the red masked object and place it in the basket",
+    "main_image": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/logs/debug_model_inputs/object/03_main.png",
+    "main_key": "steps/observation/image",
+    "main_size": [
+      256,
+      256
+    ],
+    "wrist_image": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/logs/debug_model_inputs/object/03_wrist.png"
+  },
+  {
+    "suite": "study_scene4",
+    "idx": 1,
+    "raw_lang": "pick up the book in the middle and place it on the cabinet shelf",
+    "masked_lang_to_model": "pick up the red masked book and place it on the green masked object",
+    "main_image": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/logs/debug_model_inputs/study_scene4/01_main.png",
+    "main_key": "steps/observation/image",
+    "main_size": [
+      256,
+      256
+    ],
+    "wrist_image": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/logs/debug_model_inputs/study_scene4/01_wrist.png"
+  },
+  {
+    "suite": "study_scene4",
+    "idx": 2,
+    "raw_lang": "pick up the book on the left and place it on top of the shelf",
+    "masked_lang_to_model": "pick up the red masked book and place it on the green masked object",
+    "main_image": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/logs/debug_model_inputs/study_scene4/02_main.png",
+    "main_key": "steps/observation/image",
+    "main_size": [
+      256,
+      256
+    ],
+    "wrist_image": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/logs/debug_model_inputs/study_scene4/02_wrist.png"
+  },
+  {
+    "suite": "study_scene4",
+    "idx": 3,
+    "raw_lang": "pick up the book on the right and place it under the cabinet shelf",
+    "masked_lang_to_model": "pick up the red masked book and place it under the green masked object",
+    "main_image": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/logs/debug_model_inputs/study_scene4/03_main.png",
+    "main_key": "steps/observation/image",
+    "main_size": [
+      256,
+      256
+    ],
+    "wrist_image": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/logs/debug_model_inputs/study_scene4/03_wrist.png"
+  },
+  {
+    "suite": "study_scene4",
+    "idx": 4,
+    "raw_lang": "pick up the book on the right and place it on the cabinet shelf",
+    "masked_lang_to_model": "pick up the red masked book and place it on the green masked object",
+    "main_image": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/logs/debug_model_inputs/study_scene4/04_main.png",
+    "main_key": "steps/observation/image",
+    "main_size": [
+      256,
+      256
+    ],
+    "wrist_image": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/logs/debug_model_inputs/study_scene4/04_wrist.png"
+  }
+]

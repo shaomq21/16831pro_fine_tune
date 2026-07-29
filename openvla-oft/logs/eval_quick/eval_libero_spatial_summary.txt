@@ -1,0 +1,8 @@
+                 INFO     | >> Task suite:           run_libero_eval_mask.py:325
+    total_episodes, total_successes = run_task(
+                 INFO     | >> Task suite:           run_libero_eval_mask.py:325
+                 INFO     | >> # successes: 0 (0.0%) run_libero_eval_mask.py:325
+                 INFO     | >> # successes: 0 (0.0%) run_libero_eval_mask.py:325
+                 INFO     | >> # successes: 0 (0.0%) run_libero_eval_mask.py:325
+                 INFO     | >> Total successes: 0    run_libero_eval_mask.py:325
+                 INFO     | >> Overall success rate: run_libero_eval_mask.py:325

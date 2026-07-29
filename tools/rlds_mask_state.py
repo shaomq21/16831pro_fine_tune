@@ -17,12 +17,15 @@ TFRECORD_PREFIX = {
 DEFAULT_OUT_ROOT = "/var/lib/docker/data/checkpoints/fan-test/16831pro_fine_tune/datasets/masked_libero_rlds"
 
 
-def count_tfrecord_examples(path: Path) -> int:
+def scan_tfrecord_prefix(path: Path) -> tuple[int, int]:
+    """Return (valid_record_count, byte_offset_after_last_valid_record)."""
     if not path.exists() or path.stat().st_size == 0:
-        return 0
+        return 0, 0
     n = 0
+    end = 0
     with open(path, "rb") as f:
         while True:
+            start = f.tell()
             header = f.read(12)
             if len(header) < 12:
                 break
@@ -33,7 +36,28 @@ def count_tfrecord_examples(path: Path) -> int:
             if len(f.read(4)) < 4:
                 break
             n += 1
-    return n
+            end = f.tell()
+    return n, end
+
+
+def count_tfrecord_examples(path: Path) -> int:
+    return scan_tfrecord_prefix(path)[0]
+
+
+def truncate_shard_to_valid_prefix(path: Path) -> tuple[int, int]:
+    """Drop trailing corrupt/garbage bytes so append can continue sequentially.
+
+    Returns (records_kept, bytes_removed). No-op if file is already clean.
+    """
+    if not path.exists():
+        return 0, 0
+    n, end = scan_tfrecord_prefix(path)
+    size = path.stat().st_size
+    removed = size - end
+    if removed > 0:
+        with open(path, "r+b") as f:
+            f.truncate(end)
+    return n, removed
 
 
 def shard_record_counts(out_root: Path, data_mix: str, n_shards: int = 16) -> list[int]:
@@ -80,3 +104,71 @@ def _total_episodes_from_info(out_root: Path, data_mix: str) -> int:
 
 def worker_done_episodes(done: set[int], worker_id: int, num_workers: int) -> set[int]:
     return {ep for ep in done if ep % num_workers == worker_id}
+
+
+def done_episodes_from_resume_files(
+    out_root: Path,
+    data_mix: str,
+    num_workers: int = 1,
+) -> set[int]:
+    """Union of per-worker resume files (intent only — verify with TFRecord before trusting)."""
+    done: set[int] = set()
+    if num_workers > 1:
+        for w in range(num_workers):
+            path = out_root / f".rlds_resume_{data_mix}_w{w}.json"
+            if not path.exists():
+                continue
+            try:
+                with open(path) as f:
+                    st = json.load(f)
+                done.update(int(x) for x in st.get("done_episodes", []))
+            except (json.JSONDecodeError, OSError, TypeError, ValueError):
+                pass
+    else:
+        path = out_root / f".rlds_resume_{data_mix}.json"
+        if path.exists():
+            try:
+                with open(path) as f:
+                    st = json.load(f)
+                last = int(st.get("last_episode", 0))
+                done.update(range(last))
+            except (json.JSONDecodeError, OSError, TypeError, ValueError):
+                pass
+    return done
+
+
+def count_resume_done_episodes(
+    out_root: Path, data_mix: str, num_workers: int = 4
+) -> int:
+    return len(done_episodes_from_resume_files(out_root, data_mix, num_workers))
+
+
+def count_done_episodes(
+    out_root: Path,
+    data_mix: str,
+    num_workers: int = 4,
+    total_episodes: int = 432,
+) -> int:
+    """Readable masked episodes in TFRecord shards (ground truth for progress)."""
+    return len(
+        done_episodes_from_tfrecords(out_root, data_mix, total_episodes=total_episodes)
+    )
+
+
+def integrity_summary(
+    out_root: Path,
+    data_mix: str,
+    num_workers: int = 8,
+    total_episodes: int = 432,
+) -> dict:
+    tf_done = done_episodes_from_tfrecords(out_root, data_mix, total_episodes=total_episodes)
+    resume_done = done_episodes_from_resume_files(out_root, data_mix, num_workers)
+    shard_counts = shard_record_counts(out_root, data_mix)
+    return {
+        "tfrecord_done": len(tf_done),
+        "resume_done": len(resume_done),
+        "shard_record_sum": sum(shard_counts),
+        "total_episodes": total_episodes,
+        "resume_not_on_disk": sorted(resume_done - tf_done),
+        "on_disk_not_in_resume": sorted(tf_done - resume_done),
+    }

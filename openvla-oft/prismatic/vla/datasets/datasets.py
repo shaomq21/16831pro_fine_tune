@@ -37,71 +37,102 @@ ALLOWED_TASK_DESCRIPTIONS = [
 ]
 
 
+import re
+
+
+def _apply_category_replacements(s: str) -> str:
+    s = re.sub(r"\bcabinet\b", "square object", s)
+    s = re.sub(r"\brack\b", "square object", s)
+    s = re.sub(r"\bstove\b", "flat-shaped object", s)
+    s = re.sub(r"\bplate\b", "flat-shaped object", s)
+    s = re.sub(r"\bcream cheese\b", "flat-shaped object", s)
+    return s
+
+
+# Spatial source phrases to drop (mask already marks location).
+_SPATIAL_SRC_LOC = re.compile(
+    r"\s+(?:next to|on the|in the|between|from the|from table center|beside|near|under the|at the)\b",
+    re.IGNORECASE,
+)
+_SPATIAL_OBJ_COLOR_PREFIXES = ("black ", "white ", "yellow ", "blue ", "brown ", "gray ", "grey ")
+
+
+def _strip_spatial_object_color(obj: str) -> str:
+    o = obj.strip()
+    for prefix in _SPATIAL_OBJ_COLOR_PREFIXES:
+        if o.startswith(prefix):
+            return o[len(prefix) :].strip()
+    return o
+
+
+def _spatial_masked_instruction(s: str) -> str:
+    m = re.match(
+        r"pick up the (.+?) and place it (on the|in the|under the|on top of the) (.+)$",
+        s,
+    )
+    if not m:
+        out = re.sub(r"\bpick up the\b", "pick up the red masked", s, count=1)
+        out = re.sub(r"\band place it on the\b", "and place it on the green masked", out, count=1)
+        return _apply_category_replacements(out)
+
+    src_part, dest_prep, dest_part = m.group(1), m.group(2), m.group(3)
+    src_obj = _strip_spatial_object_color(_SPATIAL_SRC_LOC.split(src_part)[0].strip())
+    dest_obj = _apply_category_replacements(dest_part.strip())
+
+    if dest_prep == "in the":
+        return f"pick up the red masked {src_obj} and place it in the green masked {dest_obj}"
+    if dest_prep == "under the":
+        return f"pick up the red masked {src_obj} and place it under the green masked {dest_obj}"
+    if dest_prep == "on top of the":
+        return f"pick up the red masked {src_obj} and place it on top of the green masked {dest_obj}"
+    return f"pick up the red masked {src_obj} and place it on the green masked {dest_obj}"
+
+
 def language_mask_processor(lang: str) -> str:
     """
     Process natural-language task instruction with masked-object rules.
 
-    Input example:
-        "put the bowl on the plate"
-        "open the middle drawer of the cabinet"
-        "push the plate to the front of the stove"
-        "turn on the stove"
+    Spatial: drop relation phrases + color prefixes; keep red/green masked source & dest.
+    Object: generic "red masked object" into basket (no product name).
+    STUDY_SCENE4 books: drop left/middle/right; keep under vs on.
+    Goal: verb-specific red/green masked insertions on put/push/open/turn-on tasks.
     """
 
     s = lang.strip().lower()
-    import re
-    # -------- verb-based masked insertion --------
+
+    # Object suite
+    if s.startswith("pick up ") and re.search(r"\band place it in the basket\s*$", s):
+        return "pick up the red masked object and place it in the basket"
+
+    # STUDY_SCENE4 books
+    if s.startswith("pick up ") and re.search(r"\bbook\b", s):
+        if re.search(r"\bunder the\b", s):
+            return "pick up the red masked book and place it under the green masked object"
+        return "pick up the red masked book and place it on the green masked object"
+
+    # Spatial suite
+    if s.startswith("pick up ") and " and place it " in s:
+        return _spatial_masked_instruction(s)
+
+    # Goal suite
     if s.startswith("put "):
-        # put the -> put the red masked
         s = re.sub(r"\bput the\b", "put the red masked", s, count=1)
-        # on the -> on the green masked
         s = re.sub(r"\bon the\b", "on the green masked", s, count=1)
         s = re.sub(r"\bon top of the\b", "on on top of the green masked", s, count=1)
         s = re.sub(r"\bin the\b", "in the green masked", s, count=1)
 
     elif s.startswith("turn on "):
-        # turn on -> turn on green masked
         s = re.sub(r"\bturn on the\b", "turn on the green masked", s, count=1)
 
     elif s.startswith("push "):
-        # push the -> push the green masked
         s = re.sub(r"\bpush the\b", "push the red masked", s, count=1)
         s = re.sub(r"\bto the front of the stove\b", "to the green masked place", s, count=1)
 
     elif s.startswith("open "):
+        s = re.sub(r"\bopen the middle\b", "open the green masked", s, count=1)
+        s = re.sub(r"\bopen the top\b", "open the green masked", s, count=1)
 
-        # open the middle -> open the green masked
-        s = re.sub(
-            r"\bopen the middle\b",
-            "open the green masked",
-            s,
-            count=1,
-        )
-        # open the top -> open the green masked top
-        s = re.sub(
-            r"\bopen the top\b",
-            "open the green masked",
-            s,
-            count=1,
-        )
-
-    elif s.startswith("pick up "):
-        s = re.sub(r"\bpick up the\b", "pick up the red masked", s, count=1)
-        s = re.sub(r"\band place it on top of the\b", "and place it on top of the green masked", s, count=1)
-        s = re.sub(r"\band place it under the\b", "and place it under the green masked", s, count=1)
-        s = re.sub(r"\band place it on the\b", "and place it on the green masked", s, count=1)
-
-    # -------- object category replacement --------
-    # cabinet / rack -> square object
-    s = re.sub(r"\bcabinet\b", "square object", s)
-    s = re.sub(r"\brack\b", "square object", s)
-
-    # stove / plate -> flat-shaped object
-    s = re.sub(r"\bstove\b", "flat-shaped object", s)
-    s = re.sub(r"\bplate\b", "flat-shaped object", s)
-    s = re.sub(r"\bcream cheese\b", "flat-shaped object", s)
-
-    return s
+    return _apply_category_replacements(s)
 
 import subprocess, tempfile, os
 import re
@@ -112,7 +143,10 @@ _DATASET_DEBUG_SAVE = os.environ.get("DATASET_DEBUG_SAVE", "0") == "1"
 _DATASET_DEBUG_SAVE_EVERY = int(os.environ.get("DATASET_DEBUG_SAVE_EVERY", "200"))
 _DATASET_DEBUG_COUNTER = [0]  # 用 list 以便在闭包中修改
 
-VLA_PREPROCESS_PY = "/home/ubuntu/miniconda3/envs/vla-preprocess/bin/python"  
+VLA_PREPROCESS_PY = os.environ.get(
+    "VLA_PREPROCESS_PY",
+    "/var/lib/docker/data/checkpoints/fan-test/16831pro_fine_tune/conda_envs/vla-preprocess/bin/python",
+)  
 
 
 from pathlib import Path
@@ -454,8 +488,12 @@ class RLDSDataset(IterableDataset):
                       When None and data_mix contains "libero", defaults to ALLOWED_TASK_DESCRIPTIONS (5 scenes).
         """
         self.data_root_dir, self.data_mix, self.batch_transform = data_root_dir, data_mix, batch_transform
+        # Optional env override: ALLOWED_TASKS="task a|task b" (strip+lower match on language_instruction)
+        _env_tasks = os.environ.get("ALLOWED_TASKS", "").strip()
         if allowed_tasks is not None:
             self.allowed_tasks = set(t.strip().lower() for t in allowed_tasks) if allowed_tasks else None
+        elif _env_tasks:
+            self.allowed_tasks = set(t.strip().lower() for t in _env_tasks.split("|") if t.strip())
         elif "libero" in data_mix:
             self.allowed_tasks = set(t.strip().lower() for t in ALLOWED_TASK_DESCRIPTIONS)
         else:

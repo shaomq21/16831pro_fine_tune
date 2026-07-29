@@ -16,6 +16,7 @@ sys.path.insert(0, str(_TOOLS_DIR))
 
 from rlds_mask_state import (
     DEFAULT_OUT_ROOT,
+    done_episodes_from_resume_files,
     done_episodes_from_tfrecords,
     worker_done_episodes,
 )
@@ -41,8 +42,23 @@ def main() -> None:
         done = set(range(last_done + 1))
         print(f"Using --last_episode={args.last_episode} -> {len(done)} episodes done")
     else:
-        done = done_episodes_from_tfrecords(out_root, args.data_mix)
-        print(f"From TFRecords: {len(done)} episodes done")
+        tf_done = done_episodes_from_tfrecords(out_root, args.data_mix)
+        resume_done = done_episodes_from_resume_files(out_root, args.data_mix, args.num_workers)
+        if tf_done:
+            done = tf_done
+            print(f"From TFRecords: {len(done)} readable episodes")
+            ghost = resume_done - tf_done
+            if ghost:
+                print(
+                    f"  Dropping {len(ghost)} resume-only episodes "
+                    f"(marked done but not readable on disk)"
+                )
+        elif resume_done:
+            done = resume_done
+            print(f"From resume files (no TFRecords yet): {len(done)} episodes")
+        else:
+            done = set()
+            print("No prior progress found")
 
     for w in range(args.num_workers):
         lane_done = sorted(worker_done_episodes(done, w, args.num_workers))

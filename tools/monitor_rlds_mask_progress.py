@@ -159,30 +159,49 @@ def _running_worker_count(data_mix: str) -> int:
         return 0
 
 
+def _done_from_tfrecords(out_root: Path, data_mix: str, total_eps: int) -> set[int]:
+    sys.path.insert(0, str(_REPO_ROOT / "tools"))
+    from rlds_mask_state import done_episodes_from_tfrecords
+
+    return done_episodes_from_tfrecords(out_root, data_mix, total_episodes=total_eps)
+
+
+def _resume_done_count(out_root: Path, data_mix: str, num_workers: int) -> int:
+    sys.path.insert(0, str(_REPO_ROOT / "tools"))
+    from rlds_mask_state import count_resume_done_episodes
+
+    return count_resume_done_episodes(out_root, data_mix, num_workers)
+
+
 def _aggregate_multi_progress(out_root: Path, data_mix: str, num_workers: int, total_eps: int) -> dict:
-    total_contrib = 0.0
+    done_eps = _done_from_tfrecords(out_root, data_mix, total_eps)
+    resume_n = _resume_done_count(out_root, data_mix, num_workers)
+    in_progress_frac = 0.0
     active: list[str] = []
     for w in range(num_workers):
         prog = _load_progress_file(out_root, data_mix, w, num_workers)
-        if prog and prog.get("_age_sec", 999) < 180:
-            nw = int(prog.get("num_workers", num_workers))
+        if prog and prog.get("_age_sec", 999) < 600:
             ge = int(prog.get("global_episode", 0))
-            full = sum(1 for ep in range(ge) if ep % nw == w)
             frac = float(prog.get("episode_progress", 0))
-            total_contrib += full + frac
+            if ge not in done_eps:
+                in_progress_frac += frac
             ep_step = int(prog.get("episode_step") or 0)
             ep_total = int(prog.get("episode_steps_total") or 0)
             active.append(f"w{w}:ep{ge} {ep_step}/{ep_total}")
-        else:
-            resume = _read_json(out_root / f".rlds_resume_{data_mix}_w{w}.json")
-            total_contrib += int(resume.get("completed", 0)) if resume else 0
+    total_contrib = len(done_eps) + in_progress_frac
+    mismatch = ""
+    if resume_n > len(done_eps):
+        mismatch = f" resume={resume_n}!"
     return {
         "total_episodes": total_eps,
         "overall_progress": min(total_contrib / max(total_eps, 1), 1.0),
         "overall_n": total_contrib,
+        "done_n": len(done_eps),
+        "resume_n": resume_n,
+        "mismatch": mismatch,
         "phase": "masking",
         "active_workers": "; ".join(active[:4]) + ("..." if len(active) > 4 else ""),
-        "source": f"multi x{num_workers}",
+        "source": f"tfrecord+live x{num_workers}",
     }
 
 
@@ -279,15 +298,25 @@ def main() -> int:
                 rate_str = "? ep/h"
 
             bar.n = overall_n
+            done_tag = ""
+            if num_workers > 1 and "done_n" in prog:
+                dn = int(prog["done_n"])
+                mm = prog.get("mismatch") or ""
+                done_tag = f"tf={dn}{mm} | "
             bar.set_postfix_str(
-                f"{overall_n:.1f}/{total} ep | {ep_bar} | {phase} | ETA {eta} | {rate_str}",
+                f"{done_tag}{overall_n:.1f}/{total} ep | {ep_bar} | {phase} | ETA {eta} | {rate_str}",
                 refresh=False,
             )
             if overall_n != last_overall_n:
                 bar.refresh()
                 last_overall_n = overall_n
 
-            if phase == "done" or overall_n >= total:
+            tf_done = int(prog.get("done_n") or 0) if num_workers > 1 else overall_n
+            if num_workers > 1 and tf_done >= total and running == 0:
+                bar.n = total
+                bar.set_postfix_str("done (TFRecord verified)", refresh=True)
+                break
+            if num_workers == 1 and (phase == "done" or overall_n >= total):
                 bar.n = total
                 bar.set_postfix_str("done", refresh=True)
                 break
