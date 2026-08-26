@@ -134,9 +134,17 @@ class RLConfig:
     local_log_dir: str = "./experiments/logs/rl_lora_color_quick"
     seed: int = 7
     skip_baseline_eval: bool = False
+    # Stability: only update groups with ≥1 success; optionally freeze vision LoRA
+    train_vision_lora: bool = False  # False = action_head (+proprio) only — avoids collapse
+    train_proprio: bool = True
+    only_success_trajs: bool = True  # within eligible groups, BC only successful rollouts
+    prefer_greedy_bc: bool = True  # BC greedy successes first (fixes #1/#2 explore→greedy gap)
+    skip_update_above_sr: float = 0.85  # skip BC when already succeeding (avoid noisy overfit)
+    adv_clip: float = 1.0
+    rollback_on_collapse: bool = True
     # legacy flags (kept for shell compatibility)
     rollouts_per_iter: int = 8
-    greedy_frac: float = 0.0
+    greedy_frac: float = 0.5  # half of group samples greedy (stable BC targets)
     min_success_to_update: int = 1
     success_buffer_size: int = 64
 
@@ -217,18 +225,25 @@ def load_rl_lora_unmerged(vla, adapter_dir: str) -> None:
     logger.info("Loaded RL LoRA (unmerged) from %s", adapter_dir)
 
 
-def freeze_non_lora(vla, action_head, proprio_projector) -> None:
+def freeze_non_lora(
+    vla,
+    action_head,
+    proprio_projector,
+    train_vision_lora: bool = True,
+    train_proprio: bool = True,
+) -> None:
     for p in vla.parameters():
         p.requires_grad = False
-    for n, p in vla.vision_backbone.named_parameters():
-        if "lora_" in n:
-            p.requires_grad = True
+    if train_vision_lora:
+        for n, p in vla.vision_backbone.named_parameters():
+            if "lora_" in n:
+                p.requires_grad = True
     if action_head is not None:
         for p in action_head.parameters():
             p.requires_grad = True
     if proprio_projector is not None:
         for p in proprio_projector.parameters():
-            p.requires_grad = True
+            p.requires_grad = bool(train_proprio)
 
 
 def forward_normalized_actions(
@@ -381,6 +396,7 @@ def predict_chunk_numpy(
         "task_label": task_label,
         "target_norm": norm_exec.astype(np.float32),
         "noise_std": float(noise_std),
+        "explore": bool(noise_std > 1e-8),
     }
     return actions, norm_exec, snap
 
@@ -516,6 +532,33 @@ def eval_sr(
     return results
 
 
+def _snapshot_trainable(action_head, proprio_projector, vla) -> Dict[str, Any]:
+    snap = {
+        "action_head": {k: v.detach().cpu().clone() for k, v in action_head.state_dict().items()},
+    }
+    if proprio_projector is not None:
+        snap["proprio"] = {k: v.detach().cpu().clone() for k, v in proprio_projector.state_dict().items()}
+    lora = {}
+    for n, p in vla.named_parameters():
+        if p.requires_grad and "lora_" in n:
+            lora[n] = p.detach().cpu().clone()
+    if lora:
+        snap["lora"] = lora
+    return snap
+
+
+def _restore_trainable(snap: Dict[str, Any], action_head, proprio_projector, vla) -> None:
+    action_head.load_state_dict(snap["action_head"], strict=False)
+    if proprio_projector is not None and "proprio" in snap:
+        proprio_projector.load_state_dict(snap["proprio"], strict=False)
+    if "lora" in snap:
+        with torch.no_grad():
+            name2p = dict(vla.named_parameters())
+            for n, t in snap["lora"].items():
+                if n in name2p:
+                    name2p[n].copy_(t.to(name2p[n].device, dtype=name2p[n].dtype))
+
+
 def rl_update_groups(
     cfg: RLConfig,
     vla,
@@ -526,26 +569,47 @@ def rl_update_groups(
     groups: List[List[Tuple[float, List[Dict[str, Any]]]]],
 ) -> Dict[str, float]:
     """
-    True GRPO-lite over groups: each group = G rollouts of the SAME (init, color).
-    advantage = r - mean_group(r). Only reinforce positive-advantage samples.
-    Skip groups with zero reward variance (all success or all fail).
+    Only use groups with ≥ min_success_to_update successes.
+    - only_success_trajs: BC on successful rollouts only (weight 1)
+    - else GRPO-lite: advantage = r - mean_group(r), positive adv only
     """
     pos: List[Tuple[float, Dict[str, Any]]] = []
     group_srs = []
     n_used_groups = 0
+    n_skip_no_success = 0
     for group in groups:
         rewards = np.array([r for r, _ in group], dtype=np.float32)
         group_srs.append(float(rewards.mean()))
-        if rewards.std() < 1e-6:
-            continue  # no relative signal
-        baseline = float(rewards.mean())
+        n_succ = int((rewards > 0.5).sum())
+        if n_succ < cfg.min_success_to_update:
+            n_skip_no_success += 1
+            continue  # 只看有成功的 group
         n_used_groups += 1
-        for r, traj in group:
-            adv = float(r - baseline)
-            if adv <= 1e-6:
+        if cfg.only_success_trajs:
+            succ_trajs = [(r, traj) for r, traj in group if r > 0.5]
+            if cfg.prefer_greedy_bc:
+                greedy_only = [
+                    (r, traj) for r, traj in succ_trajs
+                    if traj and not traj[0].get("explore", True)
+                ]
+                if greedy_only:
+                    succ_trajs = greedy_only
+            for r, traj in succ_trajs:
+                for tr in traj:
+                    pos.append((1.0, tr))
+        else:
+            if rewards.std() < 1e-6:
+                for r, traj in group:
+                    for tr in traj:
+                        pos.append((0.5, tr))
                 continue
-            for tr in traj:
-                pos.append((adv, tr))
+            baseline = float(rewards.mean())
+            for r, traj in group:
+                adv = float(np.clip(r - baseline, 0.0, cfg.adv_clip))
+                if adv <= 1e-6:
+                    continue
+                for tr in traj:
+                    pos.append((adv, tr))
 
     if not pos:
         return {
@@ -554,11 +618,12 @@ def rl_update_groups(
             "n_pos": 0,
             "skipped": 1.0,
             "n_groups_used": float(n_used_groups),
+            "n_skip_no_success": float(n_skip_no_success),
         }
 
     vla.train()
     action_head.train()
-    if proprio_projector is not None:
+    if proprio_projector is not None and cfg.train_proprio:
         proprio_projector.train()
 
     total_loss = 0.0
@@ -584,10 +649,11 @@ def rl_update_groups(
                 loss.backward()
                 step_loss += float(loss.detach().item())
                 k += 1
-        torch.nn.utils.clip_grad_norm_(
-            [p for p in list(vla.parameters()) + list(action_head.parameters()) if p.requires_grad],
-            1.0,
-        )
+        params = [p for p in action_head.parameters() if p.requires_grad]
+        params += [p for p in vla.parameters() if p.requires_grad]
+        if proprio_projector is not None:
+            params += [p for p in proprio_projector.parameters() if p.requires_grad]
+        torch.nn.utils.clip_grad_norm_(params, 0.5)
         optimizer.step()
         total_loss += step_loss / max(k, 1)
         n_steps += 1
@@ -602,6 +668,7 @@ def rl_update_groups(
         "n_pos": float(min(len(pos), cfg.max_update_chunks) * n_steps),
         "skipped": 0.0,
         "n_groups_used": float(n_used_groups),
+        "n_skip_no_success": float(n_skip_no_success),
     }
 
 
@@ -671,9 +738,16 @@ def main(cfg: RLConfig) -> None:
         logger.info("Wrote %s", out)
         return
 
-    # TRAIN: attach fresh RL LoRA (do not merge)
-    attach_rl_lora(vla, rank=cfg.lora_rank)
-    freeze_non_lora(vla, action_head, proprio_projector)
+    # TRAIN: optional fresh RL LoRA (do not merge); default freezes vision and trains action_head only
+    if cfg.train_vision_lora:
+        attach_rl_lora(vla, rank=cfg.lora_rank)
+    else:
+        logger.info("train_vision_lora=False — freeze VLA; train action_head only")
+    freeze_non_lora(
+        vla, action_head, proprio_projector,
+        train_vision_lora=cfg.train_vision_lora,
+        train_proprio=cfg.train_proprio,
+    )
     try:
         vla.language_model.gradient_checkpointing_enable()
     except Exception as e:
@@ -683,16 +757,15 @@ def main(cfg: RLConfig) -> None:
     trainable += [p for p in action_head.parameters() if p.requires_grad]
     if proprio_projector is not None:
         trainable += [p for p in proprio_projector.parameters() if p.requires_grad]
-    # param groups
     lora_params = [p for n, p in vla.named_parameters() if p.requires_grad and "lora_" in n]
     other_params = [p for p in trainable if id(p) not in {id(x) for x in lora_params}]
-    optimizer = torch.optim.AdamW(
-        [
-            {"params": lora_params, "lr": cfg.lr_lora},
-            {"params": other_params, "lr": cfg.lr_action_head},
-        ],
-        weight_decay=0.0,
-    )
+    param_groups = []
+    if lora_params:
+        param_groups.append({"params": lora_params, "lr": cfg.lr_lora})
+    if other_params:
+        param_groups.append({"params": other_params, "lr": cfg.lr_action_head})
+    assert param_groups, "No trainable parameters"
+    optimizer = torch.optim.AdamW(param_groups, weight_decay=0.0)
     logger.info("Trainable tensors: lora=%d other=%d", len(lora_params), len(other_params))
 
     benchmark_dict = benchmark.get_benchmark_dict()
@@ -707,7 +780,7 @@ def main(cfg: RLConfig) -> None:
     )
     logger.info("Task %d: %s", cfg.task_id, task_description)
 
-    history: Dict[str, Any] = {"baseline_eval": None, "iters": [], "final_eval": None}
+    history: Dict[str, Any] = {"baseline_eval": None, "iters": [], "final_eval": None, "best_iter": None}
 
     vla.eval()
     action_head.eval()
@@ -721,6 +794,11 @@ def main(cfg: RLConfig) -> None:
 
     t0 = time.time()
     init_pool = list(initial_states[: max(1, min(cfg.max_init_pool, len(initial_states)))])
+    best_sr = -1.0
+    best_snap = _snapshot_trainable(action_head, proprio_projector, vla)
+    last_good_snap = best_snap
+    last_good_sr = 0.0
+
     for it in range(cfg.num_iters):
         groups = []
         succ_all = 0
@@ -729,26 +807,92 @@ def main(cfg: RLConfig) -> None:
             init = init_pool[(it * cfg.num_groups_per_iter + g) % len(init_pool)]
             cv = variants[g % len(variants)]
             group = []
+            n_greedy = int(round(cfg.group_size * max(0.0, min(1.0, cfg.greedy_frac))))
             for s in range(cfg.group_size):
-                # Always explore within a GRPO group so samples differ
+                explore = s >= n_greedy  # first n_greedy are greedy (stable BC targets)
                 success, traj = run_episode(
                     cfg, env, task_description, vla, resize_size, processor, action_head, proprio_projector,
-                    init, cv, explore=True,
+                    init, cv, explore=explore,
                 )
                 group.append((float(success), traj))
                 succ_all += int(success)
                 n_all += 1
                 logger.info(
-                    "iter %d group %d sample %d color%d success=%s chunks=%d",
-                    it, g, s, cv, success, len(traj),
+                    "iter %d group %d sample %d color%d explore=%s success=%s chunks=%d",
+                    it, g, s, cv, explore, success, len(traj),
                 )
             groups.append(group)
-        metrics = rl_update_groups(
-            cfg, vla, processor, action_head, proprio_projector, optimizer, groups
-        )
+
+        train_sr = succ_all / max(n_all, 1)
+        pre_snap = _snapshot_trainable(action_head, proprio_projector, vla)
+
+        # Collapse: current weights produced 0 successes but we had a good policy earlier → undo
+        rolled_back = 0.0
+        if cfg.rollback_on_collapse and train_sr <= 0.0 and last_good_sr >= 0.25:
+            logger.warning(
+                "iter %d train_sr=0 after prior good=%.2f — rollback & skip update",
+                it, last_good_sr,
+            )
+            _restore_trainable(last_good_snap, action_head, proprio_projector, vla)
+            rolled_back = 1.0
+            metrics = {
+                "loss": 0.0,
+                "group_sr": 0.0,
+                "n_pos": 0,
+                "skipped": 1.0,
+                "n_groups_used": 0.0,
+                "n_skip_no_success": float(cfg.num_groups_per_iter),
+                "rolled_back": 1.0,
+                "skipped_high_sr": 0.0,
+            }
+            for pg in optimizer.param_groups:
+                pg["lr"] = max(pg["lr"] * 0.5, 1e-6)
+        elif train_sr >= cfg.skip_update_above_sr:
+            logger.info(
+                "iter %d train_sr=%.2f >= %.2f — skip update to protect greedy policy",
+                it, train_sr, cfg.skip_update_above_sr,
+            )
+            if train_sr >= 0.25 and train_sr >= last_good_sr:
+                last_good_sr = train_sr
+                last_good_snap = pre_snap
+            metrics = {
+                "loss": 0.0,
+                "group_sr": train_sr,
+                "n_pos": 0,
+                "skipped": 1.0,
+                "n_groups_used": 0.0,
+                "n_skip_no_success": 0.0,
+                "rolled_back": 0.0,
+                "skipped_high_sr": 1.0,
+            }
+        else:
+            if train_sr >= 0.25 and train_sr >= last_good_sr:
+                last_good_sr = train_sr
+                last_good_snap = pre_snap
+            metrics = rl_update_groups(
+                cfg, vla, processor, action_head, proprio_projector, optimizer, groups
+            )
+            metrics["rolled_back"] = 0.0
+            metrics["skipped_high_sr"] = 0.0
+
+        if train_sr > best_sr or (train_sr >= best_sr and rolled_back < 0.5):
+            # Prefer snapshot after a non-collapsed iter; if rolled back, keep last_good
+            best_sr = max(best_sr, train_sr, last_good_sr)
+            best_snap = last_good_snap if rolled_back else _snapshot_trainable(
+                action_head, proprio_projector, vla
+            )
+            history["best_iter"] = it if rolled_back < 0.5 else history.get("best_iter", it)
+            save_rl_checkpoint(
+                os.path.join(cfg.save_dir, "best"),
+                vla,
+                action_head,
+                proprio_projector,
+                meta={"iter": it, "train_sr": train_sr, "best": True, "rolled_back": rolled_back},
+            )
+
         row = {
             "iter": it,
-            "train_sr": succ_all / max(n_all, 1),
+            "train_sr": train_sr,
             **metrics,
             "elapsed_s": time.time() - t0,
         }
@@ -765,16 +909,19 @@ def main(cfg: RLConfig) -> None:
                 meta={"iter": it, "cfg": {k: str(v) if isinstance(v, Path) else v for k, v in cfg.__dict__.items()}},
             )
 
+    # Final eval on best snapshot (not collapsed last)
+    _restore_trainable(best_snap, action_head, proprio_projector, vla)
+    logger.info("Restored best_iter=%s train_sr=%.3f for final eval", history.get("best_iter"), best_sr)
     history["final_eval"] = eval_sr(
         cfg, task_suite, vla, resize_size, processor, action_head, proprio_projector,
-        variants, cfg.eval_trials_per_variant, tag="after_rl",
+        variants, cfg.eval_trials_per_variant, tag="after_rl_best",
     )
     save_rl_checkpoint(
         cfg.save_dir,
         vla,
         action_head,
         proprio_projector,
-        meta={"iter": cfg.num_iters - 1, "final": True},
+        meta={"iter": history.get("best_iter"), "final_best": True, "best_train_sr": best_sr},
     )
     with open(os.path.join(cfg.save_dir, "train_history.json"), "w") as f:
         json.dump(history, f, indent=2)
@@ -784,8 +931,12 @@ def main(cfg: RLConfig) -> None:
         "suite": cfg.task_suite_name,
         "baseline_sr": None if not history["baseline_eval"] else history["baseline_eval"]["sr"],
         "final_sr": history["final_eval"]["sr"],
+        "best_train_sr": best_sr,
+        "best_iter": history.get("best_iter"),
         "save_dir": cfg.save_dir,
         "merged": False,
+        "train_vision_lora": cfg.train_vision_lora,
+        "only_success_trajs": cfg.only_success_trajs,
     }
     with open(os.path.join(cfg.save_dir, "SUMMARY.json"), "w") as f:
         json.dump(summary, f, indent=2)

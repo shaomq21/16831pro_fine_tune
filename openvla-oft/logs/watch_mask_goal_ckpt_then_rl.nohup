@@ -1,0 +1,45 @@
+===== 2026-08-25T07:47:39+00:00 watching /var/lib/docker/data/checkpoints/fan-test/16831pro_fine_tune/runs/openvla_adapters/openvla-7b+dual_masked_goal+b4+lr-0.0005+lora-r32+dropout-0.0+lora-attn-only--suite_goal_oft_lr =====
+2026-08-25T07:47:39+00:00 waiting... shard1_filepart=3045495552 bytes
+2026-08-25T07:48:39+00:00 waiting... shard1_filepart=3355079904 bytes
+2026-08-25T07:49:39+00:00 waiting... shard1_filepart=3663780384 bytes
+2026-08-25T07:50:39+00:00 waiting... shard1_filepart=3971826144 bytes
+2026-08-25T07:51:39+00:00 waiting... shard1_filepart=4278267840 bytes
+2026-08-25T07:52:39+00:00 waiting... shard1_filepart=4587099264 bytes
+2026-08-25T07:53:39+00:00 waiting... shard1_filepart=4898647776 bytes
+2026-08-25T07:54:39+00:00 waiting... shard1_filepart=0 bytes
+2026-08-25T07:55:39+00:00 waiting... shard1_filepart=0 bytes
+2026-08-25T07:56:39+00:00 waiting... shard1_filepart=0 bytes
+2026-08-25T07:57:39+00:00 waiting... shard1_filepart=0 bytes
+2026-08-25T07:58:39+00:00 waiting... shard1_filepart=0 bytes
+2026-08-25T07:59:40+00:00 waiting... shard1_filepart=0 bytes
+2026-08-25T08:00:40+00:00 waiting... shard1_filepart=0 bytes
+2026-08-25T08:01:40+00:00 waiting... shard1_filepart=0 bytes
+2026-08-25T08:02:40+00:00 waiting... shard1_filepart=0 bytes
+2026-08-25T08:03:40+00:00 waiting... shard1_filepart=0 bytes
+2026-08-25T08:04:40+00:00 waiting... shard1_filepart=0 bytes
+2026-08-25T08:05:40+00:00 waiting... shard1_filepart=0 bytes
+2026-08-25T08:06:40+00:00 waiting... shard1_filepart=0 bytes
+2026-08-25T08:07:40+00:00 waiting... shard1_filepart=0 bytes
+2026-08-25T08:08:40+00:00 waiting... shard1_filepart=0 bytes
+2026-08-25T08:09:40+00:00 waiting... shard1_filepart=0 bytes
+2026-08-25T08:10:40+00:00 waiting... shard1_filepart=0 bytes
+2026-08-25T08:11:40+00:00 waiting... shard1_filepart=0 bytes
+2026-08-25T08:12:40+00:00 waiting... shard1_filepart=0 bytes
+2026-08-25T08:13:40+00:00 waiting... shard1_filepart=0 bytes
+2026-08-25T08:14:40+00:00 waiting... shard1_filepart=0 bytes
+2026-08-25T08:15:40+00:00 waiting... shard1_filepart=0 bytes
+2026-08-25T08:16:40+00:00 waiting... shard1_filepart=0 bytes
+2026-08-25T08:17:40+00:00 waiting... shard1_filepart=0 bytes
+2026-08-25T08:18:40+00:00 waiting... shard1_filepart=0 bytes
+2026-08-25T08:19:40+00:00 waiting... shard1_filepart=0 bytes
+2026-08-25T08:20:40+00:00 waiting... shard1_filepart=0 bytes
+2026-08-25T08:21:40+00:00 waiting... shard1_filepart=0 bytes
+2026-08-25T08:22:40+00:00 waiting... shard1_filepart=0 bytes
+2026-08-25T08:23:40+00:00 waiting... shard1_filepart=0 bytes
+2026-08-25T08:24:40+00:00 waiting... shard1_filepart=0 bytes
+2026-08-25T08:25:40+00:00 waiting... shard1_filepart=0 bytes
+2026-08-25T08:26:40+00:00 waiting... shard1_filepart=0 bytes
+===== 2026-08-25T08:27:40+00:00 ckpt ready; launching RL =====
+rl_bowl8_pid=1059055
+rl_plate5_pid=1059387
+===== launched; see /home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/logs/watch_mask_goal_ckpt_then_rl.log =====

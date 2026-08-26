@@ -1,0 +1,536 @@
+===== 2026-08-25T08:27:45+00:00 RL LoRA color quick =====
+suite=libero_goal task_id=5 gpu=1 ckpt=/var/lib/docker/data/checkpoints/fan-test/16831pro_fine_tune/runs/openvla_adapters/openvla-7b+dual_masked_goal+b4+lr-0.0005+lora-r32+dropout-0.0+lora-attn-only--suite_goal_oft_lr
+save_dir=/var/lib/docker/data/checkpoints/fan-test/16831pro_fine_tune/runs/rl_lora_color_quick/libero_goal_task5_mask_plate5_color iters=8 rollouts=4
+2026-08-25 08:27:47.124762: E external/local_xla/xla/stream_executor/cuda/cuda_dnn.cc:9261] Unable to register cuDNN factory: Attempting to register factory for plugin cuDNN when one has already been registered
+2026-08-25 08:27:47.124821: E external/local_xla/xla/stream_executor/cuda/cuda_fft.cc:607] Unable to register cuFFT factory: Attempting to register factory for plugin cuFFT when one has already been registered
+2026-08-25 08:27:47.126331: E external/local_xla/xla/stream_executor/cuda/cuda_blas.cc:1515] Unable to register cuBLAS factory: Attempting to register factory for plugin cuBLAS when one has already been registered
+2026-08-25 08:27:47.133148: I tensorflow/core/platform/cpu_feature_guard.cc:182] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2026-08-25 08:27:47.980246: W tensorflow/compiler/tf2tensorrt/utils/py_utils.cc:38] TF-TRT Warning: Could not find TensorRT
+[robosuite WARNING] No private macro file found! (__init__.py:7)
+[robosuite WARNING] It is recommended to use a private macro file (__init__.py:8)
+[robosuite WARNING] To setup, run: python /var/lib/docker/data/checkpoints/fan-test/16831pro_fine_tune/conda_envs/simplevla/lib/python3.10/site-packages/robosuite/scripts/setup_macros.py (__init__.py:9)
+Gym has been unmaintained since 2022 and does not support NumPy 2.0 amongst other critical functionality.
+Please upgrade to Gymnasium, the maintained drop-in replacement of Gym, or contact the authors of your software and request that they upgrade.
+Users of this version of Gym should be able to simply replace 'import gym' with 'import gymnasium as gym' in the vast majority of cases.
+See the migration guide at https://gymnasium.farama.org/introduction/migration_guide/ for additional information.
+Using LIBERO constants:
+  NUM_ACTIONS_CHUNK = 8
+  ACTION_DIM = 7
+  PROPRIO_DIM = 8
+  ACTION_PROPRIO_NORMALIZATION_TYPE = bounds_q99
+If needed, manually set the correct constants in `prismatic/vla/constants.py`!
+08/25 [08:27:59] INFO     | >>                    run_rl_lora_color_quick.py:624
+                          cfg=RLConfig(model_fami                               
+                          ly='openvla',                                         
+                          pretrained_checkpoint='                               
+                          /var/lib/docker/data/ch                               
+                          eckpoints/fan-test/1683                               
+                          1pro_fine_tune/runs/ope                               
+                          nvla_adapters/openvla-7                               
+                          b+dual_masked_goal+b4+l                               
+                          r-0.0005+lora-r32+dropo                               
+                          ut-0.0+lora-attn-only--                               
+                          suite_goal_oft_lr',                                   
+                          base_vla_path='/home/fa                               
+                          n-test/maggie/subopt_pr                               
+                          oj/third_party/16831pro                               
+                          _fine_tune/openvla-oft/                               
+                          checkpoints/openvla-7b'                               
+                          , rl_lora_path=None,                                  
+                          use_l1_regression=True,                               
+                          use_diffusion=False,                                  
+                          use_film=False,                                       
+                          num_images_in_input=1,                                
+                          use_proprio=True,                                     
+                          center_crop=False,                                    
+                          num_open_loop_steps=8,                                
+                          lora_rank=8,                                          
+                          unnorm_key='',                                        
+                          load_in_8bit=False,                                   
+                          load_in_4bit=False,                                   
+                          task_suite_name='libero                               
+                          _goal', task_id=5,                                    
+                          num_steps_wait=10,                                    
+                          env_img_res=256,                                      
+                          use_mask_for_policy=Tru                               
+                          e,                                                    
+                          use_mask_from_env=True,                               
+                          mask_alpha=0.35,                                      
+                          perturb_mode='colors',                                
+                          color_variants='0,1',                                 
+                          mode='train',                                         
+                          num_iters=8,                                          
+                          num_groups_per_iter=2,                                
+                          group_size=4,                                         
+                          eval_trials_per_variant                               
+                          =4,                                                   
+                          action_noise_std=0.06,                                
+                          lr_lora=2e-05,                                        
+                          lr_action_head=4e-05,                                 
+                          max_update_chunks=10,                                 
+                          bc_steps_per_iter=2,                                  
+                          max_init_pool=12,                                     
+                          save_dir='/var/lib/dock                               
+                          er/data/checkpoints/fan                               
+                          -test/16831pro_fine_tun                               
+                          e/runs/rl_lora_color_qu                               
+                          ick/libero_goal_task5_m                               
+                          ask_plate5_color',                                    
+                          local_log_dir='/home/fa                               
+                          n-test/maggie/subopt_pr                               
+                          oj/third_party/16831pro                               
+                          _fine_tune/openvla-oft/                               
+                          experiments/logs/rl_lor                               
+                          a_color_quick', seed=7,                               
+                          skip_baseline_eval=True                               
+                          , rollouts_per_iter=8,                                
+                          greedy_frac=0.0,                                      
+                          min_success_to_update=1                               
+                          ,                                                     
+                          success_buffer_size=64)                               
+                 INFO     | >> Loading model from run_rl_lora_color_quick.py:637
+                          /var/lib/docker/data/ch                               
+                          eckpoints/fan-test/1683                               
+                          1pro_fine_tune/runs/ope                               
+                          nvla_adapters/openvla-7                               
+                          b+dual_masked_goal+b4+l                               
+                          r-0.0005+lora-r32+dropo                               
+                          ut-0.0+lora-attn-only--                               
+                          suite_goal_oft_lr                                     
+<frozen importlib._bootstrap>:283: DeprecationWarning: the load_module() method is deprecated and slated for removal in Python 3.12; use exec_module() instead
+Instantiating pretrained VLA policy...
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:00<00:00,  3.54it/s]Loading checkpoint shards:  50%|█████     | 2/4 [00:00<00:00,  4.17it/s]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:00<00:00,  4.40it/s]Loading checkpoint shards: 100%|██████████| 4/4 [00:00<00:00,  4.54it/s]Loading checkpoint shards: 100%|██████████| 4/4 [00:00<00:00,  4.38it/s]
+Merging on-disk LoRA adapter into loaded checkpoint: /var/lib/docker/data/checkpoints/fan-test/16831pro_fine_tune/runs/openvla_adapters/openvla-7b+dual_masked_goal+b4+lr-0.0005+lora-r32+dropout-0.0+lora-attn-only--suite_goal_oft_lr/lora_adapter
+Loaded model: <class 'transformers_modules.openvla-7b+dual_masked_goal+b4+lr-0.0005+lora-r32+dropout-0.0+lora-attn-only--suite_goal_oft_lr.modeling_prismatic.OpenVLAForActionPrediction'>
+trainable params: 2,672,640 || all params: 733,584,320 || trainable%: 0.3643
+08/25 [08:28:39] INFO     | >> Trainable tensors: run_rl_lora_color_quick.py:696
+                          lora=204 other=20                                     
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+08/25 [08:28:41] INFO     | >> Task 5: push the   run_rl_lora_color_quick.py:708
+                          plate to the front of                                 
+                          the stove                                             
+08/25 [08:29:04] INFO     | >> iter 0 group 0     run_rl_lora_color_quick.py:741
+                          sample 0 color0                                       
+                          success=False chunks=19                               
+08/25 [08:29:25] INFO     | >> iter 0 group 0     run_rl_lora_color_quick.py:741
+                          sample 1 color0                                       
+                          success=False chunks=19                               
+08/25 [08:29:46] INFO     | >> iter 0 group 0     run_rl_lora_color_quick.py:741
+                          sample 2 color0                                       
+                          success=False chunks=19                               
+08/25 [08:30:08] INFO     | >> iter 0 group 0     run_rl_lora_color_quick.py:741
+                          sample 3 color0                                       
+                          success=False chunks=19                               
+08/25 [08:30:32] INFO     | >> iter 0 group 1     run_rl_lora_color_quick.py:741
+                          sample 0 color1                                       
+                          success=False chunks=19                               
+08/25 [08:30:54] INFO     | >> iter 0 group 1     run_rl_lora_color_quick.py:741
+                          sample 1 color1                                       
+                          success=False chunks=19                               
+08/25 [08:31:16] INFO     | >> iter 0 group 1     run_rl_lora_color_quick.py:741
+                          sample 2 color1                                       
+                          success=False chunks=19                               
+08/25 [08:31:37] INFO     | >> iter 0 group 1     run_rl_lora_color_quick.py:741
+                          sample 3 color1                                       
+                          success=False chunks=19                               
+                 INFO     | >> iter 0             run_rl_lora_color_quick.py:756
+                          metrics={'iter': 0,                                   
+                          'train_sr': 0.0,                                      
+                          'loss': 0.0,                                          
+                          'group_sr': 0.0,                                      
+                          'n_pos': 0, 'skipped':                                
+                          1.0, 'n_groups_used':                                 
+                          0.0, 'elapsed_s':                                     
+                          175.6150665283203}                                    
+08/25 [08:31:55] INFO     | >> iter 1 group 0     run_rl_lora_color_quick.py:741
+                          sample 0 color0                                       
+                          success=True chunks=17                                
+08/25 [08:32:11] INFO     | >> iter 1 group 0     run_rl_lora_color_quick.py:741
+                          sample 1 color0                                       
+                          success=True chunks=16                                
+08/25 [08:32:29] INFO     | >> iter 1 group 0     run_rl_lora_color_quick.py:741
+                          sample 2 color0                                       
+                          success=True chunks=17                                
+08/25 [08:32:46] INFO     | >> iter 1 group 0     run_rl_lora_color_quick.py:741
+                          sample 3 color0                                       
+                          success=True chunks=16                                
+08/25 [08:33:06] INFO     | >> iter 1 group 1     run_rl_lora_color_quick.py:741
+                          sample 0 color1                                       
+                          success=False chunks=19                               
+08/25 [08:33:26] INFO     | >> iter 1 group 1     run_rl_lora_color_quick.py:741
+                          sample 1 color1                                       
+                          success=False chunks=19                               
+08/25 [08:33:46] INFO     | >> iter 1 group 1     run_rl_lora_color_quick.py:741
+                          sample 2 color1                                       
+                          success=False chunks=19                               
+08/25 [08:34:07] INFO     | >> iter 1 group 1     run_rl_lora_color_quick.py:741
+                          sample 3 color1                                       
+                          success=False chunks=19                               
+                 INFO     | >> iter 1             run_rl_lora_color_quick.py:756
+                          metrics={'iter': 1,                                   
+                          'train_sr': 0.5,                                      
+                          'loss': 0.0,                                          
+                          'group_sr': 0.5,                                      
+                          'n_pos': 0, 'skipped':                                
+                          1.0, 'n_groups_used':                                 
+                          0.0, 'elapsed_s':                                     
+                          325.77789783477783}                                   
+                 INFO     | >> Saved unmerged RL  run_rl_lora_color_quick.py:448
+                          LoRA ->                                               
+                          /var/lib/docker/data/ch                               
+                          eckpoints/fan-test/1683                               
+                          1pro_fine_tune/runs/rl_                               
+                          lora_color_quick/libero                               
+                          _goal_task5_mask_plate5                               
+                          _color/lora_adapter                                   
+08/25 [08:34:23] INFO     | >> iter 2 group 0     run_rl_lora_color_quick.py:741
+                          sample 0 color0                                       
+                          success=True chunks=15                                
+08/25 [08:34:39] INFO     | >> iter 2 group 0     run_rl_lora_color_quick.py:741
+                          sample 1 color0                                       
+                          success=True chunks=16                                
+08/25 [08:34:59] INFO     | >> iter 2 group 0     run_rl_lora_color_quick.py:741
+                          sample 2 color0                                       
+                          success=False chunks=19                               
+08/25 [08:35:15] INFO     | >> iter 2 group 0     run_rl_lora_color_quick.py:741
+                          sample 3 color0                                       
+                          success=True chunks=15                                
+08/25 [08:35:30] INFO     | >> iter 2 group 1     run_rl_lora_color_quick.py:741
+                          sample 0 color1                                       
+                          success=True chunks=15                                
+08/25 [08:35:50] INFO     | >> iter 2 group 1     run_rl_lora_color_quick.py:741
+                          sample 1 color1                                       
+                          success=False chunks=19                               
+08/25 [08:36:07] INFO     | >> iter 2 group 1     run_rl_lora_color_quick.py:741
+                          sample 2 color1                                       
+                          success=True chunks=17                                
+08/25 [08:36:24] INFO     | >> iter 2 group 1     run_rl_lora_color_quick.py:741
+                          sample 3 color1                                       
+                          success=True chunks=16                                
+`use_cache=True` is incompatible with gradient checkpointing. Setting `use_cache=False`.
+08/25 [08:36:27] INFO     | >> iter 2             run_rl_lora_color_quick.py:756
+                          metrics={'iter': 2,                                   
+                          'train_sr': 0.75,                                     
+                          'loss':                                               
+                          0.04974365234375,                                     
+                          'group_sr': 0.75,                                     
+                          'n_pos': 20.0,                                        
+                          'skipped': 0.0,                                       
+                          'n_groups_used': 2.0,                                 
+                          'elapsed_s':                                          
+                          466.23548316955566}                                   
+08/25 [08:36:46] INFO     | >> iter 3 group 0     run_rl_lora_color_quick.py:741
+                          sample 0 color0                                       
+                          success=False chunks=19                               
+08/25 [08:37:05] INFO     | >> iter 3 group 0     run_rl_lora_color_quick.py:741
+                          sample 1 color0                                       
+                          success=False chunks=19                               
+08/25 [08:37:23] INFO     | >> iter 3 group 0     run_rl_lora_color_quick.py:741
+                          sample 2 color0                                       
+                          success=False chunks=19                               
+08/25 [08:37:42] INFO     | >> iter 3 group 0     run_rl_lora_color_quick.py:741
+                          sample 3 color0                                       
+                          success=False chunks=19                               
+08/25 [08:38:01] INFO     | >> iter 3 group 1     run_rl_lora_color_quick.py:741
+                          sample 0 color1                                       
+                          success=False chunks=19                               
+08/25 [08:38:21] INFO     | >> iter 3 group 1     run_rl_lora_color_quick.py:741
+                          sample 1 color1                                       
+                          success=False chunks=19                               
+08/25 [08:38:41] INFO     | >> iter 3 group 1     run_rl_lora_color_quick.py:741
+                          sample 2 color1                                       
+                          success=False chunks=19                               
+08/25 [08:39:01] INFO     | >> iter 3 group 1     run_rl_lora_color_quick.py:741
+                          sample 3 color1                                       
+                          success=False chunks=19                               
+                 INFO     | >> iter 3             run_rl_lora_color_quick.py:756
+                          metrics={'iter': 3,                                   
+                          'train_sr': 0.0,                                      
+                          'loss': 0.0,                                          
+                          'group_sr': 0.0,                                      
+                          'n_pos': 0, 'skipped':                                
+                          1.0, 'n_groups_used':                                 
+                          0.0, 'elapsed_s':                                     
+                          619.9445199966431}                                    
+                 INFO     | >> Saved unmerged RL  run_rl_lora_color_quick.py:448
+                          LoRA ->                                               
+                          /var/lib/docker/data/ch                               
+                          eckpoints/fan-test/1683                               
+                          1pro_fine_tune/runs/rl_                               
+                          lora_color_quick/libero                               
+                          _goal_task5_mask_plate5                               
+                          _color/lora_adapter                                   
+08/25 [08:39:21] INFO     | >> iter 4 group 0     run_rl_lora_color_quick.py:741
+                          sample 0 color0                                       
+                          success=False chunks=19                               
+08/25 [08:39:40] INFO     | >> iter 4 group 0     run_rl_lora_color_quick.py:741
+                          sample 1 color0                                       
+                          success=False chunks=19                               
+08/25 [08:39:59] INFO     | >> iter 4 group 0     run_rl_lora_color_quick.py:741
+                          sample 2 color0                                       
+                          success=False chunks=19                               
+08/25 [08:40:18] INFO     | >> iter 4 group 0     run_rl_lora_color_quick.py:741
+                          sample 3 color0                                       
+                          success=False chunks=19                               
+08/25 [08:40:37] INFO     | >> iter 4 group 1     run_rl_lora_color_quick.py:741
+                          sample 0 color1                                       
+                          success=False chunks=19                               
+08/25 [08:40:56] INFO     | >> iter 4 group 1     run_rl_lora_color_quick.py:741
+                          sample 1 color1                                       
+                          success=False chunks=19                               
+08/25 [08:41:15] INFO     | >> iter 4 group 1     run_rl_lora_color_quick.py:741
+                          sample 2 color1                                       
+                          success=False chunks=19                               
+08/25 [08:41:34] INFO     | >> iter 4 group 1     run_rl_lora_color_quick.py:741
+                          sample 3 color1                                       
+                          success=False chunks=19                               
+                 INFO     | >> iter 4             run_rl_lora_color_quick.py:756
+                          metrics={'iter': 4,                                   
+                          'train_sr': 0.0,                                      
+                          'loss': 0.0,                                          
+                          'group_sr': 0.0,                                      
+                          'n_pos': 0, 'skipped':                                
+                          1.0, 'n_groups_used':                                 
+                          0.0, 'elapsed_s':                                     
+                          772.8757245540619}                                    
+08/25 [08:41:53] INFO     | >> iter 5 group 0     run_rl_lora_color_quick.py:741
+                          sample 0 color0                                       
+                          success=False chunks=19                               
+08/25 [08:42:12] INFO     | >> iter 5 group 0     run_rl_lora_color_quick.py:741
+                          sample 1 color0                                       
+                          success=False chunks=19                               
+08/25 [08:42:30] INFO     | >> iter 5 group 0     run_rl_lora_color_quick.py:741
+                          sample 2 color0                                       
+                          success=False chunks=19                               
+08/25 [08:42:49] INFO     | >> iter 5 group 0     run_rl_lora_color_quick.py:741
+                          sample 3 color0                                       
+                          success=False chunks=19                               
+08/25 [08:43:07] INFO     | >> iter 5 group 1     run_rl_lora_color_quick.py:741
+                          sample 0 color1                                       
+                          success=False chunks=19                               
+08/25 [08:43:26] INFO     | >> iter 5 group 1     run_rl_lora_color_quick.py:741
+                          sample 1 color1                                       
+                          success=False chunks=19                               
+08/25 [08:43:44] INFO     | >> iter 5 group 1     run_rl_lora_color_quick.py:741
+                          sample 2 color1                                       
+                          success=False chunks=19                               
+08/25 [08:44:03] INFO     | >> iter 5 group 1     run_rl_lora_color_quick.py:741
+                          sample 3 color1                                       
+                          success=False chunks=19                               
+                 INFO     | >> iter 5             run_rl_lora_color_quick.py:756
+                          metrics={'iter': 5,                                   
+                          'train_sr': 0.0,                                      
+                          'loss': 0.0,                                          
+                          'group_sr': 0.0,                                      
+                          'n_pos': 0, 'skipped':                                
+                          1.0, 'n_groups_used':                                 
+                          0.0, 'elapsed_s':                                     
+                          922.4376764297485}                                    
+                 INFO     | >> Saved unmerged RL  run_rl_lora_color_quick.py:448
+                          LoRA ->                                               
+                          /var/lib/docker/data/ch                               
+                          eckpoints/fan-test/1683                               
+                          1pro_fine_tune/runs/rl_                               
+                          lora_color_quick/libero                               
+                          _goal_task5_mask_plate5                               
+                          _color/lora_adapter                                   
+08/25 [08:44:23] INFO     | >> iter 6 group 0     run_rl_lora_color_quick.py:741
+                          sample 0 color0                                       
+                          success=False chunks=19                               
+08/25 [08:44:41] INFO     | >> iter 6 group 0     run_rl_lora_color_quick.py:741
+                          sample 1 color0                                       
+                          success=False chunks=19                               
+08/25 [08:45:01] INFO     | >> iter 6 group 0     run_rl_lora_color_quick.py:741
+                          sample 2 color0                                       
+                          success=False chunks=19                               
+08/25 [08:45:20] INFO     | >> iter 6 group 0     run_rl_lora_color_quick.py:741
+                          sample 3 color0                                       
+                          success=False chunks=19                               
+08/25 [08:45:40] INFO     | >> iter 6 group 1     run_rl_lora_color_quick.py:741
+                          sample 0 color1                                       
+                          success=False chunks=19                               
+08/25 [08:45:59] INFO     | >> iter 6 group 1     run_rl_lora_color_quick.py:741
+                          sample 1 color1                                       
+                          success=False chunks=19                               
+08/25 [08:46:18] INFO     | >> iter 6 group 1     run_rl_lora_color_quick.py:741
+                          sample 2 color1                                       
+                          success=False chunks=19                               
+08/25 [08:46:38] INFO     | >> iter 6 group 1     run_rl_lora_color_quick.py:741
+                          sample 3 color1                                       
+                          success=False chunks=19                               
+                 INFO     | >> iter 6             run_rl_lora_color_quick.py:756
+                          metrics={'iter': 6,                                   
+                          'train_sr': 0.0,                                      
+                          'loss': 0.0,                                          
+                          'group_sr': 0.0,                                      
+                          'n_pos': 0, 'skipped':                                
+                          1.0, 'n_groups_used':                                 
+                          0.0, 'elapsed_s':                                     
+                          1076.6305983066559}                                   
+08/25 [08:46:57] INFO     | >> iter 7 group 0     run_rl_lora_color_quick.py:741
+                          sample 0 color0                                       
+                          success=False chunks=19                               
+08/25 [08:47:17] INFO     | >> iter 7 group 0     run_rl_lora_color_quick.py:741
+                          sample 1 color0                                       
+                          success=False chunks=19                               
+08/25 [08:47:36] INFO     | >> iter 7 group 0     run_rl_lora_color_quick.py:741
+                          sample 2 color0                                       
+                          success=False chunks=19                               
+08/25 [08:47:55] INFO     | >> iter 7 group 0     run_rl_lora_color_quick.py:741
+                          sample 3 color0                                       
+                          success=False chunks=19                               
+08/25 [08:48:13] INFO     | >> iter 7 group 1     run_rl_lora_color_quick.py:741
+                          sample 0 color1                                       
+                          success=False chunks=19                               
+08/25 [08:48:31] INFO     | >> iter 7 group 1     run_rl_lora_color_quick.py:741
+                          sample 1 color1                                       
+                          success=False chunks=19                               
+08/25 [08:48:50] INFO     | >> iter 7 group 1     run_rl_lora_color_quick.py:741
+                          sample 2 color1                                       
+                          success=False chunks=19                               
+08/25 [08:49:08] INFO     | >> iter 7 group 1     run_rl_lora_color_quick.py:741
+                          sample 3 color1                                       
+                          success=False chunks=19                               
+                 INFO     | >> iter 7             run_rl_lora_color_quick.py:756
+                          metrics={'iter': 7,                                   
+                          'train_sr': 0.0,                                      
+                          'loss': 0.0,                                          
+                          'group_sr': 0.0,                                      
+                          'n_pos': 0, 'skipped':                                
+                          1.0, 'n_groups_used':                                 
+                          0.0, 'elapsed_s':                                     
+                          1226.8062267303467}                                   
+                 INFO     | >> Saved unmerged RL  run_rl_lora_color_quick.py:448
+                          LoRA ->                                               
+                          /var/lib/docker/data/ch                               
+                          eckpoints/fan-test/1683                               
+                          1pro_fine_tune/runs/rl_                               
+                          lora_color_quick/libero                               
+                          _goal_task5_mask_plate5                               
+                          _color/lora_adapter                                   
+08/25 [08:49:28] INFO     | >>  color0 trial0     run_rl_lora_color_quick.py:512
+                          success=False                                         
+08/25 [08:49:47] INFO     | >>  color0 trial1     run_rl_lora_color_quick.py:512
+                          success=False                                         
+08/25 [08:50:05] INFO     | >>  color0 trial2     run_rl_lora_color_quick.py:512
+                          success=False                                         
+08/25 [08:50:24] INFO     | >>  color0 trial3     run_rl_lora_color_quick.py:512
+                          success=False                                         
+08/25 [08:50:43] INFO     | >>  color1 trial0     run_rl_lora_color_quick.py:512
+                          success=False                                         
+08/25 [08:51:02] INFO     | >>  color1 trial1     run_rl_lora_color_quick.py:512
+                          success=False                                         
+08/25 [08:51:21] INFO     | >>  color1 trial2     run_rl_lora_color_quick.py:512
+                          success=False                                         
+08/25 [08:51:39] INFO     | >>  color1 trial3     run_rl_lora_color_quick.py:512
+                          success=False                                         
+                 INFO     | >>  overall SR=0.000  run_rl_lora_color_quick.py:515
+                          (0/8)                                                 
+                 INFO     | >> Saved unmerged RL  run_rl_lora_color_quick.py:448
+                          LoRA ->                                               
+                          /var/lib/docker/data/ch                               
+                          eckpoints/fan-test/1683                               
+                          1pro_fine_tune/runs/rl_                               
+                          lora_color_quick/libero                               
+                          _goal_task5_mask_plate5                               
+                          _color/lora_adapter                                   
+08/25 [08:51:40] INFO     | >> DONE               run_rl_lora_color_quick.py:792
+                          summary={'task': 'push                                
+                          the plate to the front                                
+                          of the stove',                                        
+                          'task_id': 5, 'suite':                                
+                          'libero_goal',                                        
+                          'baseline_sr': None,                                  
+                          'final_sr': 0.0,                                      
+                          'save_dir':                                           
+                          '/var/lib/docker/data/c                               
+                          heckpoints/fan-test/168                               
+                          31pro_fine_tune/runs/rl                               
+                          _lora_color_quick/liber                               
+                          o_goal_task5_mask_plate                               
+                          5_color', 'merged':                                   
+                          False}                                                
+Exception ignored in: <function MjRenderContext.__del__ at 0x7f80679a0790>
+Traceback (most recent call last):
+  File "/var/lib/docker/data/checkpoints/fan-test/16831pro_fine_tune/conda_envs/simplevla/lib/python3.10/site-packages/robosuite/utils/binding_utils.py", line 199, in __del__
+    self.gl_ctx.free()
+  File "/var/lib/docker/data/checkpoints/fan-test/16831pro_fine_tune/conda_envs/simplevla/lib/python3.10/site-packages/robosuite/renderers/context/egl_context.py", line 150, in free
+    EGL.eglDestroyContext(EGL_DISPLAY, self._context)
+  File "/var/lib/docker/data/checkpoints/fan-test/16831pro_fine_tune/conda_envs/simplevla/lib/python3.10/site-packages/OpenGL/error.py", line 230, in glCheckError
+    raise self._errorClass(
+OpenGL.raw.EGL._errors.EGLError: EGLError(
+	err = EGL_NOT_INITIALIZED,
+	baseOperation = eglDestroyContext,
+	cArguments = (
+		<OpenGL._opaque.EGLDisplay_pointer object at 0x7f802b278ec0>,
+		<OpenGL._opaque.EGLContext_pointer object at 0x7f7fa3660a40>,
+	),
+	result = 0
+)
+Exception ignored in: <function EGLGLContext.__del__ at 0x7f80679a05e0>
+Traceback (most recent call last):
+  File "/var/lib/docker/data/checkpoints/fan-test/16831pro_fine_tune/conda_envs/simplevla/lib/python3.10/site-packages/robosuite/renderers/context/egl_context.py", line 155, in __del__
+    self.free()
+  File "/var/lib/docker/data/checkpoints/fan-test/16831pro_fine_tune/conda_envs/simplevla/lib/python3.10/site-packages/robosuite/renderers/context/egl_context.py", line 150, in free
+    EGL.eglDestroyContext(EGL_DISPLAY, self._context)
+  File "/var/lib/docker/data/checkpoints/fan-test/16831pro_fine_tune/conda_envs/simplevla/lib/python3.10/site-packages/OpenGL/error.py", line 230, in glCheckError
+    raise self._errorClass(
+OpenGL.raw.EGL._errors.EGLError: EGLError(
+	err = EGL_NOT_INITIALIZED,
+	baseOperation = eglDestroyContext,
+	cArguments = (
+		<OpenGL._opaque.EGLDisplay_pointer object at 0x7f802b278ec0>,
+		<OpenGL._opaque.EGLContext_pointer object at 0x7f7fa3660a40>,
+	),
+	result = 0
+)
+Exception ignored in: <function MjRenderContext.__del__ at 0x7f80679a0790>
+Traceback (most recent call last):
+  File "/var/lib/docker/data/checkpoints/fan-test/16831pro_fine_tune/conda_envs/simplevla/lib/python3.10/site-packages/robosuite/utils/binding_utils.py", line 199, in __del__
+    self.gl_ctx.free()
+  File "/var/lib/docker/data/checkpoints/fan-test/16831pro_fine_tune/conda_envs/simplevla/lib/python3.10/site-packages/robosuite/renderers/context/egl_context.py", line 149, in free
+    EGL.eglMakeCurrent(EGL_DISPLAY, EGL.EGL_NO_SURFACE, EGL.EGL_NO_SURFACE, EGL.EGL_NO_CONTEXT)
+  File "/var/lib/docker/data/checkpoints/fan-test/16831pro_fine_tune/conda_envs/simplevla/lib/python3.10/site-packages/OpenGL/error.py", line 230, in glCheckError
+    raise self._errorClass(
+OpenGL.raw.EGL._errors.EGLError: EGLError(
+	err = EGL_NOT_INITIALIZED,
+	baseOperation = eglMakeCurrent,
+	cArguments = (
+		<OpenGL._opaque.EGLDisplay_pointer object at 0x7f802b278ec0>,
+		<OpenGL._opaque.EGLSurface_pointer object at 0x7f80689cfac0>,
+		<OpenGL._opaque.EGLSurface_pointer object at 0x7f80689cfac0>,
+		<OpenGL._opaque.EGLContext_pointer object at 0x7f80689cf540>,
+	),
+	result = 0
+)
+Exception ignored in: <function EGLGLContext.__del__ at 0x7f80679a05e0>
+Traceback (most recent call last):
+  File "/var/lib/docker/data/checkpoints/fan-test/16831pro_fine_tune/conda_envs/simplevla/lib/python3.10/site-packages/robosuite/renderers/context/egl_context.py", line 155, in __del__
+    self.free()
+  File "/var/lib/docker/data/checkpoints/fan-test/16831pro_fine_tune/conda_envs/simplevla/lib/python3.10/site-packages/robosuite/renderers/context/egl_context.py", line 149, in free
+    EGL.eglMakeCurrent(EGL_DISPLAY, EGL.EGL_NO_SURFACE, EGL.EGL_NO_SURFACE, EGL.EGL_NO_CONTEXT)
+  File "/var/lib/docker/data/checkpoints/fan-test/16831pro_fine_tune/conda_envs/simplevla/lib/python3.10/site-packages/OpenGL/error.py", line 230, in glCheckError
+    raise self._errorClass(
+OpenGL.raw.EGL._errors.EGLError: EGLError(
+	err = EGL_NOT_INITIALIZED,
+	baseOperation = eglMakeCurrent,
+	cArguments = (
+		<OpenGL._opaque.EGLDisplay_pointer object at 0x7f802b278ec0>,
+		<OpenGL._opaque.EGLSurface_pointer object at 0x7f80689cfac0>,
+		<OpenGL._opaque.EGLSurface_pointer object at 0x7f80689cfac0>,
+		<OpenGL._opaque.EGLContext_pointer object at 0x7f80689cf540>,
+	),
+	result = 0
+)
+===== 2026-08-25T08:51:42+00:00 DONE rc=0 save=/var/lib/docker/data/checkpoints/fan-test/16831pro_fine_tune/runs/rl_lora_color_quick/libero_goal_task5_mask_plate5_color =====
+SUMMARY:
+{
+  "task": "push the plate to the front of the stove",
+  "task_id": 5,
+  "suite": "libero_goal",
+  "baseline_sr": null,
+  "final_sr": 0.0,
+  "save_dir": "/var/lib/docker/data/checkpoints/fan-test/16831pro_fine_tune/runs/rl_lora_color_quick/libero_goal_task5_mask_plate5_color",
+  "merged": false
+}
