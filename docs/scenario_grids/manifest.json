@@ -1,0 +1,1582 @@
+[
+  {
+    "scenario": "origin",
+    "part": 1,
+    "n_parts": 2,
+    "n_tiles": 15,
+    "n_success_in_scenario": 26,
+    "n_tasks": 30,
+    "path": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/scenario_grids/grid_origin_part1of2.mp4",
+    "tasks": [
+      {
+        "task": "open_the_middle_drawer_of_the_cabinet",
+        "success": true,
+        "trial": 2,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_27--ours_masked--episode=2--success=True--task=open_the_middle_drawer_of_the_cabinet--sidebyside_open_middle_drawer_cabinet_ours_masked-baseline_trial2.mp4"
+      },
+      {
+        "task": "open_the_top_drawer_and_put_the_bowl_inside",
+        "success": true,
+        "trial": 2,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_27--ours_masked--episode=26--success=True--task=open_the_top_drawer_and_put_the_bowl_inside--sidebyside_open_top_drawer_put_ours_masked-baseline_trial2.mp4"
+      },
+      {
+        "task": "pick_up_the_alphabet_soup_and_place_it_in_the_bask",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_27--ours_masked--episode=3--success=True--task=pick_up_the_alphabet_soup_and_place_it_in_the_bask--sidebyside_pick_up_alphabet_soup_ours_masked-baseline_trial3.mp4"
+      },
+      {
+        "task": "pick_up_the_black_bowl_between_the_plate_and_the_r",
+        "success": false,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_27/2026_07_27-15_18_42--ours_masked_sam3--episode=3--success=False--task=pick_up_the_black_bowl_between_the_plate_and_the_r--sidebyside_pick_up_black_bowl_ours_masked_sam3-baseline_trial3.mp4"
+      },
+      {
+        "task": "pick_up_the_black_bowl_from_table_center_and_place",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_27--ours_masked--episode=15--success=True--task=pick_up_the_black_bowl_from_table_center_and_place--sidebyside_pick_up_black_bowl_ours_masked-baseline_trial3.mp4"
+      },
+      {
+        "task": "pick_up_the_black_bowl_in_the_top_drawer_of_the_wo",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_27--ours_masked--episode=39--success=True--task=pick_up_the_black_bowl_in_the_top_drawer_of_the_wo--sidebyside_pick_up_black_bowl_ours_masked-baseline_trial3.mp4"
+      },
+      {
+        "task": "pick_up_the_black_bowl_next_to_the_cookie_box_and_",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_27/2026_07_27-15_18_42--ours_masked_sam3--episode=75--success=True--task=pick_up_the_black_bowl_next_to_the_cookie_box_and_--sidebyside_pick_up_black_bowl_ours_masked_sam3-baseline_trial3.mp4"
+      },
+      {
+        "task": "pick_up_the_black_bowl_next_to_the_plate_and_place",
+        "success": true,
+        "trial": 2,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_27--ours_masked--episode=86--success=True--task=pick_up_the_black_bowl_next_to_the_plate_and_place--sidebyside_pick_up_black_bowl_ours_masked-baseline_trial2.mp4"
+      },
+      {
+        "task": "pick_up_the_black_bowl_next_to_the_ramekin_and_pla",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_27--ours_masked--episode=3--success=True--task=pick_up_the_black_bowl_next_to_the_ramekin_and_pla--sidebyside_pick_up_black_bowl_ours_masked-baseline_trial3.mp4"
+      },
+      {
+        "task": "pick_up_the_black_bowl_on_the_cookie_box_and_place",
+        "success": false,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_27/2026_07_27-15_18_42--ours_masked_sam3--episode=39--success=False--task=pick_up_the_black_bowl_on_the_cookie_box_and_place--sidebyside_pick_up_black_bowl_ours_masked_sam3-baseline_trial3.mp4"
+      },
+      {
+        "task": "pick_up_the_black_bowl_on_the_ramekin_and_place_it",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_27--ours_masked--episode=51--success=True--task=pick_up_the_black_bowl_on_the_ramekin_and_place_it--sidebyside_pick_up_black_bowl_ours_masked-baseline_trial3.mp4"
+      },
+      {
+        "task": "pick_up_the_black_bowl_on_the_stove_and_place_it_o",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_27--ours_masked--episode=75--success=True--task=pick_up_the_black_bowl_on_the_stove_and_place_it_o--sidebyside_pick_up_black_bowl_ours_masked-baseline_trial3.mp4"
+      },
+      {
+        "task": "pick_up_the_black_bowl_on_the_wooden_cabinet_and_p",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_27/2026_07_27-16_01_52--ours_masked_sam3--episode=27--success=True--task=pick_up_the_black_bowl_on_the_wooden_cabinet_and_p--sidebyside_pick_up_black_bowl_ours_masked_sam3-baseline_trial3.mp4"
+      },
+      {
+        "task": "pick_up_the_book_in_the_middle_and_place_it_on_the",
+        "success": false,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_26--ours_masked--episode=3--success=False--task=pick_up_the_book_in_the_middle_and_place_it_on_the--sidebyside_pick_up_book_middle_ours_masked-baseline_trial3.mp4"
+      },
+      {
+        "task": "pick_up_the_book_on_the_left_and_place_it_on_top_o",
+        "success": true,
+        "trial": 2,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_26--ours_masked--episode=14--success=True--task=pick_up_the_book_on_the_left_and_place_it_on_top_o--sidebyside_pick_up_book_left_ours_masked-baseline_trial2.mp4"
+      }
+    ]
+  },
+  {
+    "scenario": "origin",
+    "part": 2,
+    "n_parts": 2,
+    "n_tiles": 15,
+    "n_success_in_scenario": 26,
+    "n_tasks": 30,
+    "path": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/scenario_grids/grid_origin_part2of2.mp4",
+    "tasks": [
+      {
+        "task": "pick_up_the_book_on_the_right_and_place_it_on_the_",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_26--ours_masked--episode=27--success=True--task=pick_up_the_book_on_the_right_and_place_it_on_the_--sidebyside_pick_up_book_right_ours_masked-baseline_trial3.mp4"
+      },
+      {
+        "task": "pick_up_the_book_on_the_right_and_place_it_under_t",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_26--ours_masked--episode=39--success=True--task=pick_up_the_book_on_the_right_and_place_it_under_t--sidebyside_pick_up_book_right_ours_masked-baseline_trial3.mp4"
+      },
+      {
+        "task": "pick_up_the_chocolate_pudding_and_place_it_in_the_",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_27--ours_masked--episode=63--success=True--task=pick_up_the_chocolate_pudding_and_place_it_in_the_--sidebyside_pick_up_chocolate_pudding_ours_masked-baseline_trial3.mp4"
+      },
+      {
+        "task": "pick_up_the_cream_cheese_and_place_it_in_the_baske",
+        "success": true,
+        "trial": 1,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_27--ours_masked--episode=13--success=True--task=pick_up_the_cream_cheese_and_place_it_in_the_baske--sidebyside_pick_up_cream_cheese_ours_masked-baseline_trial1.mp4"
+      },
+      {
+        "task": "pick_up_the_ketchup_and_place_it_in_the_basket",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_27--ours_masked--episode=27--success=True--task=pick_up_the_ketchup_and_place_it_in_the_basket--sidebyside_pick_up_ketchup_place_ours_masked-baseline_trial3.mp4"
+      },
+      {
+        "task": "pick_up_the_milk_and_place_it_in_the_basket",
+        "success": true,
+        "trial": 1,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_27--ours_masked--episode=49--success=True--task=pick_up_the_milk_and_place_it_in_the_basket--sidebyside_pick_up_milk_place_ours_masked-baseline_trial1.mp4"
+      },
+      {
+        "task": "pick_up_the_tomato_sauce_and_place_it_in_the_baske",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_27--ours_masked--episode=39--success=True--task=pick_up_the_tomato_sauce_and_place_it_in_the_baske--sidebyside_pick_up_tomato_sauce_ours_masked-baseline_trial3.mp4"
+      },
+      {
+        "task": "push_the_plate_to_the_front_of_the_stove",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_27/2026_07_27-15_18_42--ours_masked_sam1--episode=63--success=True--task=push_the_plate_to_the_front_of_the_stove--sidebyside_push_ours_masked_sam1-baseline_trial3.mp4"
+      },
+      {
+        "task": "put_the_bowl_on_the_plate",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_27/2026_07_27-15_18_42--ours_masked_sam1--episode=99--success=True--task=put_the_bowl_on_the_plate--sidebyside_put_ours_masked_sam1-baseline_trial3.mp4"
+      },
+      {
+        "task": "put_the_bowl_on_the_stove",
+        "success": false,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_27/2026_07_27-15_18_42--ours_masked_sam1--episode=15--success=False--task=put_the_bowl_on_the_stove--sidebyside_put_bowl_stove_ours_masked_sam1-baseline_trial3.mp4"
+      },
+      {
+        "task": "put_the_bowl_on_top_of_the_cabinet",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_27/2026_07_27-15_18_42--ours_masked_sam1--episode=51--success=True--task=put_the_bowl_on_top_of_the_cabinet--sidebyside_put_bowl_top_cabinet_ours_masked_sam1-baseline_trial3.mp4"
+      },
+      {
+        "task": "put_the_cream_cheese_in_the_bowl",
+        "success": true,
+        "trial": 2,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_27--ours_masked--episode=62--success=True--task=put_the_cream_cheese_in_the_bowl--sidebyside_put_cream_cheese_bowl_ours_masked-baseline_trial2.mp4"
+      },
+      {
+        "task": "put_the_wine_bottle_on_the_rack",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_27/2026_07_27-15_18_42--ours_masked_sam1--episode=111--success=True--task=put_the_wine_bottle_on_the_rack--sidebyside_put_wine_bottle_rack_ours_masked_sam1-baseline_trial3.mp4"
+      },
+      {
+        "task": "put_the_wine_bottle_on_top_of_the_cabinet",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_27/2026_07_27-15_18_42--ours_masked_sam1--episode=27--success=True--task=put_the_wine_bottle_on_top_of_the_cabinet--sidebyside_put_wine_bottle_top_ours_masked_sam1-baseline_trial3.mp4"
+      },
+      {
+        "task": "turn_on_the_stove",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_27--ours_masked--episode=75--success=True--task=turn_on_the_stove--sidebyside_turn_stove_ours_masked-baseline_trial3.mp4"
+      }
+    ]
+  },
+  {
+    "scenario": "lang_l1",
+    "part": 1,
+    "n_parts": 2,
+    "n_tiles": 15,
+    "n_success_in_scenario": 26,
+    "n_tasks": 30,
+    "path": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/scenario_grids/grid_lang_l1_part1of2.mp4",
+    "tasks": [
+      {
+        "task": "open_the_middle_drawer_of_the_cabinet",
+        "success": true,
+        "trial": 1,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_27--ours_masked--episode=1--success=True--task=open_the_middle_drawer_of_the_cabinet--sidebyside_open_middle_drawer_cabinet_ours_masked-baseline_trial1.mp4"
+      },
+      {
+        "task": "open_the_top_drawer_and_put_the_bowl_inside",
+        "success": true,
+        "trial": 2,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_27--ours_masked--episode=26--success=True--task=open_the_top_drawer_and_put_the_bowl_inside--sidebyside_open_top_drawer_put_ours_masked-baseline_trial2.mp4"
+      },
+      {
+        "task": "pick_up_the_alphabet_soup_and_place_it_in_the_bask",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_27--ours_masked--episode=3--success=True--task=pick_up_the_alphabet_soup_and_place_it_in_the_bask--sidebyside_pick_up_alphabet_soup_ours_masked-baseline_trial3.mp4"
+      },
+      {
+        "task": "pick_up_the_black_bowl_between_the_plate_and_the_r",
+        "success": false,
+        "trial": 1,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_27/2026_07_27-15_18_42--ours_masked_sam3--episode=1--success=False--task=pick_up_the_black_bowl_between_the_plate_and_the_r--sidebyside_pick_up_black_bowl_ours_masked_sam3-baseline_trial1.mp4"
+      },
+      {
+        "task": "pick_up_the_black_bowl_from_table_center_and_place",
+        "success": true,
+        "trial": 1,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_27--ours_masked--episode=13--success=True--task=pick_up_the_black_bowl_from_table_center_and_place--sidebyside_pick_up_black_bowl_ours_masked-baseline_trial1.mp4"
+      },
+      {
+        "task": "pick_up_the_black_bowl_in_the_top_drawer_of_the_wo",
+        "success": true,
+        "trial": 1,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_27--ours_masked--episode=37--success=True--task=pick_up_the_black_bowl_in_the_top_drawer_of_the_wo--sidebyside_pick_up_black_bowl_ours_masked-baseline_trial1.mp4"
+      },
+      {
+        "task": "pick_up_the_black_bowl_next_to_the_cookie_box_and_",
+        "success": true,
+        "trial": 1,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_27/2026_07_27-15_18_42--ours_masked_sam3--episode=73--success=True--task=pick_up_the_black_bowl_next_to_the_cookie_box_and_--sidebyside_pick_up_black_bowl_ours_masked_sam3-baseline_trial1.mp4"
+      },
+      {
+        "task": "pick_up_the_black_bowl_next_to_the_plate_and_place",
+        "success": true,
+        "trial": 1,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_27--ours_masked--episode=85--success=True--task=pick_up_the_black_bowl_next_to_the_plate_and_place--sidebyside_pick_up_black_bowl_ours_masked-baseline_trial1.mp4"
+      },
+      {
+        "task": "pick_up_the_black_bowl_next_to_the_ramekin_and_pla",
+        "success": true,
+        "trial": 1,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_27--ours_masked--episode=1--success=True--task=pick_up_the_black_bowl_next_to_the_ramekin_and_pla--sidebyside_pick_up_black_bowl_ours_masked-baseline_trial1.mp4"
+      },
+      {
+        "task": "pick_up_the_black_bowl_on_the_cookie_box_and_place",
+        "success": false,
+        "trial": 1,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_27/2026_07_27-15_18_42--ours_masked_sam3--episode=37--success=False--task=pick_up_the_black_bowl_on_the_cookie_box_and_place--sidebyside_pick_up_black_bowl_ours_masked_sam3-baseline_trial1.mp4"
+      },
+      {
+        "task": "pick_up_the_black_bowl_on_the_ramekin_and_place_it",
+        "success": true,
+        "trial": 1,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_27--ours_masked--episode=49--success=True--task=pick_up_the_black_bowl_on_the_ramekin_and_place_it--sidebyside_pick_up_black_bowl_ours_masked-baseline_trial1.mp4"
+      },
+      {
+        "task": "pick_up_the_black_bowl_on_the_stove_and_place_it_o",
+        "success": true,
+        "trial": 1,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_27--ours_masked--episode=73--success=True--task=pick_up_the_black_bowl_on_the_stove_and_place_it_o--sidebyside_pick_up_black_bowl_ours_masked-baseline_trial1.mp4"
+      },
+      {
+        "task": "pick_up_the_black_bowl_on_the_wooden_cabinet_and_p",
+        "success": true,
+        "trial": 1,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_27--ours_masked--episode=97--success=True--task=pick_up_the_black_bowl_on_the_wooden_cabinet_and_p--sidebyside_pick_up_black_bowl_ours_masked-baseline_trial1.mp4"
+      },
+      {
+        "task": "pick_up_the_book_in_the_middle_and_place_it_on_the",
+        "success": false,
+        "trial": 1,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_26--ours_masked--episode=1--success=False--task=pick_up_the_book_in_the_middle_and_place_it_on_the--sidebyside_pick_up_book_middle_ours_masked-baseline_trial1.mp4"
+      },
+      {
+        "task": "pick_up_the_book_on_the_left_and_place_it_on_top_o",
+        "success": true,
+        "trial": 1,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_26--ours_masked--episode=13--success=True--task=pick_up_the_book_on_the_left_and_place_it_on_top_o--sidebyside_pick_up_book_left_ours_masked-baseline_trial1.mp4"
+      }
+    ]
+  },
+  {
+    "scenario": "lang_l1",
+    "part": 2,
+    "n_parts": 2,
+    "n_tiles": 15,
+    "n_success_in_scenario": 26,
+    "n_tasks": 30,
+    "path": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/scenario_grids/grid_lang_l1_part2of2.mp4",
+    "tasks": [
+      {
+        "task": "pick_up_the_book_on_the_right_and_place_it_on_the_",
+        "success": true,
+        "trial": 1,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_26--ours_masked--episode=25--success=True--task=pick_up_the_book_on_the_right_and_place_it_on_the_--sidebyside_pick_up_book_right_ours_masked-baseline_trial1.mp4"
+      },
+      {
+        "task": "pick_up_the_book_on_the_right_and_place_it_under_t",
+        "success": true,
+        "trial": 1,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_26--ours_masked--episode=37--success=True--task=pick_up_the_book_on_the_right_and_place_it_under_t--sidebyside_pick_up_book_right_ours_masked-baseline_trial1.mp4"
+      },
+      {
+        "task": "pick_up_the_chocolate_pudding_and_place_it_in_the_",
+        "success": true,
+        "trial": 1,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_27--ours_masked--episode=61--success=True--task=pick_up_the_chocolate_pudding_and_place_it_in_the_--sidebyside_pick_up_chocolate_pudding_ours_masked-baseline_trial1.mp4"
+      },
+      {
+        "task": "pick_up_the_cream_cheese_and_place_it_in_the_baske",
+        "success": true,
+        "trial": 1,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_27--ours_masked--episode=13--success=True--task=pick_up_the_cream_cheese_and_place_it_in_the_baske--sidebyside_pick_up_cream_cheese_ours_masked-baseline_trial1.mp4"
+      },
+      {
+        "task": "pick_up_the_ketchup_and_place_it_in_the_basket",
+        "success": true,
+        "trial": 1,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_27--ours_masked--episode=25--success=True--task=pick_up_the_ketchup_and_place_it_in_the_basket--sidebyside_pick_up_ketchup_place_ours_masked-baseline_trial1.mp4"
+      },
+      {
+        "task": "pick_up_the_milk_and_place_it_in_the_basket",
+        "success": true,
+        "trial": 1,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_27--ours_masked--episode=49--success=True--task=pick_up_the_milk_and_place_it_in_the_basket--sidebyside_pick_up_milk_place_ours_masked-baseline_trial1.mp4"
+      },
+      {
+        "task": "pick_up_the_tomato_sauce_and_place_it_in_the_baske",
+        "success": true,
+        "trial": 1,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_27--ours_masked--episode=37--success=True--task=pick_up_the_tomato_sauce_and_place_it_in_the_baske--sidebyside_pick_up_tomato_sauce_ours_masked-baseline_trial1.mp4"
+      },
+      {
+        "task": "push_the_plate_to_the_front_of_the_stove",
+        "success": true,
+        "trial": 1,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_27/2026_07_27-15_18_42--ours_masked_sam1--episode=61--success=True--task=push_the_plate_to_the_front_of_the_stove--sidebyside_push_ours_masked_sam1-baseline_trial1.mp4"
+      },
+      {
+        "task": "put_the_bowl_on_the_plate",
+        "success": true,
+        "trial": 1,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_27/2026_07_27-15_18_42--ours_masked_sam1--episode=97--success=True--task=put_the_bowl_on_the_plate--sidebyside_put_ours_masked_sam1-baseline_trial1.mp4"
+      },
+      {
+        "task": "put_the_bowl_on_the_stove",
+        "success": false,
+        "trial": 1,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_27/2026_07_27-15_18_42--ours_masked_sam1--episode=13--success=False--task=put_the_bowl_on_the_stove--sidebyside_put_bowl_stove_ours_masked_sam1-baseline_trial1.mp4"
+      },
+      {
+        "task": "put_the_bowl_on_top_of_the_cabinet",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_27/2026_07_27-15_18_42--ours_masked_sam1--episode=51--success=True--task=put_the_bowl_on_top_of_the_cabinet--sidebyside_put_bowl_top_cabinet_ours_masked_sam1-baseline_trial3.mp4"
+      },
+      {
+        "task": "put_the_cream_cheese_in_the_bowl",
+        "success": true,
+        "trial": 2,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_27--ours_masked--episode=62--success=True--task=put_the_cream_cheese_in_the_bowl--sidebyside_put_cream_cheese_bowl_ours_masked-baseline_trial2.mp4"
+      },
+      {
+        "task": "put_the_wine_bottle_on_the_rack",
+        "success": true,
+        "trial": 1,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_27/2026_07_27-15_18_42--ours_masked_sam1--episode=109--success=True--task=put_the_wine_bottle_on_the_rack--sidebyside_put_wine_bottle_rack_ours_masked_sam1-baseline_trial1.mp4"
+      },
+      {
+        "task": "put_the_wine_bottle_on_top_of_the_cabinet",
+        "success": true,
+        "trial": 1,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_27/2026_07_27-15_18_42--ours_masked_sam1--episode=25--success=True--task=put_the_wine_bottle_on_top_of_the_cabinet--sidebyside_put_wine_bottle_top_ours_masked_sam1-baseline_trial1.mp4"
+      },
+      {
+        "task": "turn_on_the_stove",
+        "success": true,
+        "trial": 1,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_27--ours_masked--episode=73--success=True--task=turn_on_the_stove--sidebyside_turn_stove_ours_masked-baseline_trial1.mp4"
+      }
+    ]
+  },
+  {
+    "scenario": "lang_l2",
+    "part": 1,
+    "n_parts": 2,
+    "n_tiles": 15,
+    "n_success_in_scenario": 26,
+    "n_tasks": 30,
+    "path": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/scenario_grids/grid_lang_l2_part1of2.mp4",
+    "tasks": [
+      {
+        "task": "open_the_middle_drawer_of_the_cabinet",
+        "success": true,
+        "trial": 2,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_27--ours_masked--episode=2--success=True--task=open_the_middle_drawer_of_the_cabinet--sidebyside_open_middle_drawer_cabinet_ours_masked-baseline_trial2.mp4"
+      },
+      {
+        "task": "open_the_top_drawer_and_put_the_bowl_inside",
+        "success": true,
+        "trial": 2,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_27--ours_masked--episode=26--success=True--task=open_the_top_drawer_and_put_the_bowl_inside--sidebyside_open_top_drawer_put_ours_masked-baseline_trial2.mp4"
+      },
+      {
+        "task": "pick_up_the_alphabet_soup_and_place_it_in_the_bask",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_27--ours_masked--episode=3--success=True--task=pick_up_the_alphabet_soup_and_place_it_in_the_bask--sidebyside_pick_up_alphabet_soup_ours_masked-baseline_trial3.mp4"
+      },
+      {
+        "task": "pick_up_the_black_bowl_between_the_plate_and_the_r",
+        "success": false,
+        "trial": 2,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_27/2026_07_27-15_18_42--ours_masked_sam3--episode=2--success=False--task=pick_up_the_black_bowl_between_the_plate_and_the_r--sidebyside_pick_up_black_bowl_ours_masked_sam3-baseline_trial2.mp4"
+      },
+      {
+        "task": "pick_up_the_black_bowl_from_table_center_and_place",
+        "success": true,
+        "trial": 2,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_27--ours_masked--episode=14--success=True--task=pick_up_the_black_bowl_from_table_center_and_place--sidebyside_pick_up_black_bowl_ours_masked-baseline_trial2.mp4"
+      },
+      {
+        "task": "pick_up_the_black_bowl_in_the_top_drawer_of_the_wo",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_27--ours_masked--episode=39--success=True--task=pick_up_the_black_bowl_in_the_top_drawer_of_the_wo--sidebyside_pick_up_black_bowl_ours_masked-baseline_trial3.mp4"
+      },
+      {
+        "task": "pick_up_the_black_bowl_next_to_the_cookie_box_and_",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_27/2026_07_27-15_18_42--ours_masked_sam3--episode=75--success=True--task=pick_up_the_black_bowl_next_to_the_cookie_box_and_--sidebyside_pick_up_black_bowl_ours_masked_sam3-baseline_trial3.mp4"
+      },
+      {
+        "task": "pick_up_the_black_bowl_next_to_the_plate_and_place",
+        "success": true,
+        "trial": 2,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_27--ours_masked--episode=86--success=True--task=pick_up_the_black_bowl_next_to_the_plate_and_place--sidebyside_pick_up_black_bowl_ours_masked-baseline_trial2.mp4"
+      },
+      {
+        "task": "pick_up_the_black_bowl_next_to_the_ramekin_and_pla",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_27--ours_masked--episode=3--success=True--task=pick_up_the_black_bowl_next_to_the_ramekin_and_pla--sidebyside_pick_up_black_bowl_ours_masked-baseline_trial3.mp4"
+      },
+      {
+        "task": "pick_up_the_black_bowl_on_the_cookie_box_and_place",
+        "success": false,
+        "trial": 2,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_27/2026_07_27-15_18_42--ours_masked_sam3--episode=38--success=False--task=pick_up_the_black_bowl_on_the_cookie_box_and_place--sidebyside_pick_up_black_bowl_ours_masked_sam3-baseline_trial2.mp4"
+      },
+      {
+        "task": "pick_up_the_black_bowl_on_the_ramekin_and_place_it",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_27--ours_masked--episode=51--success=True--task=pick_up_the_black_bowl_on_the_ramekin_and_place_it--sidebyside_pick_up_black_bowl_ours_masked-baseline_trial3.mp4"
+      },
+      {
+        "task": "pick_up_the_black_bowl_on_the_stove_and_place_it_o",
+        "success": true,
+        "trial": 2,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_27--ours_masked--episode=74--success=True--task=pick_up_the_black_bowl_on_the_stove_and_place_it_o--sidebyside_pick_up_black_bowl_ours_masked-baseline_trial2.mp4"
+      },
+      {
+        "task": "pick_up_the_black_bowl_on_the_wooden_cabinet_and_p",
+        "success": true,
+        "trial": 2,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_27--ours_masked--episode=98--success=True--task=pick_up_the_black_bowl_on_the_wooden_cabinet_and_p--sidebyside_pick_up_black_bowl_ours_masked-baseline_trial2.mp4"
+      },
+      {
+        "task": "pick_up_the_book_in_the_middle_and_place_it_on_the",
+        "success": false,
+        "trial": 2,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_26--ours_masked--episode=2--success=False--task=pick_up_the_book_in_the_middle_and_place_it_on_the--sidebyside_pick_up_book_middle_ours_masked-baseline_trial2.mp4"
+      },
+      {
+        "task": "pick_up_the_book_on_the_left_and_place_it_on_top_o",
+        "success": true,
+        "trial": 2,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_26--ours_masked--episode=14--success=True--task=pick_up_the_book_on_the_left_and_place_it_on_top_o--sidebyside_pick_up_book_left_ours_masked-baseline_trial2.mp4"
+      }
+    ]
+  },
+  {
+    "scenario": "lang_l2",
+    "part": 2,
+    "n_parts": 2,
+    "n_tiles": 15,
+    "n_success_in_scenario": 26,
+    "n_tasks": 30,
+    "path": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/scenario_grids/grid_lang_l2_part2of2.mp4",
+    "tasks": [
+      {
+        "task": "pick_up_the_book_on_the_right_and_place_it_on_the_",
+        "success": true,
+        "trial": 2,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_26--ours_masked--episode=26--success=True--task=pick_up_the_book_on_the_right_and_place_it_on_the_--sidebyside_pick_up_book_right_ours_masked-baseline_trial2.mp4"
+      },
+      {
+        "task": "pick_up_the_book_on_the_right_and_place_it_under_t",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_26--ours_masked--episode=39--success=True--task=pick_up_the_book_on_the_right_and_place_it_under_t--sidebyside_pick_up_book_right_ours_masked-baseline_trial3.mp4"
+      },
+      {
+        "task": "pick_up_the_chocolate_pudding_and_place_it_in_the_",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_27--ours_masked--episode=63--success=True--task=pick_up_the_chocolate_pudding_and_place_it_in_the_--sidebyside_pick_up_chocolate_pudding_ours_masked-baseline_trial3.mp4"
+      },
+      {
+        "task": "pick_up_the_cream_cheese_and_place_it_in_the_baske",
+        "success": true,
+        "trial": 1,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_27--ours_masked--episode=13--success=True--task=pick_up_the_cream_cheese_and_place_it_in_the_baske--sidebyside_pick_up_cream_cheese_ours_masked-baseline_trial1.mp4"
+      },
+      {
+        "task": "pick_up_the_ketchup_and_place_it_in_the_basket",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_27--ours_masked--episode=27--success=True--task=pick_up_the_ketchup_and_place_it_in_the_basket--sidebyside_pick_up_ketchup_place_ours_masked-baseline_trial3.mp4"
+      },
+      {
+        "task": "pick_up_the_milk_and_place_it_in_the_basket",
+        "success": true,
+        "trial": 1,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_27--ours_masked--episode=49--success=True--task=pick_up_the_milk_and_place_it_in_the_basket--sidebyside_pick_up_milk_place_ours_masked-baseline_trial1.mp4"
+      },
+      {
+        "task": "pick_up_the_tomato_sauce_and_place_it_in_the_baske",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_27--ours_masked--episode=39--success=True--task=pick_up_the_tomato_sauce_and_place_it_in_the_baske--sidebyside_pick_up_tomato_sauce_ours_masked-baseline_trial3.mp4"
+      },
+      {
+        "task": "push_the_plate_to_the_front_of_the_stove",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_27/2026_07_27-15_18_42--ours_masked_sam1--episode=63--success=True--task=push_the_plate_to_the_front_of_the_stove--sidebyside_push_ours_masked_sam1-baseline_trial3.mp4"
+      },
+      {
+        "task": "put_the_bowl_on_the_plate",
+        "success": true,
+        "trial": 2,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_27/2026_07_27-15_18_42--ours_masked_sam1--episode=98--success=True--task=put_the_bowl_on_the_plate--sidebyside_put_ours_masked_sam1-baseline_trial2.mp4"
+      },
+      {
+        "task": "put_the_bowl_on_the_stove",
+        "success": false,
+        "trial": 2,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_27/2026_07_27-15_18_42--ours_masked_sam1--episode=14--success=False--task=put_the_bowl_on_the_stove--sidebyside_put_bowl_stove_ours_masked_sam1-baseline_trial2.mp4"
+      },
+      {
+        "task": "put_the_bowl_on_top_of_the_cabinet",
+        "success": true,
+        "trial": 2,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_27/2026_07_27-15_18_42--ours_masked_sam1--episode=50--success=True--task=put_the_bowl_on_top_of_the_cabinet--sidebyside_put_bowl_top_cabinet_ours_masked_sam1-baseline_trial2.mp4"
+      },
+      {
+        "task": "put_the_cream_cheese_in_the_bowl",
+        "success": true,
+        "trial": 2,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_27--ours_masked--episode=62--success=True--task=put_the_cream_cheese_in_the_bowl--sidebyside_put_cream_cheese_bowl_ours_masked-baseline_trial2.mp4"
+      },
+      {
+        "task": "put_the_wine_bottle_on_the_rack",
+        "success": true,
+        "trial": 2,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_27--ours_masked--episode=86--success=True--task=put_the_wine_bottle_on_the_rack--sidebyside_put_wine_bottle_rack_ours_masked-baseline_trial2.mp4"
+      },
+      {
+        "task": "put_the_wine_bottle_on_top_of_the_cabinet",
+        "success": true,
+        "trial": 2,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_27/2026_07_27-15_18_42--ours_masked_sam1--episode=26--success=True--task=put_the_wine_bottle_on_top_of_the_cabinet--sidebyside_put_wine_bottle_top_ours_masked_sam1-baseline_trial2.mp4"
+      },
+      {
+        "task": "turn_on_the_stove",
+        "success": true,
+        "trial": 2,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_27--ours_masked--episode=74--success=True--task=turn_on_the_stove--sidebyside_turn_stove_ours_masked-baseline_trial2.mp4"
+      }
+    ]
+  },
+  {
+    "scenario": "bg_0",
+    "part": 1,
+    "n_parts": 2,
+    "n_tiles": 15,
+    "n_success_in_scenario": 25,
+    "n_tasks": 30,
+    "path": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/scenario_grids/grid_bg_0_part1of2.mp4",
+    "tasks": [
+      {
+        "task": "open_the_middle_drawer_of_the_cabinet",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_27--ours_masked--episode=6--success=True--task=open_the_middle_drawer_of_the_cabinet--sidebyside_open_middle_drawer_cabinet_ours_masked-background_0_trial3.mp4"
+      },
+      {
+        "task": "open_the_top_drawer_and_put_the_bowl_inside",
+        "success": false,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_27/2026_07_27-15_18_42--ours_masked_sam1--episode=42--success=False--task=open_the_top_drawer_and_put_the_bowl_inside--sidebyside_open_top_drawer_put_ours_masked_sam1-background_0_trial3.mp4"
+      },
+      {
+        "task": "pick_up_the_alphabet_soup_and_place_it_in_the_bask",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_27--ours_masked--episode=6--success=True--task=pick_up_the_alphabet_soup_and_place_it_in_the_bask--sidebyside_pick_up_alphabet_soup_ours_masked-background_0_trial3.mp4"
+      },
+      {
+        "task": "pick_up_the_black_bowl_between_the_plate_and_the_r",
+        "success": true,
+        "trial": 2,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_27/2026_07_27-15_18_42--ours_masked_sam3--episode=5--success=True--task=pick_up_the_black_bowl_between_the_plate_and_the_r--sidebyside_pick_up_black_bowl_ours_masked_sam3-background_0_trial2.mp4"
+      },
+      {
+        "task": "pick_up_the_black_bowl_from_table_center_and_place",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_27--ours_masked--episode=18--success=True--task=pick_up_the_black_bowl_from_table_center_and_place--sidebyside_pick_up_black_bowl_ours_masked-background_0_trial3.mp4"
+      },
+      {
+        "task": "pick_up_the_black_bowl_in_the_top_drawer_of_the_wo",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_27--ours_masked--episode=42--success=True--task=pick_up_the_black_bowl_in_the_top_drawer_of_the_wo--sidebyside_pick_up_black_bowl_ours_masked-background_0_trial3.mp4"
+      },
+      {
+        "task": "pick_up_the_black_bowl_next_to_the_cookie_box_and_",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_27/2026_07_27-15_18_42--ours_masked_sam3--episode=78--success=True--task=pick_up_the_black_bowl_next_to_the_cookie_box_and_--sidebyside_pick_up_black_bowl_ours_masked_sam3-background_0_trial3.mp4"
+      },
+      {
+        "task": "pick_up_the_black_bowl_next_to_the_plate_and_place",
+        "success": true,
+        "trial": 2,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_27--ours_masked--episode=89--success=True--task=pick_up_the_black_bowl_next_to_the_plate_and_place--sidebyside_pick_up_black_bowl_ours_masked-background_0_trial2.mp4"
+      },
+      {
+        "task": "pick_up_the_black_bowl_next_to_the_ramekin_and_pla",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_27--ours_masked--episode=6--success=True--task=pick_up_the_black_bowl_next_to_the_ramekin_and_pla--sidebyside_pick_up_black_bowl_ours_masked-background_0_trial3.mp4"
+      },
+      {
+        "task": "pick_up_the_black_bowl_on_the_cookie_box_and_place",
+        "success": true,
+        "trial": 1,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_27/2026_07_27-15_18_42--ours_masked_sam3--episode=40--success=True--task=pick_up_the_black_bowl_on_the_cookie_box_and_place--sidebyside_pick_up_black_bowl_ours_masked_sam3-background_0_trial1.mp4"
+      },
+      {
+        "task": "pick_up_the_black_bowl_on_the_ramekin_and_place_it",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_27--ours_masked--episode=54--success=True--task=pick_up_the_black_bowl_on_the_ramekin_and_place_it--sidebyside_pick_up_black_bowl_ours_masked-background_0_trial3.mp4"
+      },
+      {
+        "task": "pick_up_the_black_bowl_on_the_stove_and_place_it_o",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_27--ours_masked--episode=78--success=True--task=pick_up_the_black_bowl_on_the_stove_and_place_it_o--sidebyside_pick_up_black_bowl_ours_masked-background_0_trial3.mp4"
+      },
+      {
+        "task": "pick_up_the_black_bowl_on_the_wooden_cabinet_and_p",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_27--ours_masked--episode=102--success=True--task=pick_up_the_black_bowl_on_the_wooden_cabinet_and_p--sidebyside_pick_up_black_bowl_ours_masked-background_0_trial3.mp4"
+      },
+      {
+        "task": "pick_up_the_book_in_the_middle_and_place_it_on_the",
+        "success": false,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_26--ours_masked--episode=6--success=False--task=pick_up_the_book_in_the_middle_and_place_it_on_the--sidebyside_pick_up_book_middle_ours_masked-background_0_trial3.mp4"
+      },
+      {
+        "task": "pick_up_the_book_on_the_left_and_place_it_on_top_o",
+        "success": true,
+        "trial": 2,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_26--ours_masked--episode=17--success=True--task=pick_up_the_book_on_the_left_and_place_it_on_top_o--sidebyside_pick_up_book_left_ours_masked-background_0_trial2.mp4"
+      }
+    ]
+  },
+  {
+    "scenario": "bg_0",
+    "part": 2,
+    "n_parts": 2,
+    "n_tiles": 15,
+    "n_success_in_scenario": 25,
+    "n_tasks": 30,
+    "path": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/scenario_grids/grid_bg_0_part2of2.mp4",
+    "tasks": [
+      {
+        "task": "pick_up_the_book_on_the_right_and_place_it_on_the_",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_26--ours_masked--episode=30--success=True--task=pick_up_the_book_on_the_right_and_place_it_on_the_--sidebyside_pick_up_book_right_ours_masked-background_0_trial3.mp4"
+      },
+      {
+        "task": "pick_up_the_book_on_the_right_and_place_it_under_t",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_26--ours_masked--episode=42--success=True--task=pick_up_the_book_on_the_right_and_place_it_under_t--sidebyside_pick_up_book_right_ours_masked-background_0_trial3.mp4"
+      },
+      {
+        "task": "pick_up_the_chocolate_pudding_and_place_it_in_the_",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_27--ours_masked--episode=66--success=True--task=pick_up_the_chocolate_pudding_and_place_it_in_the_--sidebyside_pick_up_chocolate_pudding_ours_masked-background_0_trial3.mp4"
+      },
+      {
+        "task": "pick_up_the_cream_cheese_and_place_it_in_the_baske",
+        "success": false,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_27--ours_masked--episode=18--success=False--task=pick_up_the_cream_cheese_and_place_it_in_the_baske--sidebyside_pick_up_cream_cheese_ours_masked-background_0_trial3.mp4"
+      },
+      {
+        "task": "pick_up_the_ketchup_and_place_it_in_the_basket",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_27--ours_masked--episode=30--success=True--task=pick_up_the_ketchup_and_place_it_in_the_basket--sidebyside_pick_up_ketchup_place_ours_masked-background_0_trial3.mp4"
+      },
+      {
+        "task": "pick_up_the_milk_and_place_it_in_the_basket",
+        "success": false,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_27--ours_masked--episode=54--success=False--task=pick_up_the_milk_and_place_it_in_the_basket--sidebyside_pick_up_milk_place_ours_masked-background_0_trial3.mp4"
+      },
+      {
+        "task": "pick_up_the_tomato_sauce_and_place_it_in_the_baske",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_27--ours_masked--episode=42--success=True--task=pick_up_the_tomato_sauce_and_place_it_in_the_baske--sidebyside_pick_up_tomato_sauce_ours_masked-background_0_trial3.mp4"
+      },
+      {
+        "task": "push_the_plate_to_the_front_of_the_stove",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_27--ours_masked--episode=54--success=True--task=push_the_plate_to_the_front_of_the_stove--sidebyside_push_ours_masked-background_0_trial3.mp4"
+      },
+      {
+        "task": "put_the_bowl_on_the_plate",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_27/2026_07_27-15_18_42--ours_masked_sam1--episode=102--success=True--task=put_the_bowl_on_the_plate--sidebyside_put_ours_masked_sam1-background_0_trial3.mp4"
+      },
+      {
+        "task": "put_the_bowl_on_the_stove",
+        "success": false,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_27/2026_07_27-15_18_42--ours_masked_sam1--episode=18--success=False--task=put_the_bowl_on_the_stove--sidebyside_put_bowl_stove_ours_masked_sam1-background_0_trial3.mp4"
+      },
+      {
+        "task": "put_the_bowl_on_top_of_the_cabinet",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_27/2026_07_27-15_18_42--ours_masked_sam1--episode=54--success=True--task=put_the_bowl_on_top_of_the_cabinet--sidebyside_put_bowl_top_cabinet_ours_masked_sam1-background_0_trial3.mp4"
+      },
+      {
+        "task": "put_the_cream_cheese_in_the_bowl",
+        "success": true,
+        "trial": 2,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_27--ours_masked--episode=65--success=True--task=put_the_cream_cheese_in_the_bowl--sidebyside_put_cream_cheese_bowl_ours_masked-background_0_trial2.mp4"
+      },
+      {
+        "task": "put_the_wine_bottle_on_the_rack",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_27/2026_07_27-15_18_42--ours_masked_sam1--episode=114--success=True--task=put_the_wine_bottle_on_the_rack--sidebyside_put_wine_bottle_rack_ours_masked_sam1-background_0_trial3.mp4"
+      },
+      {
+        "task": "put_the_wine_bottle_on_top_of_the_cabinet",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_27/2026_07_27-15_18_42--ours_masked_sam1--episode=30--success=True--task=put_the_wine_bottle_on_top_of_the_cabinet--sidebyside_put_wine_bottle_top_ours_masked_sam1-background_0_trial3.mp4"
+      },
+      {
+        "task": "turn_on_the_stove",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_27--ours_masked--episode=78--success=True--task=turn_on_the_stove--sidebyside_turn_stove_ours_masked-background_0_trial3.mp4"
+      }
+    ]
+  },
+  {
+    "scenario": "bg_1",
+    "part": 1,
+    "n_parts": 2,
+    "n_tiles": 15,
+    "n_success_in_scenario": 27,
+    "n_tasks": 30,
+    "path": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/scenario_grids/grid_bg_1_part1of2.mp4",
+    "tasks": [
+      {
+        "task": "open_the_middle_drawer_of_the_cabinet",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_27--ours_masked--episode=9--success=True--task=open_the_middle_drawer_of_the_cabinet--sidebyside_open_middle_drawer_cabinet_ours_masked-background_1_trial3.mp4"
+      },
+      {
+        "task": "open_the_top_drawer_and_put_the_bowl_inside",
+        "success": true,
+        "trial": 2,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_27--ours_masked--episode=32--success=True--task=open_the_top_drawer_and_put_the_bowl_inside--sidebyside_open_top_drawer_put_ours_masked-background_1_trial2.mp4"
+      },
+      {
+        "task": "pick_up_the_alphabet_soup_and_place_it_in_the_bask",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_27--ours_masked--episode=9--success=True--task=pick_up_the_alphabet_soup_and_place_it_in_the_bask--sidebyside_pick_up_alphabet_soup_ours_masked-background_1_trial3.mp4"
+      },
+      {
+        "task": "pick_up_the_black_bowl_between_the_plate_and_the_r",
+        "success": true,
+        "trial": 2,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_27/2026_07_27-15_18_42--ours_masked_sam3--episode=8--success=True--task=pick_up_the_black_bowl_between_the_plate_and_the_r--sidebyside_pick_up_black_bowl_ours_masked_sam3-background_1_trial2.mp4"
+      },
+      {
+        "task": "pick_up_the_black_bowl_from_table_center_and_place",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_27--ours_masked--episode=21--success=True--task=pick_up_the_black_bowl_from_table_center_and_place--sidebyside_pick_up_black_bowl_ours_masked-background_1_trial3.mp4"
+      },
+      {
+        "task": "pick_up_the_black_bowl_in_the_top_drawer_of_the_wo",
+        "success": true,
+        "trial": 1,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_27--ours_masked--episode=43--success=True--task=pick_up_the_black_bowl_in_the_top_drawer_of_the_wo--sidebyside_pick_up_black_bowl_ours_masked-background_1_trial1.mp4"
+      },
+      {
+        "task": "pick_up_the_black_bowl_next_to_the_cookie_box_and_",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_27/2026_07_27-15_18_42--ours_masked_sam3--episode=81--success=True--task=pick_up_the_black_bowl_next_to_the_cookie_box_and_--sidebyside_pick_up_black_bowl_ours_masked_sam3-background_1_trial3.mp4"
+      },
+      {
+        "task": "pick_up_the_black_bowl_next_to_the_plate_and_place",
+        "success": true,
+        "trial": 2,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_27--ours_masked--episode=92--success=True--task=pick_up_the_black_bowl_next_to_the_plate_and_place--sidebyside_pick_up_black_bowl_ours_masked-background_1_trial2.mp4"
+      },
+      {
+        "task": "pick_up_the_black_bowl_next_to_the_ramekin_and_pla",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_27--ours_masked--episode=9--success=True--task=pick_up_the_black_bowl_next_to_the_ramekin_and_pla--sidebyside_pick_up_black_bowl_ours_masked-background_1_trial3.mp4"
+      },
+      {
+        "task": "pick_up_the_black_bowl_on_the_cookie_box_and_place",
+        "success": true,
+        "trial": 1,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_27/2026_07_27-15_18_42--ours_masked_sam3--episode=43--success=True--task=pick_up_the_black_bowl_on_the_cookie_box_and_place--sidebyside_pick_up_black_bowl_ours_masked_sam3-background_1_trial1.mp4"
+      },
+      {
+        "task": "pick_up_the_black_bowl_on_the_ramekin_and_place_it",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_27--ours_masked--episode=57--success=True--task=pick_up_the_black_bowl_on_the_ramekin_and_place_it--sidebyside_pick_up_black_bowl_ours_masked-background_1_trial3.mp4"
+      },
+      {
+        "task": "pick_up_the_black_bowl_on_the_stove_and_place_it_o",
+        "success": true,
+        "trial": 2,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_27--ours_masked--episode=80--success=True--task=pick_up_the_black_bowl_on_the_stove_and_place_it_o--sidebyside_pick_up_black_bowl_ours_masked-background_1_trial2.mp4"
+      },
+      {
+        "task": "pick_up_the_black_bowl_on_the_wooden_cabinet_and_p",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_27--ours_masked--episode=105--success=True--task=pick_up_the_black_bowl_on_the_wooden_cabinet_and_p--sidebyside_pick_up_black_bowl_ours_masked-background_1_trial3.mp4"
+      },
+      {
+        "task": "pick_up_the_book_in_the_middle_and_place_it_on_the",
+        "success": false,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_26--ours_masked--episode=9--success=False--task=pick_up_the_book_in_the_middle_and_place_it_on_the--sidebyside_pick_up_book_middle_ours_masked-background_1_trial3.mp4"
+      },
+      {
+        "task": "pick_up_the_book_on_the_left_and_place_it_on_top_o",
+        "success": true,
+        "trial": 2,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_26--ours_masked--episode=20--success=True--task=pick_up_the_book_on_the_left_and_place_it_on_top_o--sidebyside_pick_up_book_left_ours_masked-background_1_trial2.mp4"
+      }
+    ]
+  },
+  {
+    "scenario": "bg_1",
+    "part": 2,
+    "n_parts": 2,
+    "n_tiles": 15,
+    "n_success_in_scenario": 27,
+    "n_tasks": 30,
+    "path": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/scenario_grids/grid_bg_1_part2of2.mp4",
+    "tasks": [
+      {
+        "task": "pick_up_the_book_on_the_right_and_place_it_on_the_",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_26--ours_masked--episode=33--success=True--task=pick_up_the_book_on_the_right_and_place_it_on_the_--sidebyside_pick_up_book_right_ours_masked-background_1_trial3.mp4"
+      },
+      {
+        "task": "pick_up_the_book_on_the_right_and_place_it_under_t",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_26--ours_masked--episode=45--success=True--task=pick_up_the_book_on_the_right_and_place_it_under_t--sidebyside_pick_up_book_right_ours_masked-background_1_trial3.mp4"
+      },
+      {
+        "task": "pick_up_the_chocolate_pudding_and_place_it_in_the_",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_27--ours_masked--episode=69--success=True--task=pick_up_the_chocolate_pudding_and_place_it_in_the_--sidebyside_pick_up_chocolate_pudding_ours_masked-background_1_trial3.mp4"
+      },
+      {
+        "task": "pick_up_the_cream_cheese_and_place_it_in_the_baske",
+        "success": true,
+        "trial": 1,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_27--ours_masked--episode=19--success=True--task=pick_up_the_cream_cheese_and_place_it_in_the_baske--sidebyside_pick_up_cream_cheese_ours_masked-background_1_trial1.mp4"
+      },
+      {
+        "task": "pick_up_the_ketchup_and_place_it_in_the_basket",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_27--ours_masked--episode=33--success=True--task=pick_up_the_ketchup_and_place_it_in_the_basket--sidebyside_pick_up_ketchup_place_ours_masked-background_1_trial3.mp4"
+      },
+      {
+        "task": "pick_up_the_milk_and_place_it_in_the_basket",
+        "success": false,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_27--ours_masked--episode=57--success=False--task=pick_up_the_milk_and_place_it_in_the_basket--sidebyside_pick_up_milk_place_ours_masked-background_1_trial3.mp4"
+      },
+      {
+        "task": "pick_up_the_tomato_sauce_and_place_it_in_the_baske",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_27--ours_masked--episode=45--success=True--task=pick_up_the_tomato_sauce_and_place_it_in_the_baske--sidebyside_pick_up_tomato_sauce_ours_masked-background_1_trial3.mp4"
+      },
+      {
+        "task": "push_the_plate_to_the_front_of_the_stove",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_27--ours_masked--episode=57--success=True--task=push_the_plate_to_the_front_of_the_stove--sidebyside_push_ours_masked-background_1_trial3.mp4"
+      },
+      {
+        "task": "put_the_bowl_on_the_plate",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_27/2026_07_27-15_18_42--ours_masked_sam1--episode=105--success=True--task=put_the_bowl_on_the_plate--sidebyside_put_ours_masked_sam1-background_1_trial3.mp4"
+      },
+      {
+        "task": "put_the_bowl_on_the_stove",
+        "success": false,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_27/2026_07_27-15_18_42--ours_masked_sam1--episode=21--success=False--task=put_the_bowl_on_the_stove--sidebyside_put_bowl_stove_ours_masked_sam1-background_1_trial3.mp4"
+      },
+      {
+        "task": "put_the_bowl_on_top_of_the_cabinet",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_27/2026_07_27-15_18_42--ours_masked_sam1--episode=57--success=True--task=put_the_bowl_on_top_of_the_cabinet--sidebyside_put_bowl_top_cabinet_ours_masked_sam1-background_1_trial3.mp4"
+      },
+      {
+        "task": "put_the_cream_cheese_in_the_bowl",
+        "success": true,
+        "trial": 2,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_27--ours_masked--episode=68--success=True--task=put_the_cream_cheese_in_the_bowl--sidebyside_put_cream_cheese_bowl_ours_masked-background_1_trial2.mp4"
+      },
+      {
+        "task": "put_the_wine_bottle_on_the_rack",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_27/2026_07_27-15_18_42--ours_masked_sam1--episode=117--success=True--task=put_the_wine_bottle_on_the_rack--sidebyside_put_wine_bottle_rack_ours_masked_sam1-background_1_trial3.mp4"
+      },
+      {
+        "task": "put_the_wine_bottle_on_top_of_the_cabinet",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_27/2026_07_27-15_18_42--ours_masked_sam1--episode=33--success=True--task=put_the_wine_bottle_on_top_of_the_cabinet--sidebyside_put_wine_bottle_top_ours_masked_sam1-background_1_trial3.mp4"
+      },
+      {
+        "task": "turn_on_the_stove",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_27--ours_masked--episode=81--success=True--task=turn_on_the_stove--sidebyside_turn_stove_ours_masked-background_1_trial3.mp4"
+      }
+    ]
+  },
+  {
+    "scenario": "bg_2",
+    "part": 1,
+    "n_parts": 2,
+    "n_tiles": 15,
+    "n_success_in_scenario": 25,
+    "n_tasks": 30,
+    "path": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/scenario_grids/grid_bg_2_part1of2.mp4",
+    "tasks": [
+      {
+        "task": "open_the_middle_drawer_of_the_cabinet",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_27--ours_masked--episode=12--success=True--task=open_the_middle_drawer_of_the_cabinet--sidebyside_open_middle_drawer_cabinet_ours_masked-background_2_trial3.mp4"
+      },
+      {
+        "task": "open_the_top_drawer_and_put_the_bowl_inside",
+        "success": true,
+        "trial": 2,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_27--ours_masked--episode=35--success=True--task=open_the_top_drawer_and_put_the_bowl_inside--sidebyside_open_top_drawer_put_ours_masked-background_2_trial2.mp4"
+      },
+      {
+        "task": "pick_up_the_alphabet_soup_and_place_it_in_the_bask",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_27--ours_masked--episode=12--success=True--task=pick_up_the_alphabet_soup_and_place_it_in_the_bask--sidebyside_pick_up_alphabet_soup_ours_masked-background_2_trial3.mp4"
+      },
+      {
+        "task": "pick_up_the_black_bowl_between_the_plate_and_the_r",
+        "success": true,
+        "trial": 2,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_27/2026_07_27-15_18_42--ours_masked_sam3--episode=11--success=True--task=pick_up_the_black_bowl_between_the_plate_and_the_r--sidebyside_pick_up_black_bowl_ours_masked_sam3-background_2_trial2.mp4"
+      },
+      {
+        "task": "pick_up_the_black_bowl_from_table_center_and_place",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_27--ours_masked--episode=24--success=True--task=pick_up_the_black_bowl_from_table_center_and_place--sidebyside_pick_up_black_bowl_ours_masked-background_2_trial3.mp4"
+      },
+      {
+        "task": "pick_up_the_black_bowl_in_the_top_drawer_of_the_wo",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_27--ours_masked--episode=48--success=True--task=pick_up_the_black_bowl_in_the_top_drawer_of_the_wo--sidebyside_pick_up_black_bowl_ours_masked-background_2_trial3.mp4"
+      },
+      {
+        "task": "pick_up_the_black_bowl_next_to_the_cookie_box_and_",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_27/2026_07_27-15_18_42--ours_masked_sam3--episode=84--success=True--task=pick_up_the_black_bowl_next_to_the_cookie_box_and_--sidebyside_pick_up_black_bowl_ours_masked_sam3-background_2_trial3.mp4"
+      },
+      {
+        "task": "pick_up_the_black_bowl_next_to_the_plate_and_place",
+        "success": true,
+        "trial": 2,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_27--ours_masked--episode=95--success=True--task=pick_up_the_black_bowl_next_to_the_plate_and_place--sidebyside_pick_up_black_bowl_ours_masked-background_2_trial2.mp4"
+      },
+      {
+        "task": "pick_up_the_black_bowl_next_to_the_ramekin_and_pla",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_27--ours_masked--episode=12--success=True--task=pick_up_the_black_bowl_next_to_the_ramekin_and_pla--sidebyside_pick_up_black_bowl_ours_masked-background_2_trial3.mp4"
+      },
+      {
+        "task": "pick_up_the_black_bowl_on_the_cookie_box_and_place",
+        "success": true,
+        "trial": 1,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_27/2026_07_27-15_18_42--ours_masked_sam3--episode=46--success=True--task=pick_up_the_black_bowl_on_the_cookie_box_and_place--sidebyside_pick_up_black_bowl_ours_masked_sam3-background_2_trial1.mp4"
+      },
+      {
+        "task": "pick_up_the_black_bowl_on_the_ramekin_and_place_it",
+        "success": true,
+        "trial": 1,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_27--ours_masked--episode=58--success=True--task=pick_up_the_black_bowl_on_the_ramekin_and_place_it--sidebyside_pick_up_black_bowl_ours_masked-background_2_trial1.mp4"
+      },
+      {
+        "task": "pick_up_the_black_bowl_on_the_stove_and_place_it_o",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_27--ours_masked--episode=84--success=True--task=pick_up_the_black_bowl_on_the_stove_and_place_it_o--sidebyside_pick_up_black_bowl_ours_masked-background_2_trial3.mp4"
+      },
+      {
+        "task": "pick_up_the_black_bowl_on_the_wooden_cabinet_and_p",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_27--ours_masked--episode=108--success=True--task=pick_up_the_black_bowl_on_the_wooden_cabinet_and_p--sidebyside_pick_up_black_bowl_ours_masked-background_2_trial3.mp4"
+      },
+      {
+        "task": "pick_up_the_book_in_the_middle_and_place_it_on_the",
+        "success": false,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_26--ours_masked--episode=12--success=False--task=pick_up_the_book_in_the_middle_and_place_it_on_the--sidebyside_pick_up_book_middle_ours_masked-background_2_trial3.mp4"
+      },
+      {
+        "task": "pick_up_the_book_on_the_left_and_place_it_on_top_o",
+        "success": true,
+        "trial": 2,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_26--ours_masked--episode=23--success=True--task=pick_up_the_book_on_the_left_and_place_it_on_top_o--sidebyside_pick_up_book_left_ours_masked-background_2_trial2.mp4"
+      }
+    ]
+  },
+  {
+    "scenario": "bg_2",
+    "part": 2,
+    "n_parts": 2,
+    "n_tiles": 15,
+    "n_success_in_scenario": 25,
+    "n_tasks": 30,
+    "path": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/scenario_grids/grid_bg_2_part2of2.mp4",
+    "tasks": [
+      {
+        "task": "pick_up_the_book_on_the_right_and_place_it_on_the_",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_26--ours_masked--episode=36--success=True--task=pick_up_the_book_on_the_right_and_place_it_on_the_--sidebyside_pick_up_book_right_ours_masked-background_2_trial3.mp4"
+      },
+      {
+        "task": "pick_up_the_book_on_the_right_and_place_it_under_t",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_26--ours_masked--episode=48--success=True--task=pick_up_the_book_on_the_right_and_place_it_under_t--sidebyside_pick_up_book_right_ours_masked-background_2_trial3.mp4"
+      },
+      {
+        "task": "pick_up_the_chocolate_pudding_and_place_it_in_the_",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_27--ours_masked--episode=72--success=True--task=pick_up_the_chocolate_pudding_and_place_it_in_the_--sidebyside_pick_up_chocolate_pudding_ours_masked-background_2_trial3.mp4"
+      },
+      {
+        "task": "pick_up_the_cream_cheese_and_place_it_in_the_baske",
+        "success": false,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_27--ours_masked--episode=24--success=False--task=pick_up_the_cream_cheese_and_place_it_in_the_baske--sidebyside_pick_up_cream_cheese_ours_masked-background_2_trial3.mp4"
+      },
+      {
+        "task": "pick_up_the_ketchup_and_place_it_in_the_basket",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_27--ours_masked--episode=36--success=True--task=pick_up_the_ketchup_and_place_it_in_the_basket--sidebyside_pick_up_ketchup_place_ours_masked-background_2_trial3.mp4"
+      },
+      {
+        "task": "pick_up_the_milk_and_place_it_in_the_basket",
+        "success": false,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_27--ours_masked--episode=60--success=False--task=pick_up_the_milk_and_place_it_in_the_basket--sidebyside_pick_up_milk_place_ours_masked-background_2_trial3.mp4"
+      },
+      {
+        "task": "pick_up_the_tomato_sauce_and_place_it_in_the_baske",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_27--ours_masked--episode=48--success=True--task=pick_up_the_tomato_sauce_and_place_it_in_the_baske--sidebyside_pick_up_tomato_sauce_ours_masked-background_2_trial3.mp4"
+      },
+      {
+        "task": "push_the_plate_to_the_front_of_the_stove",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_27/2026_07_27-15_18_42--ours_masked_sam1--episode=72--success=True--task=push_the_plate_to_the_front_of_the_stove--sidebyside_push_ours_masked_sam1-background_2_trial3.mp4"
+      },
+      {
+        "task": "put_the_bowl_on_the_plate",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_27/2026_07_27-15_18_42--ours_masked_sam1--episode=108--success=True--task=put_the_bowl_on_the_plate--sidebyside_put_ours_masked_sam1-background_2_trial3.mp4"
+      },
+      {
+        "task": "put_the_bowl_on_the_stove",
+        "success": false,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_27/2026_07_27-15_18_42--ours_masked_sam1--episode=24--success=False--task=put_the_bowl_on_the_stove--sidebyside_put_bowl_stove_ours_masked_sam1-background_2_trial3.mp4"
+      },
+      {
+        "task": "put_the_bowl_on_top_of_the_cabinet",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_27/2026_07_27-15_18_42--ours_masked_sam1--episode=60--success=True--task=put_the_bowl_on_top_of_the_cabinet--sidebyside_put_bowl_top_cabinet_ours_masked_sam1-background_2_trial3.mp4"
+      },
+      {
+        "task": "put_the_cream_cheese_in_the_bowl",
+        "success": false,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_27/2026_07_27-15_18_42--ours_masked_sam1--episode=84--success=False--task=put_the_cream_cheese_in_the_bowl--sidebyside_put_cream_cheese_bowl_ours_masked_sam1-background_2_trial3.mp4"
+      },
+      {
+        "task": "put_the_wine_bottle_on_the_rack",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_27/2026_07_27-15_18_42--ours_masked_sam1--episode=120--success=True--task=put_the_wine_bottle_on_the_rack--sidebyside_put_wine_bottle_rack_ours_masked_sam1-background_2_trial3.mp4"
+      },
+      {
+        "task": "put_the_wine_bottle_on_top_of_the_cabinet",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_27/2026_07_27-15_18_42--ours_masked_sam1--episode=36--success=True--task=put_the_wine_bottle_on_top_of_the_cabinet--sidebyside_put_wine_bottle_top_ours_masked_sam1-background_2_trial3.mp4"
+      },
+      {
+        "task": "turn_on_the_stove",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_28_27--ours_masked--episode=84--success=True--task=turn_on_the_stove--sidebyside_turn_stove_ours_masked-background_2_trial3.mp4"
+      }
+    ]
+  },
+  {
+    "scenario": "color_0",
+    "part": 1,
+    "n_parts": 2,
+    "n_tiles": 14,
+    "n_success_in_scenario": 22,
+    "n_tasks": 27,
+    "path": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/scenario_grids/grid_color_0_part1of2.mp4",
+    "tasks": [
+      {
+        "task": "open_the_middle_drawer_of_the_cabinet",
+        "success": true,
+        "trial": 2,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_27/2026_07_27-01_38_36--ours_masked--episode=2--success=True--task=open_the_middle_drawer_of_the_cabinet--sidebyside_open_middle_drawer_cabinet_ours_masked-color0_trial2.mp4"
+      },
+      {
+        "task": "open_the_top_drawer_and_put_the_bowl_inside",
+        "success": false,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_27/2026_07_27-01_38_36--ours_masked--episode=15--success=False--task=open_the_top_drawer_and_put_the_bowl_inside--sidebyside_open_top_drawer_put_ours_masked-color0_trial3.mp4"
+      },
+      {
+        "task": "pick_up_the_alphabet_soup_and_place_it_in_the_bask",
+        "success": true,
+        "trial": 2,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-04_04_34--ours_masked--episode=2--success=True--task=pick_up_the_alphabet_soup_and_place_it_in_the_bask--sidebyside_pick_up_alphabet_soup_ours_masked-color0_trial2.mp4"
+      },
+      {
+        "task": "pick_up_the_black_bowl_from_table_center_and_place",
+        "success": true,
+        "trial": 2,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_27/2026_07_27-01_54_38--ours_masked--episode=8--success=True--task=pick_up_the_black_bowl_from_table_center_and_place--sidebyside_pick_up_black_bowl_ours_masked-color0_trial2.mp4"
+      },
+      {
+        "task": "pick_up_the_black_bowl_in_the_top_drawer_of_the_wo",
+        "success": true,
+        "trial": 1,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_27/2026_07_27-01_54_38--ours_masked--episode=19--success=True--task=pick_up_the_black_bowl_in_the_top_drawer_of_the_wo--sidebyside_pick_up_black_bowl_ours_masked-color0_trial1.mp4"
+      },
+      {
+        "task": "pick_up_the_black_bowl_next_to_the_cookie_box_and_",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_27/2026_07_27-01_54_38--ours_masked--episode=33--success=True--task=pick_up_the_black_bowl_next_to_the_cookie_box_and_--sidebyside_pick_up_black_bowl_ours_masked-color0_trial3.mp4"
+      },
+      {
+        "task": "pick_up_the_black_bowl_next_to_the_plate_and_place",
+        "success": true,
+        "trial": 2,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_27/2026_07_27-01_54_38--ours_masked--episode=44--success=True--task=pick_up_the_black_bowl_next_to_the_plate_and_place--sidebyside_pick_up_black_bowl_ours_masked-color0_trial2.mp4"
+      },
+      {
+        "task": "pick_up_the_black_bowl_next_to_the_ramekin_and_pla",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_27/2026_07_27-01_54_38--ours_masked--episode=3--success=True--task=pick_up_the_black_bowl_next_to_the_ramekin_and_pla--sidebyside_pick_up_black_bowl_ours_masked-color0_trial3.mp4"
+      },
+      {
+        "task": "pick_up_the_black_bowl_on_the_cookie_box_and_place",
+        "success": false,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_27/2026_07_27-01_54_38--ours_masked--episode=15--success=False--task=pick_up_the_black_bowl_on_the_cookie_box_and_place--sidebyside_pick_up_black_bowl_ours_masked-color0_trial3.mp4"
+      },
+      {
+        "task": "pick_up_the_black_bowl_on_the_ramekin_and_place_it",
+        "success": false,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_27/2026_07_27-01_54_38--ours_masked--episode=27--success=False--task=pick_up_the_black_bowl_on_the_ramekin_and_place_it--sidebyside_pick_up_black_bowl_ours_masked-color0_trial3.mp4"
+      },
+      {
+        "task": "pick_up_the_black_bowl_on_the_stove_and_place_it_o",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_27/2026_07_27-01_54_38--ours_masked--episode=39--success=True--task=pick_up_the_black_bowl_on_the_stove_and_place_it_o--sidebyside_pick_up_black_bowl_ours_masked-color0_trial3.mp4"
+      },
+      {
+        "task": "pick_up_the_black_bowl_on_the_wooden_cabinet_and_p",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_27/2026_07_27-01_54_38--ours_masked--episode=51--success=True--task=pick_up_the_black_bowl_on_the_wooden_cabinet_and_p--sidebyside_pick_up_black_bowl_ours_masked-color0_trial3.mp4"
+      },
+      {
+        "task": "pick_up_the_book_in_the_middle_and_place_it_on_the",
+        "success": false,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_54_54--ours_masked--episode=3--success=False--task=pick_up_the_book_in_the_middle_and_place_it_on_the--sidebyside_pick_up_book_middle_ours_masked-color0_trial3.mp4"
+      },
+      {
+        "task": "pick_up_the_book_on_the_left_and_place_it_on_top_o",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_54_54--ours_masked--episode=9--success=True--task=pick_up_the_book_on_the_left_and_place_it_on_top_o--sidebyside_pick_up_book_left_ours_masked-color0_trial3.mp4"
+      }
+    ]
+  },
+  {
+    "scenario": "color_0",
+    "part": 2,
+    "n_parts": 2,
+    "n_tiles": 13,
+    "n_success_in_scenario": 22,
+    "n_tasks": 27,
+    "path": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/scenario_grids/grid_color_0_part2of2.mp4",
+    "tasks": [
+      {
+        "task": "pick_up_the_book_on_the_right_and_place_it_on_the_",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_54_54--ours_masked--episode=15--success=True--task=pick_up_the_book_on_the_right_and_place_it_on_the_--sidebyside_pick_up_book_right_ours_masked-color0_trial3.mp4"
+      },
+      {
+        "task": "pick_up_the_book_on_the_right_and_place_it_under_t",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_54_54--ours_masked--episode=21--success=True--task=pick_up_the_book_on_the_right_and_place_it_under_t--sidebyside_pick_up_book_right_ours_masked-color0_trial3.mp4"
+      },
+      {
+        "task": "pick_up_the_chocolate_pudding_and_place_it_in_the_",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-04_04_34--ours_masked--episode=33--success=True--task=pick_up_the_chocolate_pudding_and_place_it_in_the_--sidebyside_pick_up_chocolate_pudding_ours_masked-color0_trial3.mp4"
+      },
+      {
+        "task": "pick_up_the_cream_cheese_and_place_it_in_the_baske",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-04_04_34--ours_masked--episode=9--success=True--task=pick_up_the_cream_cheese_and_place_it_in_the_baske--sidebyside_pick_up_cream_cheese_ours_masked-color0_trial3.mp4"
+      },
+      {
+        "task": "pick_up_the_ketchup_and_place_it_in_the_basket",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-04_04_34--ours_masked--episode=15--success=True--task=pick_up_the_ketchup_and_place_it_in_the_basket--sidebyside_pick_up_ketchup_place_ours_masked-color0_trial3.mp4"
+      },
+      {
+        "task": "pick_up_the_milk_and_place_it_in_the_basket",
+        "success": true,
+        "trial": 2,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-04_04_34--ours_masked--episode=26--success=True--task=pick_up_the_milk_and_place_it_in_the_basket--sidebyside_pick_up_milk_place_ours_masked-color0_trial2.mp4"
+      },
+      {
+        "task": "pick_up_the_tomato_sauce_and_place_it_in_the_baske",
+        "success": false,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-04_04_34--ours_masked--episode=21--success=False--task=pick_up_the_tomato_sauce_and_place_it_in_the_baske--sidebyside_pick_up_tomato_sauce_ours_masked-color0_trial3.mp4"
+      },
+      {
+        "task": "push_the_plate_to_the_front_of_the_stove",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_27/2026_07_27-01_38_36--ours_masked--episode=27--success=True--task=push_the_plate_to_the_front_of_the_stove--sidebyside_push_ours_masked-color0_trial3.mp4"
+      },
+      {
+        "task": "put_the_bowl_on_top_of_the_cabinet",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_27/2026_07_27-01_38_36--ours_masked--episode=21--success=True--task=put_the_bowl_on_top_of_the_cabinet--sidebyside_put_bowl_top_cabinet_ours_masked-color0_trial3.mp4"
+      },
+      {
+        "task": "put_the_cream_cheese_in_the_bowl",
+        "success": true,
+        "trial": 2,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_27/2026_07_27-01_38_36--ours_masked--episode=32--success=True--task=put_the_cream_cheese_in_the_bowl--sidebyside_put_cream_cheese_bowl_ours_masked-color0_trial2.mp4"
+      },
+      {
+        "task": "put_the_wine_bottle_on_the_rack",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_27/2026_07_27-01_38_36--ours_masked--episode=45--success=True--task=put_the_wine_bottle_on_the_rack--sidebyside_put_wine_bottle_rack_ours_masked-color0_trial3.mp4"
+      },
+      {
+        "task": "put_the_wine_bottle_on_top_of_the_cabinet",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_27/2026_07_27-01_38_36--ours_masked--episode=9--success=True--task=put_the_wine_bottle_on_top_of_the_cabinet--sidebyside_put_wine_bottle_top_ours_masked-color0_trial3.mp4"
+      },
+      {
+        "task": "turn_on_the_stove",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_27/2026_07_27-01_38_36--ours_masked--episode=39--success=True--task=turn_on_the_stove--sidebyside_turn_stove_ours_masked-color0_trial3.mp4"
+      }
+    ]
+  },
+  {
+    "scenario": "color_1",
+    "part": 1,
+    "n_parts": 2,
+    "n_tiles": 14,
+    "n_success_in_scenario": 22,
+    "n_tasks": 27,
+    "path": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/scenario_grids/grid_color_1_part1of2.mp4",
+    "tasks": [
+      {
+        "task": "open_the_middle_drawer_of_the_cabinet",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_27/2026_07_27-01_38_36--ours_masked--episode=6--success=True--task=open_the_middle_drawer_of_the_cabinet--sidebyside_open_middle_drawer_cabinet_ours_masked-color1_trial3.mp4"
+      },
+      {
+        "task": "open_the_top_drawer_and_put_the_bowl_inside",
+        "success": false,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_27/2026_07_27-01_38_36--ours_masked--episode=18--success=False--task=open_the_top_drawer_and_put_the_bowl_inside--sidebyside_open_top_drawer_put_ours_masked-color1_trial3.mp4"
+      },
+      {
+        "task": "pick_up_the_alphabet_soup_and_place_it_in_the_bask",
+        "success": false,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-04_04_34--ours_masked--episode=6--success=False--task=pick_up_the_alphabet_soup_and_place_it_in_the_bask--sidebyside_pick_up_alphabet_soup_ours_masked-color1_trial3.mp4"
+      },
+      {
+        "task": "pick_up_the_black_bowl_from_table_center_and_place",
+        "success": true,
+        "trial": 1,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_27/2026_07_27-01_54_38--ours_masked--episode=10--success=True--task=pick_up_the_black_bowl_from_table_center_and_place--sidebyside_pick_up_black_bowl_ours_masked-color1_trial1.mp4"
+      },
+      {
+        "task": "pick_up_the_black_bowl_in_the_top_drawer_of_the_wo",
+        "success": true,
+        "trial": 1,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_27/2026_07_27-01_54_38--ours_masked--episode=22--success=True--task=pick_up_the_black_bowl_in_the_top_drawer_of_the_wo--sidebyside_pick_up_black_bowl_ours_masked-color1_trial1.mp4"
+      },
+      {
+        "task": "pick_up_the_black_bowl_next_to_the_cookie_box_and_",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_27/2026_07_27-01_54_38--ours_masked--episode=36--success=True--task=pick_up_the_black_bowl_next_to_the_cookie_box_and_--sidebyside_pick_up_black_bowl_ours_masked-color1_trial3.mp4"
+      },
+      {
+        "task": "pick_up_the_black_bowl_next_to_the_plate_and_place",
+        "success": true,
+        "trial": 1,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_27/2026_07_27-01_54_38--ours_masked--episode=46--success=True--task=pick_up_the_black_bowl_next_to_the_plate_and_place--sidebyside_pick_up_black_bowl_ours_masked-color1_trial1.mp4"
+      },
+      {
+        "task": "pick_up_the_black_bowl_next_to_the_ramekin_and_pla",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_27/2026_07_27-01_54_38--ours_masked--episode=6--success=True--task=pick_up_the_black_bowl_next_to_the_ramekin_and_pla--sidebyside_pick_up_black_bowl_ours_masked-color1_trial3.mp4"
+      },
+      {
+        "task": "pick_up_the_black_bowl_on_the_cookie_box_and_place",
+        "success": true,
+        "trial": 2,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_27/2026_07_27-01_54_38--ours_masked--episode=17--success=True--task=pick_up_the_black_bowl_on_the_cookie_box_and_place--sidebyside_pick_up_black_bowl_ours_masked-color1_trial2.mp4"
+      },
+      {
+        "task": "pick_up_the_black_bowl_on_the_ramekin_and_place_it",
+        "success": false,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_27/2026_07_27-01_54_38--ours_masked--episode=30--success=False--task=pick_up_the_black_bowl_on_the_ramekin_and_place_it--sidebyside_pick_up_black_bowl_ours_masked-color1_trial3.mp4"
+      },
+      {
+        "task": "pick_up_the_black_bowl_on_the_stove_and_place_it_o",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_27/2026_07_27-01_54_38--ours_masked--episode=42--success=True--task=pick_up_the_black_bowl_on_the_stove_and_place_it_o--sidebyside_pick_up_black_bowl_ours_masked-color1_trial3.mp4"
+      },
+      {
+        "task": "pick_up_the_black_bowl_on_the_wooden_cabinet_and_p",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_27/2026_07_27-01_54_38--ours_masked--episode=54--success=True--task=pick_up_the_black_bowl_on_the_wooden_cabinet_and_p--sidebyside_pick_up_black_bowl_ours_masked-color1_trial3.mp4"
+      },
+      {
+        "task": "pick_up_the_book_in_the_middle_and_place_it_on_the",
+        "success": false,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_54_54--ours_masked--episode=6--success=False--task=pick_up_the_book_in_the_middle_and_place_it_on_the--sidebyside_pick_up_book_middle_ours_masked-color1_trial3.mp4"
+      },
+      {
+        "task": "pick_up_the_book_on_the_left_and_place_it_on_top_o",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_54_54--ours_masked--episode=12--success=True--task=pick_up_the_book_on_the_left_and_place_it_on_top_o--sidebyside_pick_up_book_left_ours_masked-color1_trial3.mp4"
+      }
+    ]
+  },
+  {
+    "scenario": "color_1",
+    "part": 2,
+    "n_parts": 2,
+    "n_tiles": 13,
+    "n_success_in_scenario": 22,
+    "n_tasks": 27,
+    "path": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/scenario_grids/grid_color_1_part2of2.mp4",
+    "tasks": [
+      {
+        "task": "pick_up_the_book_on_the_right_and_place_it_on_the_",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_54_54--ours_masked--episode=18--success=True--task=pick_up_the_book_on_the_right_and_place_it_on_the_--sidebyside_pick_up_book_right_ours_masked-color1_trial3.mp4"
+      },
+      {
+        "task": "pick_up_the_book_on_the_right_and_place_it_under_t",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-03_54_54--ours_masked--episode=24--success=True--task=pick_up_the_book_on_the_right_and_place_it_under_t--sidebyside_pick_up_book_right_ours_masked-color1_trial3.mp4"
+      },
+      {
+        "task": "pick_up_the_chocolate_pudding_and_place_it_in_the_",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-04_04_34--ours_masked--episode=36--success=True--task=pick_up_the_chocolate_pudding_and_place_it_in_the_--sidebyside_pick_up_chocolate_pudding_ours_masked-color1_trial3.mp4"
+      },
+      {
+        "task": "pick_up_the_cream_cheese_and_place_it_in_the_baske",
+        "success": true,
+        "trial": 2,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-04_04_34--ours_masked--episode=11--success=True--task=pick_up_the_cream_cheese_and_place_it_in_the_baske--sidebyside_pick_up_cream_cheese_ours_masked-color1_trial2.mp4"
+      },
+      {
+        "task": "pick_up_the_ketchup_and_place_it_in_the_basket",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-04_04_34--ours_masked--episode=18--success=True--task=pick_up_the_ketchup_and_place_it_in_the_basket--sidebyside_pick_up_ketchup_place_ours_masked-color1_trial3.mp4"
+      },
+      {
+        "task": "pick_up_the_milk_and_place_it_in_the_basket",
+        "success": true,
+        "trial": 1,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-04_04_34--ours_masked--episode=28--success=True--task=pick_up_the_milk_and_place_it_in_the_basket--sidebyside_pick_up_milk_place_ours_masked-color1_trial1.mp4"
+      },
+      {
+        "task": "pick_up_the_tomato_sauce_and_place_it_in_the_baske",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_26/2026_07_26-04_04_34--ours_masked--episode=24--success=True--task=pick_up_the_tomato_sauce_and_place_it_in_the_baske--sidebyside_pick_up_tomato_sauce_ours_masked-color1_trial3.mp4"
+      },
+      {
+        "task": "push_the_plate_to_the_front_of_the_stove",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_27/2026_07_27-01_38_36--ours_masked--episode=30--success=True--task=push_the_plate_to_the_front_of_the_stove--sidebyside_push_ours_masked-color1_trial3.mp4"
+      },
+      {
+        "task": "put_the_bowl_on_top_of_the_cabinet",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_27/2026_07_27-01_38_36--ours_masked--episode=24--success=True--task=put_the_bowl_on_top_of_the_cabinet--sidebyside_put_bowl_top_cabinet_ours_masked-color1_trial3.mp4"
+      },
+      {
+        "task": "put_the_cream_cheese_in_the_bowl",
+        "success": false,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_27/2026_07_27-01_38_36--ours_masked--episode=36--success=False--task=put_the_cream_cheese_in_the_bowl--sidebyside_put_cream_cheese_bowl_ours_masked-color1_trial3.mp4"
+      },
+      {
+        "task": "put_the_wine_bottle_on_the_rack",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_27/2026_07_27-01_38_36--ours_masked--episode=48--success=True--task=put_the_wine_bottle_on_the_rack--sidebyside_put_wine_bottle_rack_ours_masked-color1_trial3.mp4"
+      },
+      {
+        "task": "put_the_wine_bottle_on_top_of_the_cabinet",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_27/2026_07_27-01_38_36--ours_masked--episode=12--success=True--task=put_the_wine_bottle_on_top_of_the_cabinet--sidebyside_put_wine_bottle_top_ours_masked-color1_trial3.mp4"
+      },
+      {
+        "task": "turn_on_the_stove",
+        "success": true,
+        "trial": 3,
+        "src": "/home/fan-test/maggie/subopt_proj/third_party/16831pro_fine_tune/openvla-oft/rollouts/2026_07_27/2026_07_27-01_38_36--ours_masked--episode=42--success=True--task=turn_on_the_stove--sidebyside_turn_stove_ours_masked-color1_trial3.mp4"
+      }
+    ]
+  }
+]
